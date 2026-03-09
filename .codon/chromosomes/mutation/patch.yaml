@@ -196,6 +196,8 @@ codons:
       - the canonical gene filename must use the gene name as the filename stem
       - gene creation may implicitly introduce the addressed chromosome when no chromosome directory for that identifier already exists
       - if the addressed chromosome directory does not exist, the mutation engine must create it during patch application
+      - chromosome directories created during patch application must not introduce additional metadata or files
+      - an empty chromosome directory is sufficient prior to writing the gene file
       - resolution must be deterministic
 
   destructive_change_rules:
@@ -208,12 +210,16 @@ codons:
       - destructive operations must include a reason
       - destructive operations should include old_value when possible
       - destructive patches should carry medium or high risk unless clearly reversible
+      - remove operations against object paths delete the addressed key
+      - remove operations against list paths delete the addressed element and reindex the list
+      - if old_value is supplied, it must match before the destructive operation is applied
 
   application_rules:
     rules:
       - changes must be applied in document order
       - changes targeting the same semantic target must be applied sequentially in document order
       - operations must be applied in order within each change
+      - operations are evaluated against the current state produced by prior operations in the same patch
       - required operation failure must abort the patch
       - non-required operations may be skipped only when doing so does not invalidate later required operations or final genome validity
       - operations creating structural prerequisites must not be skipped
