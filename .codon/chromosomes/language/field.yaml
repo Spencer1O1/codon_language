@@ -66,8 +66,9 @@ codons:
 
     rules:
       - a structured field definition must include type
+      - type must be reference when reference is present
       - reference must be present when type is reference
-      - reference must not be present when type is not reference
+      - reference-only field definitions are invalid
       - values must be present when type is enum
       - values must not be present when type is not enum
       - reference targets must resolve to a valid addressable entity
