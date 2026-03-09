@@ -1,0 +1,214 @@
+spec:
+  name: trait_library_spec
+  version: 0.1
+  status: draft
+
+trait_library:
+  purpose:
+    - define reusable architectural programs
+    - expand high-level traits into concrete genome structure
+    - keep common system capabilities consistent across projects
+
+  principles:
+    - traits are architectural expansions, not decorative tags
+    - traits should be reusable across stacks
+    - trait semantics should remain genome-level, not framework-specific
+    - traits may introduce modules, entities, capabilities, services, references, and infrastructure requirements
+    - explicit user-defined genome structure overrides ambiguous trait defaults
+    - trait expansion must respect genome composition rules
+
+trait_definition_schema:
+  required_fields:
+    - name
+    - description
+    - expands_into
+
+  optional_fields:
+    - scope
+    - dependencies
+    - conflicts
+    - assumptions
+    - generator_hooks
+
+  field_definitions:
+    name:
+      type: string
+      description: canonical trait name
+
+    description:
+      type: string
+      description: human-readable explanation of the trait
+
+    scope:
+      type: list
+      description: allowed application scopes
+      examples:
+        - project
+        - module
+
+    dependencies:
+      type: list
+      description: traits or architectural prerequisites required by this trait
+
+    conflicts:
+      type: list
+      description: traits or patterns incompatible with this trait
+
+    assumptions:
+      type: list
+      description: architectural assumptions expected by this trait
+
+    expands_into:
+      type: object
+      description: structured genome additions implied by the trait
+
+    generator_hooks:
+      type: object
+      description: optional generator-specific hooks or hints
+
+trait_expansion_model:
+  description: |
+    Trait application expands into concrete genome structure rather than
+    acting as a passive annotation.
+
+  expansion_targets:
+    - manifest_traits
+    - module_registry
+    - module_files
+    - entities
+    - capabilities
+    - services
+    - relations
+    - references
+    - infrastructure_requirements
+    - architecture_rules
+
+  rules:
+    - trait expansion must be explicit and inspectable
+    - trait expansion must be explainable before approval
+    - trait expansion should be deterministic within a given generator
+    - trait expansion must respect module boundaries and dependency rules
+    - trait expansion must respect genome manifest and module-file composition
+    - trait expansion should be representable through the shared patch schema
+
+genome_composition_awareness:
+  description: |
+    Codon genomes consist of a root manifest (genome.yaml) and
+    individual module files referenced by the manifest.
+
+  expansion_targets_by_file:
+    genome_manifest:
+      may_modify:
+        - project-level traits
+        - module registry
+
+    module_files:
+      may_modify:
+        - module-level traits
+        - entities
+        - capabilities
+        - services
+        - relations
+        - references
+
+  localization_rules:
+    - traits that introduce new modules must update the root manifest and create module files
+    - traits that enhance an existing module should modify only that module's file where possible
+    - trait expansion should avoid rewriting unrelated module files
+
+trait_application_rules:
+  project_scope:
+    behavior:
+      - project-level traits may introduce new modules or global capabilities
+      - project-level traits may affect multiple modules
+      - project-level traits may update genome.yaml and create new module files
+
+  module_scope:
+    behavior:
+      - module-level traits may enhance or expand a specific module
+      - module-level traits must not silently alter unrelated modules unless declared
+      - module-level traits should primarily modify the target module file
+
+  precedence_rules:
+    - explicit genome structure overrides ambiguous trait defaults
+    - approved trait expansions become part of the effective genome
+    - conflicting traits must be flagged before application
+
+trait_validation_rules:
+  - trait dependencies must be satisfied before expansion
+  - conflicting traits must not be applied together without resolution
+  - trait expansion must not introduce circular module dependencies
+  - trait expansion must remain compatible with the genome schema
+  - trait expansion must produce valid manifest and module-file mutations
+
+patch_integration:
+  schema_reference: patch_schema
+
+  rules:
+    - trait expansion should be representable as one or more patch documents
+    - manifest-level trait changes should target genome.yaml
+    - module-level trait changes should target the appropriate module file
+    - multi-file trait expansion should remain explicit and reviewable
+
+example_traits:
+  authentication:
+    name: authentication
+    description: adds authentication and session architecture
+
+    scope:
+      - project
+
+    expands_into:
+      module_registry:
+        identity: modules/identity.yaml
+
+      module_files:
+        identity:
+          entities:
+            User:
+            Session:
+          capabilities:
+            - register
+            - login
+            - logout
+
+      infrastructure_requirements:
+        - persistent-user-storage
+        - session-or-token-management
+
+  auditing:
+    name: auditing
+    description: adds auditability to changes within a module or project
+
+    scope:
+      - project
+      - module
+
+    expands_into:
+      capabilities:
+        - view-audit-log
+
+      infrastructure_requirements:
+        - audit-log-storage
+
+  notifications:
+    name: notifications
+    description: adds notification delivery architecture
+
+    scope:
+      - project
+      - module
+
+    expands_into:
+      module_registry:
+        notifications: modules/notifications.yaml
+
+      module_files:
+        notifications:
+          capabilities:
+            - send-notification
+            - list-notifications
+
+      infrastructure_requirements:
+        - async-job-processing
+        - delivery-provider-integration

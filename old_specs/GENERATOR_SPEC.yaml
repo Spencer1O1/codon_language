@@ -1,0 +1,146 @@
+spec:
+  name: generator_spec
+  version: 0.1
+  status: draft
+
+generation_targets:
+  philosophy:
+    - Codon is designed to be stack-agnostic
+    - genome semantics should not be tightly coupled to a single framework
+    - generation should be extensible through stack-specific generators
+
+  generator_architecture:
+    pluggable: true
+    responsibilities:
+      - read the composed genome from the root manifest and referenced module files
+      - map genome semantics to stack conventions
+      - express modules, capabilities, traits, relations, and references in a target stack
+      - preserve deterministic generation behavior within a given generator
+      - preserve user-owned code according to code ownership rules
+
+  initial_supported_stacks:
+    backend:
+      - go
+    frontend:
+      - react
+    database:
+      - postgres
+
+  future_supported_stacks:
+    backend:
+      - node
+      - convex
+      - python
+      - rust
+      - java
+      - csharp
+      - php
+    frontend:
+      - react-native
+      - nextjs
+      - vue
+      - svelte
+    database:
+      - convex
+      - mysql
+      - sqlite
+      - mongodb
+
+  outputs:
+    - backend scaffold
+    - frontend scaffold
+    - database schema
+    - migrations
+    - api scaffolding
+    - README
+    - docker-compose
+
+generation_model:
+  primary: template-driven
+  optional: ai-assisted
+  goal: deterministic genome expression
+
+  assumptions:
+    - the genome has already passed genome validation
+    - the composed genome consists of the root manifest plus all referenced module files
+    - trait expansion has been resolved or made available to the generator as part of the composed genome
+
+  principles:
+    - the same genome and generator version should produce the same generated structure by default
+    - generation should favor architectural consistency over framework-specific magic
+    - inferred details should remain reproducible within a given generator
+
+  code_ownership:
+    generated:
+      description: files fully owned by Codon and safe to overwrite
+
+    protected:
+      description: protected regions or files preserved across regeneration
+
+    extension:
+      description: user-authored files referenced by generated architecture but never overwritten
+
+  regeneration_rules:
+    - generated files may be replaced during regeneration
+    - protected files or regions must be preserved
+    - extension files must never be overwritten
+    - regeneration behavior must be deterministic within a given generator
+
+service_expression:
+  description: |
+    Services are usually derived from module capabilities unless
+    explicitly overridden in the genome.
+
+  default_behavior:
+    - capabilities drive service generation
+    - generators derive service names and method groupings by convention
+    - generated services must respect module boundaries and architecture layers
+
+  explicit_override_behavior:
+    - generators must honor explicit service definitions when present
+    - explicit service overrides must take precedence over inferred grouping
+
+genome_composition_awareness:
+  description: |
+    Codon genomes consist of a root manifest (genome.yaml) and
+    individual module files referenced by the manifest.
+
+  generator_responsibilities:
+    - resolve module registry entries from genome.yaml
+    - load all referenced module files
+    - generate from the composed genome rather than from a single source file
+    - preserve module boundaries established by module files
+    - treat module files as the canonical source of module-local architecture
+
+  generation_units:
+    manifest_level:
+      includes:
+        - project metadata
+        - project-level traits
+        - module registry
+
+    module_level:
+      includes:
+        - module dependencies
+        - entities
+        - capabilities
+        - service overrides
+        - relations
+        - references
+
+generation_validation_integration:
+  description: |
+    Generated output may be checked after generation by the generation validator
+    to confirm fidelity to the composed genome and adherence to generation rules.
+
+generator_scope:
+  owns:
+    - file and directory generation
+    - stack-specific expression of modules, services, repositories, and APIs
+    - preservation of code ownership boundaries during regeneration
+
+  does_not_own:
+    - mutation approval policy
+    - genome validation rules
+    - planner inference policy
+    - updater reconciliation policy

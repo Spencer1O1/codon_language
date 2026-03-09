@@ -1,0 +1,40 @@
+gene:
+  name: boundary
+
+purpose: define the boundary between semantic genome structure and derived implementation artifacts
+
+codons:
+  semantic_model:
+    description: |
+      The genome describes semantic architecture rather than concrete
+      implementation artifacts.
+
+    principles:
+      - the genome defines domains, models, actions, and relationships
+      - the genome does not directly define implementation layers or files
+      - the semantic model must remain independent of programming languages or frameworks
+
+  derived_artifacts:
+    description: |
+      Implementation-oriented constructs such as services, controllers,
+      handlers, repositories, API routes, or database schemas are
+      considered derived artifacts.
+
+    examples:
+      - services
+      - controllers
+      - handlers
+      - repositories
+      - api_routes
+      - database_tables
+
+  expression_projection:
+    description: |
+      Derived artifacts are produced through expression rules that
+      project semantic genome structure into implementation artifacts.
+
+    rules:
+      - core genome schema remains semantic
+      - implementation artifacts are normally derived through expression
+      - capabilities are primary semantic action units for many projections
+      - projections must not alter the semantic meaning of the genome

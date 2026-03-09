@@ -1,0 +1,56 @@
+gene:
+  name: manifest
+
+purpose: define the schema of genome.yaml
+
+codons:
+  genome_manifest:
+    description: |
+      genome.yaml is the root manifest for the genome and defines
+      project-wide metadata and global genome configuration.
+
+    root_fields:
+      required:
+        - project
+      optional:
+        - traits
+        - expression
+
+    rules:
+      - project is required
+      - traits is optional
+      - expression is optional
+      - unknown fields must be rejected unless enabled by the active schema version
+      - genome.yaml must not contain inline chromosome or gene definitions
+
+  project:
+    description: project-wide metadata
+
+    fields:
+      name:
+        type: string
+        required: true
+
+      description:
+        type: string
+        required: false
+
+      type:
+        type: string
+        required: false
+
+  traits:
+    description: project-level architectural traits
+    type: list
+    item_type: string
+    required: false
+
+  expression:
+    description: active expression configuration for the genome
+    type: object
+    required: false
+
+    fields:
+      active_style:
+        type: string
+        required: true

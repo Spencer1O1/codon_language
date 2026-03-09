@@ -1,0 +1,77 @@
+gene:
+  name: projections
+
+dependencies:
+  - expression.style
+
+purpose: define the structure and rules of expression projection mappings
+
+codons:
+  projection_definition:
+    description: |
+      Projection mappings describe how semantic genome structures
+      are expressed into implementation artifacts.
+
+    principles:
+      - projections operate on semantic structures rather than raw files
+      - projections may map one semantic construct to multiple implementation artifacts
+      - projections must preserve semantic meaning
+      - projections are governed by the active expression style
+
+  projection_targets:
+    description: define supported semantic targets for projection mappings
+
+    supported_targets:
+      - chromosome
+      - gene
+      - codon
+
+    rules:
+      - projection targets must reference semantic structures defined by the genome
+      - projection targets must not introduce new semantic primitives
+
+  output_definition:
+    description: define a projected implementation artifact
+
+    required_fields:
+      - layer
+      - path
+
+    field_definitions:
+      layer:
+        type: expression.style.layer_name
+        description: implementation layer that owns the projected artifact
+
+      path:
+        type: string
+        description: output path template for the projected artifact
+
+    rules:
+      - output layers must exist in the active expression style
+      - output paths must be deterministic for a given target and style
+      - output paths may use supported template variables
+
+  template_variables:
+    description: define supported variables in projection path templates
+
+    examples:
+      - "{{ chromosome }}"
+      - "{{ gene }}"
+      - "{{ codon }}"
+      - "{{ chromosome_snake }}"
+      - "{{ gene_snake }}"
+      - "{{ codon_snake }}"
+
+    rules:
+      - template variables must resolve deterministically from the addressed semantic target
+      - unknown template variables must be rejected unless enabled by future schema versions
+
+  projection_rules:
+    description: define constraints on projection mappings
+
+    rules:
+      - chromosome projections may influence grouping but need not map directly to top-level directories
+      - gene projections may produce one or more implementation artifacts
+      - codon projections may produce one or more implementation artifacts
+      - projections must remain compatible with the active expression style
+      - implementation structure may differ from genome structure according to projection rules

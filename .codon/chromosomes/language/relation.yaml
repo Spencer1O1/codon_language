@@ -1,0 +1,47 @@
+gene:
+  name: relation
+
+purpose: define the structure and validation rules of internal relation codons
+
+codons:
+  relation_definition:
+    description: |
+      Relations describe structural links between entities within the same gene.
+
+    fields:
+      from:
+        type: entity
+        required: true
+
+      to:
+        type: entity
+        required: true
+
+      type:
+        type: relation_type
+        required: true
+
+      name:
+        type: string
+        required: true
+
+    rules:
+      - source entity must belong to the declaring gene
+      - target entity must belong to the declaring gene
+      - internal relations must not reference external genes
+
+    relation_type:
+      description: define supported relation cardinalities
+
+      values:
+        - one-to-one
+        - one-to-many
+        - many-to-one
+        - many-to-many
+
+    example:
+    relations:
+      - from: Comment
+        to: Issue
+        type: many-to-one
+        name: issue

@@ -1,0 +1,10 @@
+module:
+  identity:
+    entities:
+      User: {}
+      Session: {}
+
+    capabilities:
+      - register
+      - login
+      - logout

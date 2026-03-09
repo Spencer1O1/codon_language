@@ -1,0 +1,18 @@
+gene:
+  name: mutation_model
+
+purpose: define the conceptual mutation model of Codon genomes
+
+codons:
+  mutation_model:
+    description: |
+      Genome evolution occurs through explicit structural mutations
+      rather than unrestricted document rewrites.
+
+    principles:
+      - mutations are explicit structural changes
+      - mutations target defined semantic locations within the genome
+      - mutations are represented through structured patch documents
+      - mutation application must preserve genome validity or report failure
+      - mutation application must be deterministic for a given genome and patch
+      - mutation semantics are part of the language, not just the product workflow

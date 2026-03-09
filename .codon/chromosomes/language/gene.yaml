@@ -1,0 +1,72 @@
+gene:
+  name: gene
+
+dependencies:
+  - genome.addressing
+
+purpose: define the schema of a gene file
+
+codons:
+  gene_file:
+    description: |
+      Each gene file defines exactly one gene and contains the
+      architecture owned by that gene.
+
+    root_fields:
+      required:
+        - gene
+      optional:
+        - purpose
+        - dependencies
+        - codons
+      additional_fields: forbidden
+
+    rules:
+      - each gene file must define exactly one gene
+      - the gene block must declare the gene name
+      - gene files are the canonical home for gene-owned entities, capabilities, relations, references, and traits
+      - unknown top-level fields must be rejected unless enabled by the active schema version
+
+  gene_identity:
+    description: identify the gene defined by the file
+
+    fields:
+      name:
+        type: string
+        required: true
+
+    rules:
+      - gene name must be unique within its chromosome
+      - gene name must match the filename stem exactly
+      - filename matching is case-sensitive
+      - filename matching must not apply normalization or aliasing
+
+  dependencies:
+    description: |
+      Explicit architectural dependencies on other genes.
+
+    type: list
+    item_type: genome.addressing.gene_reference
+    required: false
+
+    rules:
+      - dependencies must reference existing genes
+      - dependencies must use canonical qualified gene references
+      - duplicate dependency entries must be rejected
+      - genes with no external dependencies may omit this field
+
+  codon_collections:
+    description: |
+      The codons section contains architectural instructions
+      owned by the gene.
+
+    allowed_members:
+      - entities
+      - capabilities
+      - relations
+      - references
+      - traits
+
+    rules:
+      - unknown codon collections must be rejected unless enabled by future schema versions
+      - each codon collection must conform to its corresponding schema

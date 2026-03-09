@@ -1,0 +1,78 @@
+gene:
+  name: capability
+
+purpose: define the structure, semantics, and naming rules of capability codons
+
+codons:
+  capability_definition:
+    description: |
+      Capabilities describe domain actions that a gene can perform.
+
+    philosophy:
+      - capabilities are semantic declarations of intent
+      - capabilities describe what a system does, not how it is implemented
+      - the semantic form is the default and recommended representation
+      - structured capability definitions are an advanced form for cases requiring explicit detail
+      - implementation artifacts are normally derived through expression
+
+    supported_forms:
+      semantic:
+        description: simple semantic identifier
+        type: string
+
+        example:
+          - create-issue
+          - assign-issue
+          - close-issue
+
+      structured:
+        description: extended capability definition for cases requiring explicit structure
+        type: object
+
+        fields:
+          description:
+            type: string
+            required: false
+
+          inputs:
+            type: object
+            required: false
+
+          outputs:
+            type: object
+            required: false
+
+          effects:
+            type: list
+            required: false
+
+        example:
+          create-issue:
+            description: create a new issue
+            inputs:
+              title: string
+              description: string
+            outputs:
+              issue: tracking.issues.Issue
+            effects:
+              - creates tracking.issues.Issue
+
+    inference_rules:
+      - structured details may be inferred from semantic capabilities
+      - capabilities may contribute to inferred entity fields
+      - explicit structured definitions override inferred structure
+
+    naming_convention:
+      style: kebab-case
+      pattern: verb-noun
+
+      examples:
+        - create-issue
+        - assign-user
+        - send-invite
+
+    validation_rules:
+      rules:
+        - capability names must be unique within a gene
+        - semantic capability identifiers must be kebab-case
+        - structured capability definitions must be well-formed

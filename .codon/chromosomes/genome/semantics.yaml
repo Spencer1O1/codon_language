@@ -1,0 +1,26 @@
+gene:
+  name: semantics
+
+purpose: define semantics within Codon genomes
+
+codons:
+  chromosome:
+    meaning: named architectural domain or bounded context grouping one or more genes
+    
+  gene:
+    meaning: module-level architectural unit defined in its own file
+
+  entity:
+    meaning: persistent domain model owned by a gene
+
+  capability:
+    meaning: domain action a gene can perform
+
+  relation:
+    meaning: internal structural link between entities in the same gene
+
+  reference:
+    meaning: cross-gene entity link declared by the dependent gene
+
+  trait:
+    meaning: reusable architectural program expanding into concrete genome structure

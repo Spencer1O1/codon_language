@@ -1,0 +1,48 @@
+gene:
+  name: reference
+
+dependencies:
+  - genome.addressing
+  - language.relation
+
+purpose: define the structure and validation rules of cross-gene reference codons
+
+codons:
+  reference_definition:
+    description: |
+      References describe cross-gene links declared by the dependent gene.
+
+    fields:
+      from:
+        type: entity
+        required: true
+      to:
+        type: genome.addressing.entity_reference
+        required: true
+      type:
+        type: language.relation.relation_type
+        required: true
+      name:
+        type: string
+        required: true
+      reference:
+        type: string
+        required: true
+        default: id
+
+    rules:
+      - source entity must belong to the declaring gene
+      - target gene must be listed in dependencies
+      - references must not create circular gene dependencies
+      - cross-gene references use ID semantics unless explicitly overridden
+      - references do not imply direct repository access across genes
+
+    example:
+      references:
+        - from: Issue
+          to: identity.user.User
+          type: many-to-one
+          name: assignee
+          reference: id
+
+    

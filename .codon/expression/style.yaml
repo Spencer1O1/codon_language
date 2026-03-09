@@ -1,0 +1,33 @@
+style:
+  id: go-language-engine
+
+  description: |
+    Expression style for implementing the Codon language as a Go-based
+    language engine and specification repository.
+
+  language: go
+
+  principles:
+    - genome structure is semantic
+    - implementation structure is derived through expression
+    - one gene may project into multiple implementation artifacts
+    - implementation should remain understandable without knowledge of the genome metaphor
+    - reusable language logic should be exposed through stable packages
+
+  layers:
+    - pkg
+    - internal
+    - examples
+
+  dependency_rules:
+    pkg:
+      may_depend_on:
+        - internal
+
+    internal:
+      may_depend_on: []
+
+    examples:
+      may_depend_on:
+        - pkg
+        - internal

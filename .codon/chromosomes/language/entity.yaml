@@ -1,0 +1,52 @@
+gene:
+  name: entity
+
+dependencies:
+  - language.field
+
+purpose: define the structure and inference rules of entity codons
+
+codons:
+  entity_definition:
+    description: |
+      Entities represent persistent domain models owned by a gene.
+
+    default_fields:
+      description: define default implicit fields for persistent entities
+
+      implicit_definitions:
+        id:
+          type: uuid
+
+        created_at:
+          type: datetime
+
+        updated_at:
+          type: datetime
+
+      rules:
+        - implicit default fields are supplied when not explicitly defined
+        - explicit field definitions override implicit default field definitions
+        - explicit overrides must conform to language.field.field_definition
+
+    fields:
+      description: explicit field definitions for the entity
+      type: object
+      key: field_name
+      value_type: language.field.field_definition
+      required: false
+
+    inference_rules:
+      - fields may be inferred when omitted
+      - inference may use capabilities
+      - inference may use relations
+      - inference may use references
+      - inference may use traits
+      - explicit field definitions override inferred fields
+
+  example:
+    entities:
+      User:
+        fields:
+          email: string
+          display_name: string

@@ -1,0 +1,51 @@
+gene:
+  name: composition
+
+purpose: define how a Codon genome is composed from manifest and gene files
+
+codons:
+  principles:
+    items:
+      - genome.yaml is the project manifest, not the place where genes are defined
+      - genes are the primary architectural unit
+      - each gene is defined in its own file
+      - genes own codons such as entities, capabilities, relations, references, and traits
+      - capabilities are first-class semantic actions
+      - structure is explicit while details may be inferred
+      - internal relations stay inside genes
+      - cross-gene links are references declared by the dependent gene
+      - implementation artifacts are produced through expression
+      - genome mutations are applied through the shared patch system
+
+  genome_root:
+    description: |
+      The genome root is the filesystem directory containing genome.yaml
+      and the associated chromosomes/ and optional expression/ directories.
+
+    rules:
+      - genome root may be the repository root or a nested reserved directory
+      - all genome-relative paths are resolved from the genome root
+      - composed genome discovery is scoped to the genome root
+
+  composed_genome:
+    description: |
+      The composed genome is the effective architectural model formed by
+      genome.yaml plus all gene files discovered under chromosomes/
+      relative to the genome root.
+
+  filesystem_model:
+    description: |
+      A Codon genome is composed from a root manifest file and gene files
+      organized into chromosome directories.
+
+    rules:
+      - genome.yaml must exist at the genome root
+      - chromosomes/ must exist relative to the genome root
+      - expression/ may exist relative to the genome root
+      - each chromosome directory may contain one or more direct child .yaml gene files
+      - only .yaml files are treated as gene files
+      - hidden files and directories must be ignored
+      - nested subdirectories inside chromosome directories must be rejected unless enabled by future schema versions
+      - each gene file must define exactly one gene
+      - all valid gene files under chromosomes/ relative to the genome root are included in the composed genome
+      - gene discovery order must not affect composed genome semantics

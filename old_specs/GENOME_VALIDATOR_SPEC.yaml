@@ -1,0 +1,174 @@
+spec:
+  name: genome_validator_spec
+  version: 0.1
+  status: draft
+
+validator_role:
+  purpose:
+    - validate genome structure
+    - detect architectural violations in the genome
+    - ensure genomes conform to Codon architecture rules
+
+  constraints:
+    - validator does not modify the genome
+    - validator operates on the composed genome
+    - validator reports findings as errors, warnings, and suggestions
+    - validator may optionally suggest fixes but must not apply them automatically
+
+inputs:
+  required:
+    - genome.yaml
+    - referenced module files
+
+  optional:
+    - trait library definitions
+    - schema version metadata
+
+validation_scope:
+  validates:
+    - root manifest structure
+    - module file structure
+    - genome composition consistency
+    - schema correctness
+    - dependency graph correctness
+    - module ownership rules
+    - relation correctness
+    - reference correctness
+    - capability/service consistency
+    - trait compatibility
+
+  does_not_validate:
+    - generated code
+    - generator output fidelity
+    - planner mutation permissions
+    - updater reconciliation policy
+    - arbitrary implementation quality outside the genome
+
+genome_composition_validation:
+  description: |
+    The validator operates on the composed genome, defined as the root
+    manifest plus all referenced module files.
+
+  rules:
+    - genome.yaml must contain required root fields
+    - every module registry entry must point to a valid module file
+    - module names must be globally unique across the composed genome
+    - every referenced module file must resolve successfully
+    - module files must not define modules that are not registered in genome.yaml
+
+loading_assumptions:
+  description: |
+    Certain required structural checks may be enforced by the genome loader
+    before validation begins. The validator operates on a successfully composed genome.
+
+  examples:
+    - required root fields present
+    - referenced module files resolve successfully
+    - module file shape is loadable
+
+schema_validation:
+  root_manifest_rules:
+    - genome.yaml must contain required root fields
+    - project.name must be present
+    - unknown root fields should be flagged unless allowed by schema version
+
+  module_file_rules:
+    - each module file must define exactly one module
+    - module file module name must match the registry entry in genome.yaml
+    - unknown module fields should be flagged unless allowed by schema version
+
+  entity_rules:
+    - entity names must be unique within their module
+    - explicit field names must be unique within an entity
+    - structured fields must include a type
+    - enum fields should define values
+
+  capability_rules:
+    - capabilities may use semantic or structured form
+    - semantic capability names should follow kebab-case verb-noun convention
+    - structured capabilities should only be used when additional precision is needed
+
+dependency_validation:
+  rules:
+    - module dependencies must reference declared modules
+    - circular module dependencies are forbidden
+    - self-dependencies are forbidden
+    - dependency direction must be explicit
+
+module_boundary_validation:
+  rules:
+    - modules own their entities and capabilities
+    - entities belong to exactly one module
+    - services must remain module-scoped
+    - internal relations must remain inside their module
+    - cross-module links must use references, not internal relations
+
+relation_validation:
+  rules:
+    - relation source and target entities must exist
+    - relation source and target entities must belong to the declaring module
+    - relation types must be valid
+    - relation names must be present
+
+reference_validation:
+  rules:
+    - reference source entity must exist in the declaring module
+    - reference target must point to an existing module.entity
+    - target module must be listed in dependencies
+    - references must not create circular module dependencies
+    - references use ID semantics
+    - references do not imply direct repository ownership across modules
+
+service_validation:
+  rules:
+    - every capability must map to a service, either derived or explicit
+    - explicit service overrides must not orphan capabilities
+    - explicit service definitions must remain module-scoped
+    - services should default to derived form unless overridden
+
+trait_validation:
+  rules:
+    - project-level traits must be allowed at project scope
+    - module-level traits must be allowed at module scope
+    - trait dependencies must be satisfied
+    - trait conflicts must be flagged
+    - trait expansion must remain compatible with the genome schema
+    - trait expansion must not introduce illegal module dependencies
+
+inference_compatibility_validation:
+  rules:
+    - omitted entity fields are valid when they are inferable
+    - semantic capabilities are valid without explicit inputs/outputs
+    - inferred defaults must not conflict with explicit definitions
+
+patch_suggestion_integration:
+  schema_reference: patch_schema
+
+  behavior:
+    - validator may optionally suggest patch-compatible fixes
+    - suggested fixes must not be applied automatically
+    - suggested patches must respect manifest and module-file boundaries
+
+severity_model:
+  error:
+    description: structural or architectural violation that should fail validation
+
+  warning:
+    description: potentially valid but risky or ambiguous genome design
+
+  suggestion:
+    description: non-blocking recommendation for improved architecture or clarity
+
+example_findings:
+  errors:
+    - circular dependency detected between identity and billing
+    - reference from issues.Issue to identity.User without declared dependency on identity
+    - module file modules/issues.yaml defines module billing but registry entry is issues
+
+  warnings:
+    - structured capability used where semantic form appears sufficient
+    - module defines many cross-module references and may be over-coupled
+
+  suggestions:
+    - consider splitting notifications into its own module
+    - consider explicit service override for capabilities with clear command/query separation

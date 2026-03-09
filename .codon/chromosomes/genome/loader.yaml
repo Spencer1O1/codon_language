@@ -1,0 +1,37 @@
+gene:
+  name: loader
+
+purpose: define how genome roots are discovered and loaded
+
+codons:
+  genome_root_discovery:
+    description: |
+      Genome loading begins by identifying a genome root, which is the
+      directory containing genome.yaml and the associated genome structure.
+
+    supported_forms:
+      standalone:
+        description: genome root is the repository root
+        example: ./genome.yaml
+
+      embedded:
+        description: genome root is a reserved nested directory
+        reserved_directory: .codon
+        example: ./.codon/genome.yaml
+
+    rules:
+      - explicit caller-provided genome roots take precedence over automatic discovery
+      - automatic discovery may consider repository-root and embedded genome roots
+      - embedded genome roots must use the reserved directory name .codon
+      - if multiple valid genome roots exist at the same search level, discovery must fail as ambiguous
+      - when searching upward, the nearest valid genome root must be selected
+      - all genome-relative paths must be resolved from the discovered genome root
+
+  loading_rules:
+    description: define how a discovered genome root is loaded
+
+    rules:
+      - the loader must read genome.yaml from the genome root
+      - the loader must discover genes from chromosomes/ relative to the genome root
+      - the loader may load invalid files for diagnostics but must not treat them as valid composed genome structure
+      - loader behavior must be deterministic for a given genome root and filesystem state

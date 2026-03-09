@@ -1,0 +1,52 @@
+projections:
+  chromosome:
+    description: |
+      Chromosomes define semantic domains within the language specification.
+      They may influence package boundaries and directory structure, but do
+      not necessarily map 1:1 to implementation directories.
+
+  gene:
+    description: |
+      A gene may project into one or more specification artifacts or
+      implementation artifacts depending on the active expression style.
+
+  targets:
+    manifest:
+      outputs:
+        - path: .codon/genome.yaml
+
+    addressing:
+      outputs:
+        - path: .codon/chromosomes/genome/addressing.yaml
+
+    composition:
+      outputs:
+        - path: .codon/chromosomes/genome/composition.yaml
+
+    semantics:
+      outputs:
+        - path: .codon/chromosomes/genome/semantics.yaml
+
+    gene:
+      outputs:
+        - path: .codon/chromosomes/{{ chromosome }}/{{ gene_snake }}.yaml
+
+    trait_system:
+      outputs:
+        - path: .codon/chromosomes/traits/{{ gene_snake }}.yaml
+
+    mutation_model:
+      outputs:
+        - path: .codon/chromosomes/mutation/{{ gene_snake }}.yaml
+
+    expression_model:
+      outputs:
+        - path: .codon/chromosomes/expression/{{ gene_snake }}.yaml
+
+  generation_rules:
+    - expression must preserve the semantic meaning of the genome
+    - implementation structure may differ from genome structure according to expression rules
+    - specification artifacts must be written under .codon/
+    - reusable Go implementation should be written under pkg/
+    - supporting helpers should be written under internal/
+    - regeneration behavior should preserve user-owned code according to generator rules

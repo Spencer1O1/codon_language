@@ -1,0 +1,7 @@
+project:
+  name: codon-language
+  description: Formal language specification and reference implementation for Codon genomes
+  type: language-engine
+
+expression:
+  active_style: go-language-engine

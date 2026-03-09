@@ -1,0 +1,39 @@
+gene:
+  name: addressing
+
+purpose: define identifier scopes, canonical addressing formats used within a genome
+
+codons:
+  identifier_scopes:
+    chromosome:
+      type: string
+      description: unique chromosome identifier within a genome
+
+    gene:
+      type: string
+      description: unique gene identifier within its chromosome
+
+    entity:
+      type: string
+      description: unique entity identifier within its gene
+
+    rules:
+      - chromosome names must be unique within a genome
+      - gene names must be unique within a chromosome
+      - entity names must be unique within a gene 
+
+  reference_types:
+    gene_reference:
+      description: canonical identifier for a gene
+      format: chromosome.gene
+      example: identity.user
+
+    entity_reference:
+      description: canonical identifier for an entity
+      format: chromosome.gene.entity
+      example: identity.user.User
+
+  resolution_rules:
+    - cross-gene references must use canonical qualified forms
+    - reference resolution must be deterministic
+    - unqualified references must be rejected unless explicitly enabled by future schema versions

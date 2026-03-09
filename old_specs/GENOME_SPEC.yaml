@@ -1,0 +1,507 @@
+spec:
+  name: genome_spec
+  version: 0.1
+  status: draft
+
+schema_principles:
+  - genome.yaml is the project manifest, not the place where modules are defined
+  - modules are the primary architectural unit
+  - each module is defined in its own file
+  - modules own entities and capabilities
+  - capabilities are first-class and services are usually derived
+  - semantic capability definitions are preferred
+  - structure is explicit while details may be inferred
+  - internal relations stay inside modules
+  - cross-module links are references declared by the dependent module
+  - genome mutations are applied through the shared patch schema
+
+genome_semantics:
+  project:
+    meaning: top-level project metadata and manifest identity
+
+  modules:
+    meaning: named architectural domains registered by the genome manifest and defined in separate module files
+
+  entities:
+    meaning: persistent domain models owned by modules
+
+  capabilities:
+    meaning: domain actions a module can perform
+
+  relations:
+    meaning: internal entity relationships within a module
+
+  references:
+    meaning: cross-module entity references declared by the dependent module
+
+  traits:
+    meaning: reusable architectural programs expanding into concrete genome structure
+
+  services:
+    meaning: implementation units derived from capabilities unless explicitly overridden
+
+  composed_genome:
+    meaning: the root manifest plus all referenced module files, used as the effective input to validation and generation
+
+genome_composition:
+  description: |
+    A Codon genome is composed of a root manifest file and one or more
+    separately defined module files.
+
+  philosophy:
+    - small root manifest, rich module files
+    - one module per file
+    - root manifest remains the canonical project entry point
+    - composed genome semantics must be identical regardless of file layout
+
+  supported_forms:
+    manifest_plus_module_files:
+      description: root genome file references separate module definition files
+
+  rules:
+    - genome.yaml must not contain inline module definitions
+    - each referenced module file must define exactly one module
+    - module names must be globally unique across the composed genome
+    - cross-module references behave the same regardless of file boundaries
+
+genome_schema:
+  root_fields:
+    - project
+    - traits
+    - modules
+
+  root_rules:
+    - project is required
+    - modules is required
+    - traits is optional
+    - unknown root fields should be flagged unless explicitly supported by future schema versions
+    - modules is a registry, not an inline module definition block
+
+  project:
+    fields:
+      name:
+        type: string
+        required: true
+      description:
+        type: string
+        required: false
+
+  traits:
+    description: project-level architectural traits
+    type: list
+    item_type: string
+    required: false
+
+  modules:
+    description: registry of module names to module file paths
+    type: object
+    key: module_name
+    value_type: module_file_path
+    required: true
+
+    rules:
+      - module names must be unique
+      - module file paths must be unique
+      - every listed module must resolve to a valid module file
+      - registry entries must match module names declared inside module files
+
+module_file_schema:
+  description: |
+    Each module file defines exactly one module and contains the
+    architecture owned by that module. Module files are the canonical
+    home for module-local entities, capabilities, relations, references,
+    and service overrides.
+
+  root_fields:
+    - module
+
+  root_rules:
+    - each module file must define exactly one module
+    - module names must match the registry entry in genome.yaml
+    - module files are the canonical home for module-owned entities, capabilities, relations, references, and service overrides
+
+  module:
+    type: object
+    key: module_name
+    required: true
+
+    module_rules:
+      - dependencies must reference other declared modules from the root manifest
+      - modules own their entities and capabilities
+      - services are optional explicit overrides
+      - internal relations must stay within the module
+      - references may target only declared dependencies
+
+    module_fields:
+      description:
+        type: string
+        required: false
+
+      dependencies:
+        description: modules this module depends on
+        type: list
+        item_type: string
+        required: false
+
+      traits:
+        description: module-level traits
+        type: list
+        item_type: string
+        required: false
+
+      entities:
+        description: entities owned by this module
+        type: object
+        key: entity_name
+        required: false
+
+      capabilities:
+        description: domain actions provided by this module
+        type: list_or_object
+        required: false
+
+      services:
+        description: optional explicit service overrides
+        type: object
+        required: false
+
+      relations:
+        description: internal entity relationships
+        type: list
+        required: false
+
+      references:
+        description: cross-module entity references
+        type: list
+        required: false
+
+entity_schema:
+  description: |
+    Entities represent persistent domain models owned by a module.
+
+  defaults:
+    implicit_fields:
+      - id
+      - created_at
+      - updated_at
+
+  fields:
+    description: optional explicit field definitions
+    type: object
+    key: field_name
+    value_schema: field_schema
+    required: false
+
+  inference_rules:
+    - fields may be inferred when omitted
+    - inference may use capabilities
+    - inference may use relations
+    - inference may use references
+    - inference may use traits
+    - users may override inferred fields explicitly
+
+  example:
+    User:
+      fields:
+        email: string
+        display_name: string
+
+field_schema:
+  description: |
+    Fields define scalar or structured properties on an entity.
+    Field definitions are optional and may be inferred unless explicitly stated.
+
+  philosophy:
+    - fields are secondary to structure and capabilities
+    - explicit fields override inferred fields
+    - field definitions should remain lightweight and portable across stacks
+
+  supported_forms:
+    shorthand:
+      description: simple scalar type declaration
+      example:
+        title: string
+        created_at: datetime
+
+    structured:
+      description: extended field definition for precision when needed
+      example:
+        email:
+          type: string
+          unique: true
+        status:
+          type: enum
+          values:
+            - open
+            - closed
+
+  scalar_types:
+    - string
+    - text
+    - int
+    - float
+    - boolean
+    - uuid
+    - datetime
+    - json
+    - enum
+
+  structured_fields:
+    type:
+      required: true
+      description: logical field type
+
+    optional:
+      required: false
+      description: whether the field may be omitted or null
+
+    unique:
+      required: false
+      description: whether the field value must be unique within the entity scope
+
+    default:
+      required: false
+      description: default value if supported by the target stack
+
+    values:
+      required: false
+      description: enum values when type is enum
+
+    reference:
+      required: false
+      description: reference target for explicit foreign-key-like fields when needed
+
+  inference_rules:
+    - planners may infer fields from capabilities, traits, relations, and references
+    - generators should preserve explicit field definitions over inferred ones
+    - implicit fields may be supplied by entity defaults unless explicitly overridden
+
+  validation_rules:
+    - field names must be unique within an entity
+    - structured fields must include a type
+    - enum fields should define values
+
+capability_schema:
+  description: |
+    Capabilities describe domain actions that a module can perform.
+    They are first-class architectural concepts in the Codon genome.
+
+  philosophy: |
+    Capabilities are primarily semantic declarations of intent.
+    The semantic form is the most common and recommended usage.
+    Structured capability definitions are an optional escape hatch
+    for cases where explicit inputs, outputs, or effects must be defined.
+
+  supported_forms:
+    semantic:
+      description: |
+        The default and most common capability form.
+        Represents a domain action using a simple string identifier.
+      type: string
+      example:
+        - create-issue
+        - assign-issue
+        - close-issue
+
+    structured:
+      description: |
+        Advanced capability definition allowing explicit control
+        over inputs, outputs, and behavioral effects.
+      type: object
+      fields:
+        description:
+          type: string
+          required: false
+        inputs:
+          type: object
+          required: false
+        outputs:
+          type: object
+          required: false
+        effects:
+          type: list
+          required: false
+
+  inference_rules:
+    - planner may infer inputs and outputs from semantic capabilities
+    - planner may infer required entity fields from capabilities
+    - users may override inferred structure using structured form
+
+  naming_convention:
+    style: kebab-case
+    pattern: verb-noun
+    examples:
+      - create-issue
+      - assign-user
+      - send-invite
+
+relation_schema:
+  description: |
+    Relations describe structural links between entities within the same module.
+
+  fields:
+    from:
+      type: entity
+      required: true
+    to:
+      type: entity
+      required: true
+    type:
+      type: relation_type
+      required: true
+    name:
+      type: string
+      required: true
+
+  relation_types:
+    - one-to-one
+    - one-to-many
+    - many-to-one
+    - many-to-many
+
+  rules:
+    - source and target entities must belong to the declaring module
+    - internal relations must not reference external modules
+
+  example: |
+    relations:
+      - from: OrderItem
+        to: Order
+        type: many-to-one
+        name: order
+
+reference_schema:
+  description: |
+    References describe cross-module links declared by the dependent module.
+
+  fields:
+    from:
+      type: entity
+      required: true
+    to:
+      type: module.entity
+      required: true
+    type:
+      type: relation_type
+      required: true
+    name:
+      type: string
+      required: true
+    reference:
+      type: string
+      required: true
+      default: id
+
+  example: |
+    references:
+      - from: Order
+        to: identity.User
+        type: many-to-one
+        name: customer
+        reference: id
+
+  rules:
+    - source entity must belong to the declaring module
+    - target module must be listed in dependencies
+    - references must not create circular module dependencies
+    - cross-module references use ID semantics
+    - references do not imply direct repository access across modules
+
+service_model:
+  description: |
+    Services are architectural units derived from module capabilities
+    unless explicitly overridden by the user.
+
+  philosophy:
+    - capabilities are first-class
+    - services are usually expression-level constructs
+    - explicit service definitions are an advanced override mechanism
+
+  default_behavior:
+    - services are derived from capabilities by convention
+    - derived services follow architecture and naming rules
+
+  override_behavior:
+    - users may explicitly define service groupings
+    - services may map multiple capabilities
+    - overrides must still respect module boundaries and architecture rules
+
+  validation_rules:
+    - every capability must map to a service
+    - explicit overrides must not orphan capabilities
+    - service definitions must remain module-scoped
+
+trait_system:
+  description: |
+    Traits represent reusable architectural programs.
+
+  scope:
+    project_level: supported
+    module_level: supported
+    entity_level: not primary
+
+  trait_library:
+    responsibilities:
+      - define trait semantics
+      - define entities, services, and modules introduced by a trait
+      - define infrastructure requirements
+      - define dependencies and conflicts
+      - produce expansions compatible with manifest and module-file composition
+      - emit or support mutations compatible with patch_schema
+
+  trait_behavior:
+    - traits may introduce modules
+    - traits may introduce entities
+    - traits may introduce services
+    - traits may introduce infrastructure
+    - trait expansion must respect manifest and module-file boundaries
+
+patch_integration:
+  schema_reference: patch_schema
+
+  rules:
+    - genome mutations should be representable through the shared patch schema
+    - manifest-level mutations target genome.yaml
+    - module-level mutations target the owning module file
+
+example_genome: |
+  project:
+    name: issue_tracker
+
+  traits:
+    - authentication
+
+  modules:
+    identity: modules/identity.yaml
+    issues: modules/issues.yaml
+
+example_module_file: |
+  module:
+    issues:
+      dependencies:
+        - identity
+
+      entities:
+        Issue:
+        Comment:
+
+      capabilities:
+        - create-issue
+        - assign-issue
+        - comment-on-issue
+
+      relations:
+        - from: Comment
+          to: Issue
+          type: many-to-one
+          name: issue
+
+      references:
+        - from: Issue
+          to: identity.User
+          type: many-to-one
+          name: assignee
+          reference: id
+
+module_file_naming:
+  recommendation: modules/<module_name>.yaml

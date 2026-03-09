@@ -1,0 +1,291 @@
+gene:
+  name: patch
+
+dependencies:
+  - genome.addressing
+
+purpose: define the structure and rules of patch documents used to represent genome mutations
+
+codons:
+  patch_principles:
+    description: |
+      Patches represent explicit structural mutations against a genome.
+
+    purpose:
+      - represent structured genome mutations
+      - support evolution and reconciliation proposals
+      - enable reviewable, localized, multi-target changes
+      - preserve human readability and machine applicability
+
+    rules:
+      - patches must be explicit
+      - patches must be localized
+      - patches must be diffable
+      - patches must be explainable
+      - unrelated structures must not be rewritten
+      - composed genome boundaries must be respected
+
+  patch_definition:
+    description: define the top-level structure of a patch document
+
+    required_fields:
+      - summary
+      - rationale
+      - risk
+      - changes
+
+    optional_fields:
+      - evidence
+      - warnings
+      - suggestions
+      - confidence
+
+    field_definitions:
+      summary:
+        type: string
+        description: short human-readable summary of the mutation set
+
+      rationale:
+        type: string
+        description: explanation of why the patch is being proposed
+
+      risk:
+        type: mutation.patch.risk_level
+        description: overall patch risk level
+
+      evidence:
+        type: list
+        description: optional observed evidence supporting the patch
+
+      warnings:
+        type: list
+        description: optional cautionary notes about ambiguity, destructiveness, or side effects
+
+      suggestions:
+        type: list
+        description: optional follow-up recommendations related to the patch
+
+      confidence:
+        type: mutation.patch.confidence_level
+        description: confidence in the proposed patch
+
+      changes:
+        type: list
+        item_type: mutation.patch.change_definition
+        description: ordered list of semantic mutation changes
+
+  change_definition:
+    description: |
+      A change applies to exactly one semantic target and contains one or more
+      structured operations against that target.
+
+    required_fields:
+      - id
+      - target
+      - operations
+
+    field_definitions:
+      id:
+        type: string
+        description: unique change identifier within the patch
+
+      target:
+        type: mutation.patch.change_target
+        description: semantic target of the change
+
+      operations:
+        type: list
+        item_type: mutation.patch.operation_definition
+        description: ordered mutation operations applied to the target
+
+  change_target:
+    description: define supported semantic patch targets
+
+    supported_forms:
+      root:
+        value: genome
+        description: target the root manifest
+
+      gene:
+        type: genome.addressing.gene_reference
+        example: tracking.issues
+        description: target a specific gene
+
+  operation_definition:
+    description: |
+      An operation is a structured mutation against a specific path inside a semantic target.
+
+    required_fields:
+      - id
+      - op
+      - path
+
+    optional_fields:
+      - value
+      - old_value
+      - required
+      - reason
+
+    field_definitions:
+      id:
+        type: string
+        description: unique operation identifier within the containing change
+
+      op:
+        type: mutation.patch.operation_type
+        description: mutation operation type
+
+      path:
+        type: string
+        description: logical path within the targeted structure
+
+      value:
+        type: any
+        description: new value for add or update operations
+
+      old_value:
+        type: any
+        description: optional expected old value for safer updates and removals
+
+      required:
+        type: boolean
+        description: whether this operation is essential to patch success
+        default: true
+
+      reason:
+        type: string
+        description: optional per-operation explanation
+
+  operation_type:
+    description: define supported mutation operation types
+
+    values:
+      - add
+      - update
+      - remove
+      - move
+
+  risk_level:
+    description: define supported patch risk levels
+
+    values:
+      - low
+      - medium
+      - high
+
+  confidence_level:
+    description: define supported patch confidence levels
+
+    values:
+      - high
+      - medium
+      - low
+
+  path_rules:
+    description: |
+      Paths reference logical locations within semantic genome structures
+      using slash-separated keys.
+
+    examples:
+      - /project/name
+      - /traits/0
+      - /expression/active_style
+      - /gene/name
+      - /codons/entities/Issue
+      - /codons/capabilities/-
+
+    rules:
+      - paths must resolve within the addressed target
+      - root-level paths must target genome
+      - gene-local paths must target the addressed gene
+      - list indices are zero-based
+      - numeric list indices must resolve to an existing element at the time the operation is applied
+      - the path segment "-" appends to a list
+      - the path segment "-" is valid only as the final segment of an add operation targeting a list
+      - operations must respect composed genome boundaries
+
+  target_resolution:
+    description: define how semantic patch targets map to storage locations
+
+    rules:
+      - target resolution to files is handled by the mutation engine
+      - root target resolution maps to genome.yaml
+      - gene target resolution maps to the owning gene file
+      - target resolution must be deterministic
+
+  destructive_change_rules:
+    description: destructive mutations require additional clarity and explicit intent
+
+    destructive_operations:
+      - remove
+      - move
+
+    rules:
+      - destructive changes must include a reason
+      - destructive changes should include old_value when possible
+      - destructive patches should carry medium or high risk unless clearly reversible
+
+  application_rules:
+    rules:
+      - changes must be applied in document order
+      - operations must be applied in document order within each change
+      - required operation failure must cause patch failure
+      - non-required operation failure may be skipped with warning when safe
+      - patch application must fail safely when required paths or old_value checks do not match
+      - patch application must be atomic across all changes
+      - partial patch application must not be committed
+      - target resolution and operation application must remain deterministic
+
+  examples:
+    single_target_patch:
+      summary: add comments to issues gene
+      rationale: add support for discussion on issues
+      risk: low
+      changes:
+        - id: change-1
+          target: tracking.issues
+          operations:
+            - id: op-1
+              op: add
+              path: /codons/entities/Comment
+              value: {}
+              reason: add comment entity
+
+            - id: op-2
+              op: add
+              path: /codons/capabilities/-
+              value: comment-on-issue
+              reason: add commenting capability
+
+            - id: op-3
+              op: add
+              path: /codons/relations/-
+              value:
+                from: Comment
+                to: Issue
+                type: many-to-one
+                name: issue
+              reason: link comments to issues
+
+    multi_target_patch:
+      summary: add notifications gene
+      rationale: introduce notification delivery as a new architectural unit
+      risk: medium
+      changes:
+        - id: change-1
+          target: notifications.alerts
+          operations:
+            - id: op-1
+              op: add
+              path: /gene
+              value:
+                name: alerts
+              reason: create alerts gene
+
+            - id: op-2
+              op: add
+              path: /codons/capabilities
+              value:
+                - send-notification
+                - list-notifications
+              reason: define notification capabilities

@@ -1,0 +1,81 @@
+gene:
+  name: field
+
+dependencies:
+  - genome.addressing
+
+purpose: define field structures used by entities
+
+codons:
+  field_definition:
+    description: |
+      Fields define scalar or structured properties on an entity.
+
+    philosophy:
+      - fields are secondary to structure and capabilities
+      - explicit fields override inferred fields
+      - field definitions should remain lightweight and portable across stacks
+
+    supported_forms:
+      shorthand:
+        description: simple scalar type declaration
+        example:
+          title: string
+          created_at: datetime
+
+      structured:
+        description: extended field definition for precision when needed
+        fields:
+          type:
+            type: scalar_type
+            required: true
+
+          optional:
+            type: boolean
+            required: false
+
+          unique:
+            type: boolean
+            required: false
+
+          default:
+            type: any
+            required: false
+
+          values:
+            type: list
+            required: false
+
+          reference:
+            type: genome.addressing.entity_reference
+            required: false
+
+        example:
+          email:
+            type: string
+            unique: true
+          status:
+            type: enum
+            values:
+              - open
+              - closed
+
+    scalar_type:
+      description: define supported scalar field types
+
+      values:
+        - string
+        - text
+        - int
+        - float
+        - boolean
+        - uuid
+        - datetime
+        - json
+        - enum
+
+    validation_rules:
+      rules:
+        - field names must be unique within an entity
+        - structured fields must include a type
+        - enum fields must define values
