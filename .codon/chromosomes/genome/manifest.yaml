@@ -26,7 +26,7 @@ codons:
   project:
     description: project-wide metadata
 
-    fields:
+    members:
       name:
         type: string
         required: true
@@ -50,7 +50,7 @@ codons:
     type: object
     required: false
 
-    fields:
+    members:
       active_style:
         type: string
         required: true

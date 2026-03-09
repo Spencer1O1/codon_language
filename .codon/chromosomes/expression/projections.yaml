@@ -38,7 +38,7 @@ codons:
       - layer
       - path
 
-    field_definitions:
+    members:
       layer:
         type: expression.style.layer_name
         description: implementation layer that owns the projected artifact
@@ -100,7 +100,7 @@ codons:
       helper_snake:
         source: helper
 
-    normalization_rules:
+    normalization:
       constraints:
         - derived variables must be computed deterministically from their declared source
         - snake variants must use lowercase identifiers with underscore separators

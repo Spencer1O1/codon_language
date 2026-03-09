@@ -10,7 +10,7 @@ codons:
       A genome repository is the directory containing genome.yaml,
       the associated genome structure, and its own Git repository.
 
-    supported_forms:
+    forms:
       standalone:
         description: genome repository is rooted at the current project directory
         example: ./genome.yaml

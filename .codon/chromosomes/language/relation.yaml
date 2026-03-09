@@ -8,7 +8,7 @@ codons:
     description: |
       Relations describe structural links between entities within the same gene.
 
-    fields:
+    members:
       from:
         type: entity
         required: true

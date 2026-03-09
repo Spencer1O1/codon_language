@@ -12,7 +12,7 @@ codons:
     description: |
       References describe cross-gene links declared by the dependent gene.
 
-    fields:
+    members:
       from:
         type: entity
         required: true

@@ -30,7 +30,7 @@ codons:
   gene_identity:
     description: identify the gene defined by the file
 
-    fields:
+    members:
       name:
         type: string
         required: true

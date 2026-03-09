@@ -18,7 +18,7 @@ codons:
       - structured capability definitions are an advanced form for cases requiring explicit detail
       - implementation artifacts are normally derived through expression
 
-    supported_forms:
+    forms:
       semantic:
         description: simple semantic identifier
         type: string
@@ -32,7 +32,7 @@ codons:
         description: extended capability definition for cases requiring explicit structure
         type: object
 
-        fields:
+        members:
           description:
             type: string
             required: false
@@ -83,11 +83,10 @@ codons:
       - assign-user
       - send-invite
 
-  validation_rules:
-    constraints:
-      - capability names must be unique within a gene
-      - semantic capability identifiers must be kebab-case
-      - structured capability definitions must be well-formed
-      - structured inputs must conform to language.field.field_definition
-      - structured outputs must conform to language.field.field_definition
-      - effects must be strings
+  constraints:
+    - capability names must be unique within a gene
+    - semantic capability identifiers must be kebab-case
+    - structured capability definitions must be well-formed
+    - structured inputs must conform to language.field.field_definition
+    - structured outputs must conform to language.field.field_definition
+    - effects must be strings

@@ -29,8 +29,8 @@ codons:
         - explicit field definitions override implicit default field definitions
         - explicit overrides must conform to language.field.field_definition
 
-    fields:
-      description: explicit field definitions for the entity
+    members:
+      description: mapping of entity field names to filed definitions
       type: object
       key: field_name
       value_type: language.field.field_definition

@@ -25,7 +25,7 @@ codons:
       - description
       - principles
 
-    field_definitions:
+    members:
       id:
         type: string
         description: unique identifier for the expression style
@@ -64,7 +64,7 @@ codons:
     required_fields:
       - may_depend_on
 
-    field_definitions:
+    members:
       may_depend_on:
         type: list
         item_type: expression.style.layer_name
@@ -74,8 +74,7 @@ codons:
       - dependency rules must reference declared layers
       - dependency graphs should be acyclic unless explicitly allowed by future schema versions
 
-  validation_rules:
-    constraints:
-      - style identifiers must be unique within the active expression context
-      - all declared dependency rules must target known layers
-      - every declared layer should have a dependency rule
+  constraints:
+    - style identifiers must be unique within the active expression context
+    - all declared dependency rules must target known layers
+    - every declared layer should have a dependency rule

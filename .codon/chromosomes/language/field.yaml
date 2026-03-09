@@ -16,7 +16,7 @@ codons:
       - explicit field definitions override inferred fields
       - field definitions should remain lightweight and portable across stacks
 
-    supported_forms:
+    forms:
       shorthand:
         description: simple scalar type declaration
         example:
@@ -26,7 +26,7 @@ codons:
       structured:
         description: extended field definition for precision when needed
 
-        fields:
+        members:
           type:
             type: field.field_type
             required: true
@@ -92,9 +92,8 @@ codons:
       - enum
       - reference
 
-  validation_rules:
-    constraints:
-      - field names must be unique within an entity
-      - structured fields must be well-formed
-      - enum fields must define values
-      - reference targets must resolve deterministically
+  constraints:
+    - field names must be unique within an entity
+    - structured fields must be well-formed
+    - enum fields must define values
+    - reference targets must resolve deterministically

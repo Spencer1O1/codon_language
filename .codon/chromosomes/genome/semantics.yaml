@@ -31,9 +31,19 @@ codons:
       validation content within codons using structured rule categories.
 
     supported_sections:
+      members:
+        description: |
+          Defines the named members and their shapes within a construct.
+          Use when listing the schema of an object.
+
+      forms:
+        description: |
+          Enumerates alternate shapes or syntactic forms a construct may take
+          (for example, shorthand vs structured forms).
+
       constraints:
         description: |
-          Hard validity rules that must hold for a genome to be valid.
+          Normative validity rules that must hold for a genome to be valid.
           Violations must be reported as validation errors.
 
       semantics:
@@ -43,13 +53,17 @@ codons:
 
       processing:
         description: |
-          Describe how engines should process or apply constructs
+          Defines how engines should process or apply constructs
           during loading, validation, mutation, or expression.
 
       guidance:
         description: |
-          Recommended practices or non-mandatory behaviors that improve
-          consistency or safety but do not invalidate a genome.
+          Non-normative recommendations that improve consistency or safety
+          but do not affect genome validity.
+
+      examples:
+        description: |
+          Non-normative illustrative snippets showing valid usage or outputs.
 
     constraints:
       - codons may include one or more of these sections when appropriate

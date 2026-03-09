@@ -40,7 +40,7 @@ codons:
       - suggestions
       - confidence
 
-    field_definitions:
+    members:
       summary:
         type: string
         description: short human-readable summary of the mutation set
@@ -78,7 +78,7 @@ codons:
       - target
       - operations
 
-    field_definitions:
+    members:
       id:
         type: string
 
@@ -92,7 +92,7 @@ codons:
   change_target:
     description: define supported semantic patch targets
 
-    supported_forms:
+    forms:
       root:
         value: genome
         description: target the root manifest
@@ -123,7 +123,7 @@ codons:
       - required
       - reason
 
-    field_definitions:
+    members:
       id:
         type: string
 
