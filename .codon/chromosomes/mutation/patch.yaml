@@ -111,6 +111,11 @@ codons:
         example: tracking.issues
         description: target a specific gene
 
+    rules:
+      - gene targets normally require the addressed gene to exist
+      - a non-existent gene target is valid only when introduced by an add operation at /gene within the same change
+      - gene creation through patching must initialize /gene with a name matching the addressed target
+
   operation_definition:
     description: |
       An operation is a structured mutation against a specific path inside a semantic target.
@@ -226,15 +231,18 @@ codons:
       - destructive patches should carry medium or high risk unless clearly reversible
 
   application_rules:
-    rules:
-      - changes must be applied in document order
-      - operations must be applied in document order within each change
-      - required operation failure must cause patch failure
-      - non-required operation failure may be skipped with warning when safe
-      - patch application must fail safely when required paths or old_value checks do not match
-      - patch application must be atomic across all changes
-      - partial patch application must not be committed
-      - target resolution and operation application must remain deterministic
+  rules:
+    - changes must be applied in document order
+    - operations must be applied in document order within each change
+    - required operation failure must cause patch failure
+    - non-required operation failure may be skipped with warning only when skipping it does not invalidate later required operations or final genome validity
+    - optional operations that create required structural prerequisites must not be skipped safely
+    - patch application must fail safely when required paths or old_value checks do not match
+    - patch application must be atomic across all changes
+    - partial patch application must not be externally committed
+    - if any required change or operation fails, persisted genome state must remain unchanged
+    - implementations may use staging, rollback, or equivalent mechanisms to satisfy atomicity
+    - target resolution and operation application must remain deterministic
 
   examples:
     single_target_patch:
