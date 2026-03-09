@@ -57,29 +57,48 @@ codons:
     description: define supported variables in projection path templates
 
     semantic_variables:
-      - chromosome
-      - gene
-      - codon
-      - entity
-      - capability
-      - relation
-      - trait
+      chromosome:
+        source: chromosome identifier
+      gene:
+        source: gene.name
+      codon:
+        source: codon identifier
+      entity:
+        source: entity identifier
+      capability:
+        source: capability identifier
+      relation:
+        source: relation identifier
+      trait:
+        source: trait identifier
 
     generator_variables:
-      - rule
-      - helper
-      - helper_group
+      rule:
+        source: validation rule identifier
+      helper:
+        source: internal helper identifier
+      helper_group:
+        source: internal helper grouping identifier
 
     derived_variables:
-      - chromosome_snake
-      - gene_snake
-      - codon_snake
-      - entity_snake
-      - capability_snake
-      - relation_snake
-      - trait_snake
-      - rule_snake
-      - helper_snake
+      chromosome_snake:
+        source: chromosome
+      gene_snake:
+        source: gene
+      codon_snake:
+        source: codon
+      entity_snake:
+        source: entity
+      capability_snake:
+        source: capability
+      relation_snake:
+        source: relation
+      trait_snake:
+        source: trait
+      rule_snake:
+        source: rule
+      helper_snake:
+        source: helper
 
     normalization_rules:
       - derived variables must be computed deterministically from their semantic source
@@ -90,7 +109,6 @@ codons:
 
     rules:
       - only declared template variables may be used in projection paths
-      - derived variables must be computed from their declared source
       - template variable resolution must be deterministic
       - unknown template variables must be rejected unless enabled by future schema versions
 

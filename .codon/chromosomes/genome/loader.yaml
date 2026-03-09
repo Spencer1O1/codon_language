@@ -66,6 +66,6 @@ codons:
       - only files admitted by genome composition rules may be parsed as gene files
       - hidden files excluded by composition rules must not be treated as gene files
       - the loader may parse invalid files for diagnostics but must not treat them as valid composed genome structure
-      - loaders must fail clearly when genome structure is present but the required .git directory is missing
+      - loaders must fail clearly when genome structure is present but the required .git directory is missing, the loader must fail immediately and must not proceed with genome validation or composition
       - all genome-relative paths must be resolved from the genome repository root
       - loader behavior must be deterministic for a given genome repository and filesystem state
