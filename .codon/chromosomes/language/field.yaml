@@ -28,8 +28,8 @@ codons:
 
         fields:
           type:
-            type: field.scalar_type
-            required: false
+            type: field.field_type
+            required: true
 
           optional:
             type: boolean
@@ -61,17 +61,21 @@ codons:
               - open
               - closed
           assignee:
+            type: reference
             reference: identity.user.User
 
     rules:
-      - a structured field definition must include either type or reference
-      - if reference is present, it must target a valid addressable entity
+      - a structured field definition must include type
+      - reference must be present when type is reference
+      - reference must not be present when type is not reference
+      - values must be present when type is enum
+      - values must not be present when type is not enum
+      - reference targets must resolve to a valid addressable entity
       - cross-gene field references require a declared dependency on the target gene
-      - enum fields must define values
       - explicit field definitions must remain valid regardless of inferred structure
 
-  scalar_type:
-    description: define supported scalar field types
+  field_type:
+    description: define supported field types
 
     values:
       - string
@@ -83,6 +87,7 @@ codons:
       - datetime
       - json
       - enum
+      - reference
 
   validation_rules:
     rules:

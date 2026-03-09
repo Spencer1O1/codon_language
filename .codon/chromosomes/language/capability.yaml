@@ -64,6 +64,7 @@ codons:
                 type: string
             outputs:
               issue:
+                type: reference
                 reference: tracking.issues.Issue
             effects:
               - creates tracking.issues.Issue
