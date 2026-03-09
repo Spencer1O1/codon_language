@@ -6,7 +6,7 @@ purpose: define how a Codon genome is composed from manifest and gene files
 codons:
   principles:
     items:
-      - genome.yaml is the project manifest and must not contain inline gene definitions
+      - genome.yaml is the genome manifest and must not contain inline gene definitions
       - genes are the primary architectural unit
       - each gene is defined in its own file
       - genes own codons such as entities, capabilities, relations, references, and traits
@@ -51,6 +51,7 @@ codons:
       - each gene file must define exactly one gene
       - all valid gene files discovered under chromosomes/ relative to the composition root are included in the composed genome
       - gene discovery order must not affect composed genome semantics
+      - trait-expanded structures must conform to the same composition rules as handwritten genome structures
 
   validation_pipeline:
     description: define the validation phases applied to a genome

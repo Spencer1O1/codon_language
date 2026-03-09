@@ -44,8 +44,6 @@ codons:
     rules:
       - explicit caller-provided genome repository roots take precedence over automatic discovery
       - embedded genome repositories must use the reserved directory name .codon
-      - a valid genome repository must contain genome.yaml and its own .git directory
-      - all genome-relative paths must be resolved from the discovered genome repository root
       - genome repository discovery must remain deterministic for a given filesystem state
 
   repository_rules:
@@ -53,9 +51,10 @@ codons:
 
     rules:
       - the genome repository root must satisfy the composition_root rules defined by the composition model
-      - genome repositories must contain their own .git directory
+      - genome repositories must contain genome.yaml and their own .git directory
       - embedded genome repositories must remain distinct from the outer project repository
       - the outer project repository and embedded genome repository must not be treated as the same repository
+      - a composition_root without .git is structurally recognizable but must not be treated as a valid genome repository
 
   loading_rules:
     description: define how a discovered genome repository is loaded
@@ -64,7 +63,9 @@ codons:
       - the loader must read genome.yaml from the genome repository root
       - the loader must discover genes under chromosomes/ relative to the genome repository root
       - gene discovery must follow the active genome composition rules
-      - the loader may parse invalid files for diagnostics but must not treat them as valid composed genome structure
-      - loader behavior must be deterministic for a given genome repository and filesystem state
       - only files admitted by genome composition rules may be parsed as gene files
       - hidden files excluded by composition rules must not be treated as gene files
+      - the loader may parse invalid files for diagnostics but must not treat them as valid composed genome structure
+      - loaders must fail clearly when genome structure is present but the required .git directory is missing
+      - all genome-relative paths must be resolved from the genome repository root
+      - loader behavior must be deterministic for a given genome repository and filesystem state

@@ -150,6 +150,7 @@ codons:
     values:
       - add
       - update
+      - remove
 
   risk_level:
     values:
