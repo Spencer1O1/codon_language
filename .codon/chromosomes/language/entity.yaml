@@ -43,6 +43,8 @@ codons:
       - inference may use references
       - inference may use traits
       - explicit field definitions override inferred fields
+      - implicit default field definitions override inferred fields
+      - inferred fields may only fill names not already occupied by explicit or implicit field definitions
 
   example:
     entities:

@@ -35,3 +35,5 @@ codons:
       - the loader must discover genes from chromosomes/ relative to the genome root
       - the loader may load invalid files for diagnostics but must not treat them as valid composed genome structure
       - loader behavior must be deterministic for a given genome root and filesystem state
+      - only files admitted by the active genome composition and discovery rules may be parsed as gene files
+      - hidden files excluded by composition rules must not be treated as gene files

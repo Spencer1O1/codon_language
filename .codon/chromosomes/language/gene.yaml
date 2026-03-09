@@ -9,7 +9,7 @@ purpose: define the schema of a gene file
 codons:
   gene_file:
     description: |
-      Each gene file defines exactly one gene and contains the
+      Each admitted gene file defines exactly one gene and contains the
       architecture owned by that gene.
 
     root_fields:
