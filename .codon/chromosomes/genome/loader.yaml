@@ -1,39 +1,70 @@
 gene:
   name: loader
 
-purpose: define how genome roots are discovered and loaded
+purpose: define how genome repositories are discovered and loaded
 
 codons:
-  genome_root_discovery:
+  genome_repository_discovery:
     description: |
-      Genome loading begins by identifying a genome root, which is the
-      directory containing genome.yaml and the associated genome structure.
+      Genome loading begins by identifying a genome repository.
+      A genome repository is the directory containing genome.yaml,
+      the associated genome structure, and its own Git repository.
 
     supported_forms:
       standalone:
-        description: genome root is the repository root
+        description: genome repository is rooted at the current project directory
         example: ./genome.yaml
 
       embedded:
-        description: genome root is a reserved nested directory
+        description: genome repository exists inside a reserved nested directory
         reserved_directory: .codon
         example: ./.codon/genome.yaml
 
+    search_behavior:
+      description: |
+        When the caller does not explicitly provide a genome repository root,
+        the loader may attempt automatic discovery.
+
+      rules:
+        - discovery begins at the caller working directory
+        - the loader must check for a genome repository rooted at the current directory
+        - the loader must check for an embedded genome repository in .codon/
+        - if neither exists, discovery proceeds to the parent directory
+        - discovery continues upward until a genome repository is found or filesystem root is reached
+        - if multiple valid genome repositories exist at the same search level, discovery must fail as ambiguous
+        - the nearest valid genome repository must be selected
+
+    discovery_limits:
+      description: define the stopping conditions for automatic discovery
+
+      rules:
+        - automatic discovery must stop at filesystem root if no genome repository is found
+        - explicit caller-provided genome repository roots bypass automatic search limits
+
     rules:
-      - explicit caller-provided genome roots take precedence over automatic discovery
-      - automatic discovery may consider repository-root and embedded genome roots
-      - embedded genome roots must use the reserved directory name .codon
-      - if multiple valid genome roots exist at the same search level, discovery must fail as ambiguous
-      - when searching upward, the nearest valid genome root must be selected
-      - all genome-relative paths must be resolved from the discovered genome root
+      - explicit caller-provided genome repository roots take precedence over automatic discovery
+      - embedded genome repositories must use the reserved directory name .codon
+      - a valid genome repository must contain genome.yaml and its own .git directory
+      - all genome-relative paths must be resolved from the discovered genome repository root
+      - genome repository discovery must remain deterministic for a given filesystem state
+
+  repository_rules:
+    description: define structural requirements of a genome repository
+
+    rules:
+      - the genome repository root must satisfy the composition_root rules defined by the composition model
+      - genome repositories must contain their own .git directory
+      - embedded genome repositories must remain distinct from the outer project repository
+      - the outer project repository and embedded genome repository must not be treated as the same repository
 
   loading_rules:
-    description: define how a discovered genome root is loaded
+    description: define how a discovered genome repository is loaded
 
     rules:
-      - the loader must read genome.yaml from the genome root
-      - the loader must discover genes from chromosomes/ relative to the genome root
-      - the loader may load invalid files for diagnostics but must not treat them as valid composed genome structure
-      - loader behavior must be deterministic for a given genome root and filesystem state
-      - only files admitted by the active genome composition and discovery rules may be parsed as gene files
+      - the loader must read genome.yaml from the genome repository root
+      - the loader must discover genes under chromosomes/ relative to the genome repository root
+      - gene discovery must follow the active genome composition rules
+      - the loader may parse invalid files for diagnostics but must not treat them as valid composed genome structure
+      - loader behavior must be deterministic for a given genome repository and filesystem state
+      - only files admitted by genome composition rules may be parsed as gene files
       - hidden files excluded by composition rules must not be treated as gene files

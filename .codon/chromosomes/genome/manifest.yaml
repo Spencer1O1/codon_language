@@ -6,7 +6,7 @@ purpose: define the schema of genome.yaml
 codons:
   genome_manifest:
     description: |
-      genome.yaml is the root manifest for the genome and defines
+      genome.yaml is the root manifest of a genome repository and defines
       project-wide metadata and global genome configuration.
 
     root_fields:

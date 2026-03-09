@@ -6,7 +6,7 @@ purpose: define how a Codon genome is composed from manifest and gene files
 codons:
   principles:
     items:
-      - genome.yaml is the project manifest, not the place where genes are defined
+      - genome.yaml is the project manifest and must not contain inline gene definitions
       - genes are the primary architectural unit
       - each gene is defined in its own file
       - genes own codons such as entities, capabilities, relations, references, and traits
@@ -17,37 +17,39 @@ codons:
       - implementation artifacts are produced through expression
       - genome mutations are applied through the shared patch system
 
-  genome_root:
+  composition_root:
     description: |
-      The genome root is the filesystem directory containing genome.yaml
-      and the associated chromosomes/ and optional expression/ directories.
+      A Codon genome is composed relative to a composition root.
+      The composition root is the filesystem directory containing
+      genome.yaml and the genome structure directories.
 
     rules:
-      - genome root may be the repository root or a nested reserved directory
-      - all genome-relative paths are resolved from the genome root
-      - composed genome discovery is scoped to the genome root
+      - genome.yaml must exist at the composition root
+      - chromosomes/ must exist relative to the composition root
+      - expression/ may exist relative to the composition root
+      - embedded composition roots must use the reserved directory name .codon
+      - all genome-relative paths are resolved from the composition root
+      - composed genome discovery is scoped strictly to the composition root
 
   composed_genome:
     description: |
       The composed genome is the effective architectural model formed by
       genome.yaml plus all gene files discovered under chromosomes/
-      relative to the genome root.
+      relative to the composition root.
 
   filesystem_model:
     description: |
-      A Codon genome is composed from a root manifest file and gene files
-      organized into chromosome directories.
+      Gene files are organized under chromosome directories within
+      the chromosomes/ directory.
 
     rules:
-      - genome.yaml must exist at the genome root
-      - chromosomes/ must exist relative to the genome root
-      - expression/ may exist relative to the genome root
+      - chromosomes/ contains one directory per chromosome
       - each chromosome directory may contain one or more direct child .yaml gene files
       - only .yaml files are treated as gene files
       - hidden files and directories must be ignored
       - nested subdirectories inside chromosome directories must be rejected unless enabled by future schema versions
       - each gene file must define exactly one gene
-      - all valid gene files under chromosomes/ relative to the genome root are included in the composed genome
+      - all valid gene files discovered under chromosomes/ relative to the composition root are included in the composed genome
       - gene discovery order must not affect composed genome semantics
 
   validation_pipeline:
@@ -63,4 +65,4 @@ codons:
       - trait expansion must produce a deterministic expanded genome
       - structural constraints must be evaluated on the expanded genome
       - uniqueness constraints must be enforced on the expanded genome
-      - validators must report errors from both phases separately
+      - validators must report errors from both validation phases separately
