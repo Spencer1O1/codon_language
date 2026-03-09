@@ -25,27 +25,28 @@ codons:
   reference_forms:
     description: define supported reference forms in the language
 
-    forms:
-      primitive:
-        description: intrinsic built-in language types
-        examples:
-          - string
-          - boolean
-          - int
-          - float
-          - list
-          - object
-          - any
+    schema:
+      forms:
+        primitive:
+          description: intrinsic built-in language types
+          examples:
+            - string
+            - boolean
+            - int
+            - float
+            - list
+            - object
+            - any
 
-      local:
-        description: named constructs defined within the same gene
-        format: gene.name
-        example: field.scalar_type
+        local:
+          description: named constructs defined within the same gene
+          format: gene.name
+          example: field.scalar_type
 
-      qualified:
-        description: named constructs defined in another gene
-        format: chromosome.gene.name
-        example: genome.addressing.entity_reference
+        qualified:
+          description: named constructs defined in another gene
+          format: chromosome.gene.name
+          example: genome.addressing.entity_reference
 
     constraints:
       - primitive references are intrinsic and require no dependency declaration

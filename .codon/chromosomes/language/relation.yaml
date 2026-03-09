@@ -8,22 +8,23 @@ codons:
     description: |
       Relations describe structural links between entities within the same gene.
 
-    members:
-      from:
-        type: entity
-        required: true
+    schema:
+      members:
+        from:
+          type: entity
+          required: true
 
-      to:
-        type: entity
-        required: true
+        to:
+          type: entity
+          required: true
 
-      type:
-        type: relation.relation_type
-        required: true
+        type:
+          type: relation.relation_type
+          required: true
 
-      name:
-        type: string
-        required: true
+        name:
+          type: string
+          required: true
 
     constraints:
       - source entity must belong to the declaring gene
@@ -39,9 +40,10 @@ codons:
         - many-to-one
         - many-to-many
 
-    example:
-    relations:
-      - from: Comment
-        to: Issue
-        type: many-to-one
-        name: issue
+    examples:
+      simple_relation:
+        relations:
+          - from: Comment
+            to: Issue
+            type: many-to-one
+            name: issue

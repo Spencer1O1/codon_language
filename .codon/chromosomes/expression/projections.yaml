@@ -34,18 +34,19 @@ codons:
   output_definition:
     description: define a projected implementation artifact
 
-    required_fields:
-      - layer
-      - path
+    schema:
+      required_members:
+        - layer
+        - path
 
-    members:
-      layer:
-        type: expression.style.layer_name
-        description: implementation layer that owns the projected artifact
+      members:
+        layer:
+          type: expression.style.layer_name
+          description: implementation layer that owns the projected artifact
 
-      path:
-        type: string
-        description: output path template for the projected artifact
+        path:
+          type: string
+          description: output path template for the projected artifact
 
     constraints:
       - output layers must exist in the active expression style

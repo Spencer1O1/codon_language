@@ -30,10 +30,11 @@ codons:
   gene_identity:
     description: identify the gene defined by the file
 
-    members:
-      name:
-        type: string
-        required: true
+    schema:
+      members:
+        name:
+          type: string
+          required: true
 
     constraints:
       - gene name must be unique within its chromosome

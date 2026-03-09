@@ -28,79 +28,82 @@ codons:
   patch_definition:
     description: define the top-level structure of a patch document
 
-    required_fields:
-      - summary
-      - rationale
-      - risk
-      - changes
+    schema:
+      required_members:
+        - summary
+        - rationale
+        - risk
+        - changes
 
-    optional_fields:
-      - evidence
-      - warnings
-      - suggestions
-      - confidence
+      optional_members:
+        - evidence
+        - warnings
+        - suggestions
+        - confidence
 
-    members:
-      summary:
-        type: string
-        description: short human-readable summary of the mutation set
+      members:
+        summary:
+          type: string
+          description: short human-readable summary of the mutation set
 
-      rationale:
-        type: string
-        description: explanation of why the patch is being proposed
+        rationale:
+          type: string
+          description: explanation of why the patch is being proposed
 
-      risk:
-        type: mutation.patch.risk_level
+        risk:
+          type: mutation.patch.risk_level
 
-      evidence:
-        type: list
+        evidence:
+          type: list
 
-      warnings:
-        type: list
+        warnings:
+          type: list
 
-      suggestions:
-        type: list
+        suggestions:
+          type: list
 
-      confidence:
-        type: mutation.patch.confidence_level
+        confidence:
+          type: mutation.patch.confidence_level
 
-      changes:
-        type: list
-        item_type: mutation.patch.change_definition
+        changes:
+          type: list
+          item_type: mutation.patch.change_definition
 
   change_definition:
     description: |
       A change applies to exactly one semantic target and contains
       one or more operations against that target.
 
-    required_fields:
-      - id
-      - target
-      - operations
+    schema:
+      required_members:
+        - id
+        - target
+        - operations
 
-    members:
-      id:
-        type: string
+      members:
+        id:
+          type: string
 
-      target:
-        type: mutation.patch.change_target
+        target:
+          type: mutation.patch.change_target
 
-      operations:
-        type: list
-        item_type: mutation.patch.operation_definition
+        operations:
+          type: list
+          item_type: mutation.patch.operation_definition
 
   change_target:
     description: define supported semantic patch targets
 
-    forms:
-      root:
-        value: genome
-        description: target the root manifest
+    schema:
+      forms:
+        root:
+          value: genome
+          description: target the root manifest
 
-      gene:
-        type: genome.addressing.gene_reference
-        example: tracking.issues
-        description: target a specific gene
+        gene:
+          type: genome.addressing.gene_reference
+          example: tracking.issues
+          description: target a specific gene
 
     constraints:
       - gene targets normally require the addressed gene to exist
@@ -112,39 +115,40 @@ codons:
       An operation is a structured mutation against a path inside
       the addressed semantic target.
 
-    required_fields:
-      - id
-      - op
-      - path
+    schema:
+      required_members:
+        - id
+        - op
+        - path
 
-    optional_fields:
-      - value
-      - old_value
-      - required
-      - reason
+      optional_members:
+        - value
+        - old_value
+        - required
+        - reason
 
-    members:
-      id:
-        type: string
+      members:
+        id:
+          type: string
 
-      op:
-        type: mutation.patch.operation_type
+        op:
+          type: mutation.patch.operation_type
 
-      path:
-        type: string
+        path:
+          type: string
 
-      value:
-        type: any
+        value:
+          type: any
 
-      old_value:
-        type: any
+        old_value:
+          type: any
 
-      required:
-        type: boolean
-        default: true
+        required:
+          type: boolean
+          default: true
 
-      reason:
-        type: string
+        reason:
+          type: string
 
   operation_type:
     values:

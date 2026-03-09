@@ -15,41 +15,42 @@ codons:
       - expression styles may vary by language, architecture, or packaging strategy
       - the same genome may be expressed through different styles
 
-    required_fields:
-      - id
-      - language
-      - layers
-      - dependency_rules
+    schema:
+      required_members:
+        - id
+        - language
+        - layers
+        - dependency_rules
 
-    optional_fields:
-      - description
-      - principles
+      optional_members:
+        - description
+        - principles
 
-    members:
-      id:
-        type: string
-        description: unique identifier for the expression style
+      members:
+        id:
+          type: string
+          description: unique identifier for the expression style
 
-      description:
-        type: string
-        description: optional human-readable description of the style
+        description:
+          type: string
+          description: optional human-readable description of the style
 
-      language:
-        type: string
-        description: implementation language targeted by the style
+        language:
+          type: string
+          description: implementation language targeted by the style
 
-      principles:
-        type: list
-        description: optional guiding principles of the style
+        principles:
+          type: list
+          description: optional guiding principles of the style
 
-      layers:
-        type: list
-        item_type: expression.style.layer_name
-        description: ordered set of implementation layers used by the style
+        layers:
+          type: list
+          item_type: expression.style.layer_name
+          description: ordered set of implementation layers used by the style
 
-      dependency_rules:
-        type: object
-        description: layer-specific dependency constraints
+        dependency_rules:
+          type: object
+          description: layer-specific dependency constraints
 
   layer_name:
     description: define the identifier of an implementation layer
@@ -61,14 +62,15 @@ codons:
   dependency_rule:
     description: define permitted dependencies for a layer
 
-    required_fields:
-      - may_depend_on
+    schema:
+      required_members:
+        - may_depend_on
 
-    members:
-      may_depend_on:
-        type: list
-        item_type: expression.style.layer_name
-        description: layers that the declaring layer may depend on
+      members:
+        may_depend_on:
+          type: list
+          item_type: expression.style.layer_name
+          description: layers that the declaring layer may depend on
 
     constraints:
       - dependency rules must reference declared layers

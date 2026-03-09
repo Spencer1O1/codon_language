@@ -26,18 +26,19 @@ codons:
   project:
     description: project-wide metadata
 
-    members:
-      name:
-        type: string
-        required: true
+    schema:
+      members:
+        name:
+          type: string
+          required: true
 
-      description:
-        type: string
-        required: false
+        description:
+          type: string
+          required: false
 
-      type:
-        type: string
-        required: false
+        type:
+          type: string
+          required: false
 
   traits:
     description: project-level architectural traits
@@ -50,7 +51,8 @@ codons:
     type: object
     required: false
 
-    members:
-      active_style:
-        type: string
-        required: true
+    schema:
+      members:
+        active_style:
+          type: string
+          required: true

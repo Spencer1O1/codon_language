@@ -11,82 +11,86 @@ codons:
     description: |
       Capabilities describe domain actions that a gene can perform.
 
-    philosophy:
+    semantics:
       - capabilities are semantic declarations of intent
       - capabilities describe what a system does, not how it is implemented
       - the semantic form is the default and recommended representation
       - structured capability definitions are an advanced form for cases requiring explicit detail
       - implementation artifacts are normally derived through expression
 
-    forms:
-      semantic:
-        description: simple semantic identifier
-        type: string
+    schema:
+      forms:
+        semantic:
+          description: simple semantic identifier
+          type: string
 
-        example:
-          - create-issue
-          - assign-issue
-          - close-issue
+        structured:
+          description: extended capability definition for cases requiring explicit structure
+          type: object
 
-      structured:
-        description: extended capability definition for cases requiring explicit structure
-        type: object
-
-        members:
-          description:
-            type: string
-            required: false
-
-          inputs:
-            type: object
-            key: input_name
-            value_type: language.field.field_definition
-            required: false
-
-          outputs:
-            type: object
-            key: output_name
-            value_type: language.field.field_definition
-            required: false
-
-          effects:
-            type: list
-            item_type: string
-            required: false
-
-        example:
-          create-issue:
-            description: create a new issue
-            inputs:
-              title:
-                type: string
+          schema:
+            members:
               description:
                 type: string
-            outputs:
-              issue:
-                type: reference
-                reference: tracking.issues.Issue
-            effects:
-              - creates tracking.issues.Issue
+                required: false
 
-    inference_rules:
+              inputs:
+                type: object
+                key: input_name
+                value_type: language.field.field_definition
+                required: false
+
+              outputs:
+                type: object
+                key: output_name
+                value_type: language.field.field_definition
+                required: false
+
+              effects:
+                type: list
+                item_type: string
+                required: false
+
+    examples:
+      semantic:
+        - create-issue
+        - assign-issue
+        - close-issue
+
+      structured:
+        create-issue:
+          description: create a new issue
+          inputs:
+            title:
+              type: string
+            description:
+              type: string
+          outputs:
+            issue:
+              type: reference
+              reference: tracking.issues.Issue
+          effects:
+            - creates tracking.issues.Issue
+
+    processing:
       - structured details may be inferred from semantic capabilities
       - capabilities may contribute to inferred entity fields
       - explicit structured definitions override inferred structure
 
-  naming_convention:
-    style: kebab-case
-    pattern: verb-noun
+    constraints:
+      - capability names must be unique within a gene
+      - semantic capability identifiers must be kebab-case
+      - structured capability definitions must be well-formed
+      - structured inputs must conform to language.field.field_definition
+      - structured outputs must conform to language.field.field_definition
+      - effects must be strings
 
-    examples:
-      - create-issue
-      - assign-user
-      - send-invite
+    guidance:
+      naming_convention:
+        style: kebab-case
+        pattern: verb-noun
 
-  constraints:
-    - capability names must be unique within a gene
-    - semantic capability identifiers must be kebab-case
-    - structured capability definitions must be well-formed
-    - structured inputs must conform to language.field.field_definition
-    - structured outputs must conform to language.field.field_definition
-    - effects must be strings
+        examples:
+          - create-issue
+          - assign-user
+          - send-invite

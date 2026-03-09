@@ -31,15 +31,21 @@ codons:
       validation content within codons using structured rule categories.
 
     supported_sections:
-      members:
+      schema:
         description: |
-          Defines the named members and their shapes within a construct.
-          Use when listing the schema of an object.
+          Describes the structural shape of a codon, including its
+          members and allowed forms.
 
-      forms:
-        description: |
-          Enumerates alternate shapes or syntactic forms a construct may take
-          (for example, shorthand vs structured forms).
+        subsections:
+          members:
+            description: |
+              Defines the named members and their shapes within a construct.
+              Use when listing the schema of an object.
+
+          forms:
+            description: |
+              Enumerates alternate shapes or syntactic forms a construct may take
+              (for example, shorthand vs structured forms).
 
       constraints:
         description: |

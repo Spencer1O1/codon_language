@@ -9,7 +9,7 @@ codons:
       Traits are reusable architectural programs that expand into
       concrete genome structure.
 
-    philosophy:
+    semantics:
       - traits provide reusable architecture patterns
       - traits expand into standard genome constructs
       - traits do not introduce new semantic primitives
