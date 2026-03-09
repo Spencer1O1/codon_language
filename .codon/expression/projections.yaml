@@ -1,52 +1,41 @@
 projections:
   chromosome:
     description: |
-      Chromosomes define semantic domains within the language specification.
-      They may influence package boundaries and directory structure, but do
-      not necessarily map 1:1 to implementation directories.
+      Chromosomes influence package grouping but do not necessarily map
+      directly to top-level implementation directories.
 
   gene:
     description: |
-      A gene may project into one or more specification artifacts or
-      implementation artifacts depending on the active expression style.
+      A gene may project into one or more implementation artifacts.
 
-  targets:
-    manifest:
+  codon_targets:
+    gene_loader:
       outputs:
-        - path: .codon/genome.yaml
+        - kind: implementation
+          layer: pkg
+          path: pkg/genome/{{ gene_snake }}.go
 
-    addressing:
+    validation_rule:
       outputs:
-        - path: .codon/chromosomes/genome/addressing.yaml
+        - kind: implementation
+          layer: pkg
+          path: pkg/validation/genome_validator/rules/{{ rule_snake }}.go
 
-    composition:
+    patch_model:
       outputs:
-        - path: .codon/chromosomes/genome/composition.yaml
+        - kind: implementation
+          layer: pkg
+          path: pkg/patch/{{ gene_snake }}.go
 
-    semantics:
+    helper:
       outputs:
-        - path: .codon/chromosomes/genome/semantics.yaml
-
-    gene:
-      outputs:
-        - path: .codon/chromosomes/{{ chromosome }}/{{ gene_snake }}.yaml
-
-    trait_system:
-      outputs:
-        - path: .codon/chromosomes/traits/{{ gene_snake }}.yaml
-
-    mutation_model:
-      outputs:
-        - path: .codon/chromosomes/mutation/{{ gene_snake }}.yaml
-
-    expression_model:
-      outputs:
-        - path: .codon/chromosomes/expression/{{ gene_snake }}.yaml
+        - kind: implementation
+          layer: internal
+          path: internal/{{ helper_group }}/{{ helper_snake }}.go
 
   generation_rules:
     - expression must preserve the semantic meaning of the genome
     - implementation structure may differ from genome structure according to expression rules
-    - specification artifacts must be written under .codon/
     - reusable Go implementation should be written under pkg/
     - supporting helpers should be written under internal/
     - regeneration behavior should preserve user-owned code according to generator rules

@@ -2,17 +2,18 @@ style:
   id: go-language-engine
 
   description: |
-    Expression style for implementing the Codon language as a Go-based
-    language engine and specification repository.
+    Expression style for projecting a Codon genome into Go-based
+    implementation artifacts suitable for building language engines,
+    validators, and supporting tooling.
 
   language: go
 
   principles:
-    - genome structure is semantic
-    - implementation structure is derived through expression
+    - genome structure is semantic and implementation-agnostic
+    - implementation artifacts are derived through expression
     - one gene may project into multiple implementation artifacts
-    - implementation should remain understandable without knowledge of the genome metaphor
-    - reusable language logic should be exposed through stable packages
+    - generated code should remain understandable without requiring knowledge of the genome metaphor
+    - reusable language logic should be exposed through stable Go packages
 
   layers:
     - pkg
@@ -21,13 +22,16 @@ style:
 
   dependency_rules:
     pkg:
+      description: reusable public packages
       may_depend_on:
         - internal
 
     internal:
+      description: private implementation helpers
       may_depend_on: []
 
     examples:
+      description: demonstration or sample programs using the language engine
       may_depend_on:
         - pkg
         - internal
