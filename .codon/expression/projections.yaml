@@ -8,29 +8,25 @@ projections:
     description: |
       A gene may project into one or more implementation artifacts.
 
-  codon_targets:
+  projection_targets:
     gene_loader:
       outputs:
-        - kind: implementation
-          layer: pkg
+        - layer: pkg
           path: pkg/genome/{{ gene_snake }}.go
 
     validation_rule:
       outputs:
-        - kind: implementation
-          layer: pkg
+        - layer: pkg
           path: pkg/validation/genome_validator/rules/{{ rule_snake }}.go
 
     patch_model:
       outputs:
-        - kind: implementation
-          layer: pkg
+        - layer: pkg
           path: pkg/patch/{{ gene_snake }}.go
 
     helper:
       outputs:
-        - kind: implementation
-          layer: internal
+        - layer: internal
           path: internal/{{ helper_group }}/{{ helper_snake }}.go
 
   generation_rules:

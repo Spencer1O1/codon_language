@@ -17,6 +17,7 @@ codons:
       - projections may map one semantic construct to multiple implementation artifacts
       - projections must preserve semantic meaning
       - projections are governed by the active expression style
+      - projections must not generate or modify the genome specification itself
 
   projection_targets:
     description: define supported semantic targets for projection mappings
@@ -50,20 +51,47 @@ codons:
       - output layers must exist in the active expression style
       - output paths must be deterministic for a given target and style
       - output paths may use supported template variables
+      - projections must not write files inside the genome repository
 
   template_variables:
     description: define supported variables in projection path templates
 
-    examples:
-      - "{{ chromosome }}"
-      - "{{ gene }}"
-      - "{{ codon }}"
-      - "{{ chromosome_snake }}"
-      - "{{ gene_snake }}"
-      - "{{ codon_snake }}"
+    semantic_variables:
+      - chromosome
+      - gene
+      - codon
+      - entity
+      - capability
+      - relation
+      - trait
+
+    generator_variables:
+      - rule
+      - helper
+      - helper_group
+
+    derived_variables:
+      - chromosome_snake
+      - gene_snake
+      - codon_snake
+      - entity_snake
+      - capability_snake
+      - relation_snake
+      - trait_snake
+      - rule_snake
+      - helper_snake
+
+    normalization_rules:
+      - derived variables must be computed deterministically from their semantic source
+      - snake variants must use lowercase identifiers with underscore separators
+      - hyphens and spaces must normalize to underscores
+      - repeated separators must collapse to a single underscore
+      - leading and trailing separators must be removed
 
     rules:
-      - template variables must resolve deterministically from the addressed semantic target
+      - only declared template variables may be used in projection paths
+      - derived variables must be computed from their declared source
+      - template variable resolution must be deterministic
       - unknown template variables must be rejected unless enabled by future schema versions
 
   projection_rules:
@@ -74,4 +102,6 @@ codons:
       - gene projections may produce one or more implementation artifacts
       - codon projections may produce one or more implementation artifacts
       - projections must remain compatible with the active expression style
+      - projection path generation must be deterministic for a given genome and expression configuration
       - implementation structure may differ from genome structure according to projection rules
+      - projections must not write files inside the genome repository
