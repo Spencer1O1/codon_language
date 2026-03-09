@@ -3,6 +3,7 @@ gene:
 
 dependencies:
   - language.field
+  - language.inference
 
 purpose: define the structure and inference rules of entity codons
 
@@ -44,27 +45,12 @@ codons:
         required: false
 
     processing:
-      rules:
-        - fields may be inferred when omitted
-        - inference may use capabilities
-        - inference may use relations
-        - inference may use references
-        - inference may use traits
+      - fields may be inferred when omitted
+      - inference sources may include capabilities, relations, references, and traits
+      - field inference must follow language.inference.inference_model
 
-      precedence:
-        description: define merge/override rules for explicit, implicit, and inferred fields
-        rules:
-          - ordering: explicit > implicit defaults > inferred
-          - explicit field definitions replace any inferred or implicit definition for the same field name
-          - implicit defaults apply only when the field name is absent after explicit definitions
-          - inferred fields may populate only field names not present in explicit or implicit defaults
-          - no deep merge is performed; field definitions are replaced whole at their precedence level
-          - when multiple inference sources propose the same field name with conflicting shapes, validation must raise an error (inference conflict)
-          - if an inferred field conflicts with an implicit default or explicit definition, validation must raise an error rather than merging
-
-  examples:
-    simple_entity:
-      entities:
+    examples:
+      simple_entity:
         User:
           fields:
             email: string

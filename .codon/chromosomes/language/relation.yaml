@@ -1,6 +1,9 @@
 gene:
   name: relation
 
+dependencies:
+  - language.entity
+
 purpose: define the structure and validation rules of internal relation codons
 
 types:

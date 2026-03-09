@@ -1,0 +1,24 @@
+gene:
+  name: inference
+
+purpose: define shared inference semantics and precedence for Codon language constructs
+
+codons:
+  inference_model:
+    description: |
+      Shared rules for inferring structure from other codon content
+      such as capabilities, relations, references, or traits.
+
+    processing:
+      - inference sources may include capabilities, relations, references, traits, or other codon-specific mechanisms
+      - precedence ordering is explicit > implicit defaults > inferred
+      - explicit definitions replace any implicit or inferred definition for the same member
+      - implicit defaults apply only when the member name is absent after explicit definitions
+      - inferred members may populate only names not present in explicit or implicit defaults
+      - no deep merge is performed; inferred or implicit members are replaced whole at their precedence level
+      - when multiple inference sources propose the same member name with conflicting shapes, validation must raise an error
+      - if an inferred member conflicts with an implicit default or explicit definition, validation must raise an error rather than merging
+
+    guidance:
+      - engines should emit diagnostics indicating which source produced each inferred member
+      - engines may optionally disable inference per codon via configuration, but must still honor precedence rules when inference is enabled

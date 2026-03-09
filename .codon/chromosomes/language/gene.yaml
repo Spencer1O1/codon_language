@@ -45,7 +45,8 @@ codons:
 
   dependencies:
     description: |
-      Explicit architectural dependencies on other genes.
+      Explicit dependencies on other genes required for schema resolution,
+      semantic interpretation, or processing behavior.
 
     schema:
       type: list
@@ -57,6 +58,7 @@ codons:
       - dependencies must use canonical qualified gene references
       - duplicate dependency entries must be rejected
       - genes with no external dependencies may omit this field
+      - genes must declare dependencies on any external gene whose definitions are required for schema resolution, semantic interpretation, or processing behavior
 
   types:
     description: |

@@ -3,6 +3,7 @@ gene:
 
 dependencies:
   - language.field
+  - language.inference
 
 purpose: define the structure, semantics, and naming rules of capability codons
 
@@ -80,8 +81,7 @@ codons:
     processing:
       - structured details may be inferred from semantic capabilities
       - capabilities may contribute to inferred entity fields
-      - explicit structured definitions override inferred structure
-      - when contributing inferred entity fields, capabilities must follow entity processing.precedence (explicit > implicit defaults > inferred) and must not override explicit or implicit fields
+      - capability-driven inference must follow language.inference.inference_model
 
     constraints:
       - capability names must be unique within a gene
