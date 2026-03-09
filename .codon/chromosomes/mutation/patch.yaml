@@ -192,9 +192,10 @@ codons:
     rules:
       - target resolution is handled by the mutation engine
       - root targets resolve to genome.yaml
-      - gene targets resolve to the canonical gene file within the addressed chromosome
-      - the canonical gene file path must use the addressed chromosome directory and the gene name as the filename stem
-      - gene creation must produce the canonical gene file path for the addressed chromosome and gene
+      - gene targets resolve to the canonical gene file under chromosomes/<chromosome>/<gene>.yaml
+      - the canonical gene filename must use the gene name as the filename stem
+      - gene creation may implicitly introduce the addressed chromosome when no chromosome directory for that identifier already exists
+      - if the addressed chromosome directory does not exist, the mutation engine must create it during patch application
       - resolution must be deterministic
 
   destructive_change_rules:
