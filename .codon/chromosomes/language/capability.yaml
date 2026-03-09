@@ -81,6 +81,7 @@ codons:
       - structured details may be inferred from semantic capabilities
       - capabilities may contribute to inferred entity fields
       - explicit structured definitions override inferred structure
+      - when contributing inferred entity fields, capabilities must follow entity processing.precedence (explicit > implicit defaults > inferred) and must not override explicit or implicit fields
 
     constraints:
       - capability names must be unique within a gene
