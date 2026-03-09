@@ -49,3 +49,18 @@ codons:
       - each gene file must define exactly one gene
       - all valid gene files under chromosomes/ relative to the genome root are included in the composed genome
       - gene discovery order must not affect composed genome semantics
+
+  validation_pipeline:
+    description: define the validation phases applied to a genome
+
+    phases:
+      - raw_genome_validation
+      - trait_expansion
+      - expanded_genome_validation
+
+    rules:
+      - raw genome validation must occur before trait expansion
+      - trait expansion must produce a deterministic expanded genome
+      - structural constraints must be evaluated on the expanded genome
+      - uniqueness constraints must be enforced on the expanded genome
+      - validators must report errors from both phases separately

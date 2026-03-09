@@ -1,6 +1,9 @@
 gene:
   name: capability
 
+dependencies:
+  - language.field
+
 purpose: define the structure, semantics, and naming rules of capability codons
 
 codons:
@@ -36,24 +39,32 @@ codons:
 
           inputs:
             type: object
+            key: input_name
+            value_type: language.field.field_definition
             required: false
 
           outputs:
             type: object
+            key: output_name
+            value_type: language.field.field_definition
             required: false
 
           effects:
             type: list
+            item_type: string
             required: false
 
         example:
           create-issue:
             description: create a new issue
             inputs:
-              title: string
-              description: string
+              title:
+                type: string
+              description:
+                type: string
             outputs:
-              issue: tracking.issues.Issue
+              issue:
+                reference: tracking.issues.Issue
             effects:
               - creates tracking.issues.Issue
 
@@ -62,17 +73,20 @@ codons:
       - capabilities may contribute to inferred entity fields
       - explicit structured definitions override inferred structure
 
-    naming_convention:
-      style: kebab-case
-      pattern: verb-noun
+  naming_convention:
+    style: kebab-case
+    pattern: verb-noun
 
-      examples:
-        - create-issue
-        - assign-user
-        - send-invite
+    examples:
+      - create-issue
+      - assign-user
+      - send-invite
 
-    validation_rules:
-      rules:
-        - capability names must be unique within a gene
-        - semantic capability identifiers must be kebab-case
-        - structured capability definitions must be well-formed
+  validation_rules:
+    rules:
+      - capability names must be unique within a gene
+      - semantic capability identifiers must be kebab-case
+      - structured capability definitions must be well-formed
+      - structured inputs must conform to language.field.field_definition
+      - structured outputs must conform to language.field.field_definition
+      - effects must be strings

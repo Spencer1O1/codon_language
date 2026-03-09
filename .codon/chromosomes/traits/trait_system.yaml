@@ -52,8 +52,8 @@ codons:
         - traits
 
   expansion_rules:
-  rules:
-    - project-level traits may introduce new chromosomes when required by their architecture
-    - gene-level traits must expand only within the owning gene
-    - trait expansion must respect genome and gene-file boundaries
-    - trait expansion must remain deterministic for a given trait definition and input genome
+    rules:
+      - project-level traits may introduce new chromosomes when required by their architecture
+      - gene-level traits must expand only within the owning gene
+      - trait expansion must respect genome and gene-file boundaries
+      - trait expansion must remain deterministic for a given trait definition and input genome

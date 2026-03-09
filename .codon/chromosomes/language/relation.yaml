@@ -18,7 +18,7 @@ codons:
         required: true
 
       type:
-        type: relation_type
+        type: relation.relation_type
         required: true
 
       name:

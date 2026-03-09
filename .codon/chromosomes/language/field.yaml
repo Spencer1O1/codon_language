@@ -4,7 +4,7 @@ gene:
 dependencies:
   - genome.addressing
 
-purpose: define field structures used by entities
+purpose: define the structure of field definitions used by entities
 
 codons:
   field_definition:
@@ -13,7 +13,7 @@ codons:
 
     philosophy:
       - fields are secondary to structure and capabilities
-      - explicit fields override inferred fields
+      - explicit field definitions override inferred fields
       - field definitions should remain lightweight and portable across stacks
 
     supported_forms:
@@ -25,10 +25,11 @@ codons:
 
       structured:
         description: extended field definition for precision when needed
+
         fields:
           type:
-            type: scalar_type
-            required: true
+            type: field.scalar_type
+            required: false
 
           optional:
             type: boolean
@@ -59,23 +60,33 @@ codons:
             values:
               - open
               - closed
+          assignee:
+            reference: identity.user.User
 
-    scalar_type:
-      description: define supported scalar field types
+    rules:
+      - a structured field definition must include either type or reference
+      - if reference is present, it must target a valid addressable entity
+      - cross-gene field references require a declared dependency on the target gene
+      - enum fields must define values
+      - explicit field definitions must remain valid regardless of inferred structure
 
-      values:
-        - string
-        - text
-        - int
-        - float
-        - boolean
-        - uuid
-        - datetime
-        - json
-        - enum
+  scalar_type:
+    description: define supported scalar field types
 
-    validation_rules:
-      rules:
-        - field names must be unique within an entity
-        - structured fields must include a type
-        - enum fields must define values
+    values:
+      - string
+      - text
+      - int
+      - float
+      - boolean
+      - uuid
+      - datetime
+      - json
+      - enum
+
+  validation_rules:
+    rules:
+      - field names must be unique within an entity
+      - structured fields must be well-formed
+      - enum fields must define values
+      - reference targets must resolve deterministically
