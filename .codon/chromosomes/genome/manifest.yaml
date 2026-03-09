@@ -9,17 +9,27 @@ codons:
       genome.yaml is the root manifest of a genome repository and defines
       project-wide metadata and global genome configuration.
 
-    root_fields:
-      required:
+    schema:
+      required_members:
         - project
-      optional:
+        - schema_version
+      optional_members:
         - traits
         - expression
 
+      members:
+        schema_version:
+          type: string
+          constraints:
+            - must follow semantic versioning (MAJOR.MINOR.PATCH)
+        project:
+          type: object
+        traits:
+          type: list
+        expression:
+          type: object
+
     constraints:
-      - project is required
-      - traits is optional
-      - expression is optional
       - unknown fields must be rejected unless enabled by the active schema version
       - genome.yaml must not contain inline chromosome or gene definitions
 
@@ -27,32 +37,35 @@ codons:
     description: project-wide metadata
 
     schema:
+      required_members:
+        - name
+      optional_members:
+        - description
+        - type
+
       members:
         name:
           type: string
-          required: true
 
         description:
           type: string
-          required: false
 
         type:
           type: string
-          required: false
 
   traits:
     description: project-level architectural traits
     type: list
     item_type: string
-    required: false
 
   expression:
     description: active expression configuration for the genome
     type: object
-    required: false
 
     schema:
+      required_members:
+        - active_style
+
       members:
         active_style:
           type: string
-          required: true
