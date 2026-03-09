@@ -12,19 +12,20 @@ codons:
       Each admitted gene file defines exactly one gene and contains the
       architecture owned by that gene.
 
-    root_fields:
-      required:
+    schema:
+      required_members:
         - gene
-      optional:
+      optional_members:
         - purpose
+        - types
         - dependencies
         - codons
-      additional_fields: forbidden
+      additional_members: forbidden
 
     constraints:
       - each gene file must define exactly one gene
       - the gene block must declare the gene name
-      - gene files are the canonical home for gene-owned entities, capabilities, relations, references, and traits
+      - gene files are the canonical home for gene-owned types, entities, capabilities, relations, references, and traits
       - unknown top-level fields must be rejected unless enabled by the active schema version
 
   gene_identity:
@@ -46,9 +47,10 @@ codons:
     description: |
       Explicit architectural dependencies on other genes.
 
-    type: list
-    item_type: genome.addressing.gene_reference
-    required: false
+    schema:
+      type: list
+      item_type: genome.addressing.gene_reference
+      required: false
 
     constraints:
       - dependencies must reference existing genes
@@ -56,18 +58,36 @@ codons:
       - duplicate dependency entries must be rejected
       - genes with no external dependencies may omit this field
 
-  codon_collections:
+  types:
+    description: |
+      Reusable schema types scoped to the gene specification.
+      Types are referenced by other schema members within the same gene.
+
+    schema:
+      members:
+        <type_name>:
+          description: schema definition for a reusable type
+          type: any
+          required: false
+
+    constraints:
+      - type names must be unique within the gene
+      - types may be referenced by local or fully-qualified identifiers according to the addressing rules
+      - types must not conflict with codon names
+
+  codons:
     description: |
       The codons section contains architectural instructions
       owned by the gene.
 
-    allowed_members:
-      - entities
-      - capabilities
-      - relations
-      - references
-      - traits
+    schema:
+      allowed_members:
+        - entities
+        - capabilities
+        - relations
+        - references
+        - traits
 
     constraints:
-      - unknown codon collections must be rejected unless enabled by future schema versions
-      - each codon collection must conform to its corresponding schema
+      - unknown codons must be rejected unless enabled by future schema versions
+      - each codon must conform to its corresponding schema

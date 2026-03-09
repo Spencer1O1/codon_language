@@ -3,6 +3,15 @@ gene:
 
 purpose: define the structure and validation rules of internal relation codons
 
+types:
+  relation_type:
+    description: define supported relation cardinalities
+    values:
+      - one-to-one
+      - one-to-many
+      - many-to-one
+      - many-to-many
+
 codons:
   relation_definition:
     description: |
@@ -11,15 +20,15 @@ codons:
     schema:
       members:
         from:
-          type: entity
+          type: language.entity.entity_identifier
           required: true
 
         to:
-          type: entity
+          type: language.entity.entity_identifier
           required: true
 
         type:
-          type: relation.relation_type
+          type: language.relation.relation_type
           required: true
 
         name:
@@ -30,15 +39,6 @@ codons:
       - source entity must belong to the declaring gene
       - target entity must belong to the declaring gene
       - internal relations must not reference external genes
-
-    relation_type:
-      description: define supported relation cardinalities
-
-      values:
-        - one-to-one
-        - one-to-many
-        - many-to-one
-        - many-to-many
 
     examples:
       simple_relation:

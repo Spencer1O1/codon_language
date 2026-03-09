@@ -6,6 +6,12 @@ dependencies:
 
 purpose: define the structure and inference rules of entity codons
 
+types:
+  entity_identifier:
+    description: |
+      identifier referencing an entity declared in the current gene
+    type: string
+
 codons:
   entity_definition:
     description: |

@@ -4,6 +4,7 @@ gene:
 dependencies:
   - genome.addressing
   - language.relation
+  - language.entity
 
 purpose: define the structure and validation rules of cross-gene reference codons
 
@@ -15,7 +16,7 @@ codons:
     schema:
       members:
         from:
-          type: entity
+          type: language.entity.entity_identifier
           required: true
         to:
           type: genome.addressing.entity_reference
@@ -32,7 +33,7 @@ codons:
           default: id
 
     constraints:
-      - source entity must belong to the declaring gene
+      - the from entity must exist in the declaring gene
       - target gene must be listed in dependencies
       - references must not create circular gene dependencies
       - cross-gene references use ID semantics unless explicitly overridden

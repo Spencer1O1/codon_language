@@ -3,6 +3,15 @@ gene:
 
 purpose: define the identifier scopes and canonical addressing formats used within a genome
 
+types:
+  chromosome_identifier:
+    description: unique chromosome identifier within a genome
+    type: string
+
+  gene_identifier:
+    description: unique gene identifier within its chromosome
+    type: string
+
 codons:
   identifier_scopes:
     chromosome:

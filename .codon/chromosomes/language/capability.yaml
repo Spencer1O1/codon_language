@@ -6,6 +6,11 @@ dependencies:
 
 purpose: define the structure, semantics, and naming rules of capability codons
 
+types:
+  capability_identifier:
+    description: kebab-case capability identifier following verb-noun pattern
+    type: string
+
 codons:
   capability_definition:
     description: |
