@@ -16,7 +16,7 @@ codons:
         - traits
         - expression
 
-    rules:
+    constraints:
       - project is required
       - traits is optional
       - expression is optional

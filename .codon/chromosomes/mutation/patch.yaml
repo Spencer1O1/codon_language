@@ -11,13 +11,13 @@ codons:
     description: |
       Patches represent explicit structural mutations against a genome.
 
-    purpose:
+    semantics:
       - represent structured genome mutations
       - support evolution and reconciliation proposals
       - enable reviewable, localized, multi-target changes
       - preserve human readability and machine applicability
 
-    rules:
+    constraints:
       - patches must be explicit
       - patches must be localized
       - patches must be diffable
@@ -102,7 +102,7 @@ codons:
         example: tracking.issues
         description: target a specific gene
 
-    rules:
+    constraints:
       - gene targets normally require the addressed gene to exist
       - a non-existent gene target is valid only when introduced by an add operation at /gene within the same change
       - gene creation must initialize /gene.name exactly matching the addressed target gene name
@@ -177,22 +177,27 @@ codons:
       - /codons/entities/Issue
       - /codons/capabilities/-
 
-    rules:
+    semantics:
+      - paths address logical locations inside the semantic target using slash-separated keys
+
+    constraints:
       - paths must resolve within the addressed target
       - root-level paths apply only to genome
       - gene-local paths apply only to the addressed gene
       - list indices are zero-based
       - numeric indices must resolve to an existing element
-      - The symbol "-" appends to a list and may appear only as the final segment of an add operation
+      - the symbol "-" appends to a list and may appear only as the final segment of an add operation
       - operations must respect composed genome boundaries
 
   target_resolution:
     description: define how semantic patch targets map to storage locations
 
-    rules:
+    semantics:
       - target resolution is handled by the mutation engine
       - root targets resolve to genome.yaml
       - gene targets resolve to the canonical gene file under chromosomes/<chromosome>/<gene>.yaml
+
+    constraints:
       - the canonical gene filename must use the gene name as the filename stem
       - gene creation may implicitly introduce the addressed chromosome when no chromosome directory for that identifier already exists
       - if the addressed chromosome directory does not exist, the mutation engine must create it during patch application
@@ -203,30 +208,36 @@ codons:
   destructive_change_rules:
     description: destructive mutations require additional clarity
 
-    destructive_operations:
+    operations:
       - remove
 
-    rules:
+    constraints:
       - destructive operations must include a reason
+      - if old_value is supplied it must match before the operation is applied
+
+    semantics:
+      - remove against object paths deletes the addressed key
+      - remove against list paths deletes the addressed element and reindexes the list
+
+    guidance:
       - destructive operations should include old_value when possible
       - destructive patches should carry medium or high risk unless clearly reversible
-      - remove operations against object paths delete the addressed key
-      - remove operations against list paths delete the addressed element and reindex the list
-      - if old_value is supplied, it must match before the destructive operation is applied
 
   application_rules:
-    rules:
+    processing:
       - changes must be applied in document order
       - changes targeting the same semantic target must be applied sequentially in document order
       - operations must be applied in order within each change
       - operations are evaluated against the current state produced by prior operations in the same patch
-      - required operation failure must abort the patch
       - non-required operations may be skipped only when doing so does not invalidate later required operations or final genome validity
       - operations creating structural prerequisites must not be skipped
+      - implementations may use staging, rollback, or equivalent mechanisms to ensure atomicity
+
+    constraints:
+      - required operation failure must abort the patch
       - patch application must be atomic across all changes
       - partial patch application must not be externally visible or persisted
       - if any required operation fails, the persisted genome state must remain unchanged
-      - implementations may use staging, rollback, or equivalent mechanisms to ensure atomicity
       - target resolution and operation execution must remain deterministic
 
   examples:

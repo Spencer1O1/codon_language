@@ -9,7 +9,7 @@ codons:
       - project
       - gene
 
-    rules:
+    constraints:
       - project-level traits may expand across multiple chromosomes or genes
       - gene-level traits must expand only within the owning gene
       - unsupported trait scopes must be rejected unless enabled by future schema versions

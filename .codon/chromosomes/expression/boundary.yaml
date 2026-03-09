@@ -33,7 +33,7 @@ codons:
       Derived artifacts are produced through expression rules that
       project semantic genome structure into implementation artifacts.
 
-    rules:
+    constraints:
       - core genome schema remains semantic
       - implementation artifacts are normally derived through expression
       - capabilities are primary semantic action units for many projections

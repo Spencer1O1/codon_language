@@ -30,7 +30,7 @@ codons:
         required: true
         default: id
 
-    rules:
+    constraints:
       - source entity must belong to the declaring gene
       - target gene must be listed in dependencies
       - references must not create circular gene dependencies

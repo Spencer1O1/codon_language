@@ -8,7 +8,7 @@ codons:
     meaning: named architectural domain or bounded context grouping one or more genes
     
   gene:
-    meaning: module-level architectural unit defined in its own file
+    meaning: primary architectural unit defined in its own file
 
   entity:
     meaning: persistent domain model owned by a gene
@@ -24,3 +24,35 @@ codons:
 
   trait:
     meaning: reusable architectural program expanding into concrete genome structure
+
+  specification_structure:
+    description: |
+      Codon language specifications may organize explanatory and
+      validation content within codons using structured rule categories.
+
+    supported_sections:
+      constraints:
+        description: |
+          Hard validity rules that must hold for a genome to be valid.
+          Violations must be reported as validation errors.
+
+      semantics:
+        description: |
+          Define the meaning of a construct or operation within the
+          Codon language model.
+
+      processing:
+        description: |
+          Describe how engines should process or apply constructs
+          during loading, validation, mutation, or expression.
+
+      guidance:
+        description: |
+          Recommended practices or non-mandatory behaviors that improve
+          consistency or safety but do not invalidate a genome.
+
+    constraints:
+      - codons may include one or more of these sections when appropriate
+      - specifications should prefer structured sections over large untyped rule lists
+      - absence of a section implies no rules of that category are defined
+      - specifications must not require any particular section structure unless explicitly defined by the gene schema

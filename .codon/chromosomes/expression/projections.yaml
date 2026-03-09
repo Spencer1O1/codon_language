@@ -27,7 +27,7 @@ codons:
       - gene
       - codon
 
-    rules:
+    constraints:
       - projection targets must reference semantic structures defined by the genome
       - projection targets must not introduce new semantic primitives
 
@@ -47,7 +47,7 @@ codons:
         type: string
         description: output path template for the projected artifact
 
-    rules:
+    constraints:
       - output layers must exist in the active expression style
       - output paths must be deterministic for a given target and style
       - output paths may use supported template variables
@@ -101,25 +101,27 @@ codons:
         source: helper
 
     normalization_rules:
-      - derived variables must be computed deterministically from their semantic source
-      - snake variants must use lowercase identifiers with underscore separators
-      - hyphens and spaces must normalize to underscores
-      - repeated separators must collapse to a single underscore
-      - leading and trailing separators must be removed
+      constraints:
+        - derived variables must be computed deterministically from their declared source
+        - snake variants must use lowercase identifiers with underscore separators
+        - hyphens and spaces must normalize to underscores
+        - repeated separators must collapse to a single underscore
+        - leading and trailing separators must be removed
 
-    rules:
+    constraints:
       - only declared template variables may be used in projection paths
       - template variable resolution must be deterministic
       - unknown template variables must be rejected unless enabled by future schema versions
 
   projection_rules:
-    description: define constraints on projection mappings
+    description: define rules for projection mappings
 
-    rules:
+    semantics:
       - chromosome projections may influence grouping but need not map directly to top-level directories
       - gene projections may produce one or more implementation artifacts
       - codon projections may produce one or more implementation artifacts
+      - implementation structure may differ from genome structure according to projection rules
+
+    constraints:
       - projections must remain compatible with the active expression style
       - projection path generation must be deterministic for a given genome and expression configuration
-      - implementation structure may differ from genome structure according to projection rules
-      - projections must not write files inside the genome repository

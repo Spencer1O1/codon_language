@@ -21,7 +21,7 @@ codons:
         - codons
       additional_fields: forbidden
 
-    rules:
+    constraints:
       - each gene file must define exactly one gene
       - the gene block must declare the gene name
       - gene files are the canonical home for gene-owned entities, capabilities, relations, references, and traits
@@ -35,7 +35,7 @@ codons:
         type: string
         required: true
 
-    rules:
+    constraints:
       - gene name must be unique within its chromosome
       - gene name must match the filename stem exactly
       - filename matching is case-sensitive
@@ -49,7 +49,7 @@ codons:
     item_type: genome.addressing.gene_reference
     required: false
 
-    rules:
+    constraints:
       - dependencies must reference existing genes
       - dependencies must use canonical qualified gene references
       - duplicate dependency entries must be rejected
@@ -67,6 +67,6 @@ codons:
       - references
       - traits
 
-    rules:
+    constraints:
       - unknown codon collections must be rejected unless enabled by future schema versions
       - each codon collection must conform to its corresponding schema

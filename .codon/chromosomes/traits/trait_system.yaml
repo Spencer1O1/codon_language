@@ -52,7 +52,7 @@ codons:
         - traits
 
   expansion_rules:
-    rules:
+    constraints:
       - project-level traits may introduce new chromosomes when required by their architecture
       - gene-level traits must expand only within the owning gene
       - trait expansion must respect genome composition boundaries

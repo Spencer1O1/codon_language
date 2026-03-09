@@ -84,7 +84,7 @@ codons:
       - send-invite
 
   validation_rules:
-    rules:
+    constraints:
       - capability names must be unique within a gene
       - semantic capability identifiers must be kebab-case
       - structured capability definitions must be well-formed

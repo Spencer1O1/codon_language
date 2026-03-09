@@ -23,7 +23,7 @@ codons:
       The composition root is the filesystem directory containing
       genome.yaml and the genome structure directories.
 
-    rules:
+    constraints:
       - genome.yaml must exist at the composition root
       - chromosomes/ must exist relative to the composition root
       - expression/ may exist relative to the composition root
@@ -42,7 +42,7 @@ codons:
       Gene files are organized under chromosome directories within
       the chromosomes/ directory.
 
-    rules:
+    constraints:
       - chromosomes/ contains one directory per chromosome
       - each chromosome directory may contain one or more direct child .yaml gene files
       - only .yaml files are treated as gene files
@@ -61,9 +61,11 @@ codons:
       - trait_expansion
       - expanded_genome_validation
 
-    rules:
+    processing:
       - raw genome validation must occur before trait expansion
-      - trait expansion must produce a deterministic expanded genome
       - structural constraints must be evaluated on the expanded genome
       - uniqueness constraints must be enforced on the expanded genome
       - validators must report errors from both validation phases separately
+
+    constraints:
+      - trait expansion must produce a deterministic expanded genome

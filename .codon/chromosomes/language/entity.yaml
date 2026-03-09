@@ -24,7 +24,7 @@ codons:
         updated_at:
           type: datetime
 
-      rules:
+      constraints:
         - implicit default fields are supplied when not explicitly defined
         - explicit field definitions override implicit default field definitions
         - explicit overrides must conform to language.field.field_definition

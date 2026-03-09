@@ -64,19 +64,18 @@ codons:
             type: reference
             reference: identity.user.User
 
-    rules:
-      rules:
-        - a structured field definition must include type
-        - reference may only be present when type is reference
-        - reference must be present when type is reference
-        - optional may be used with reference fields
-        - unique may be used with reference fields
-        - default must not be present when type is reference unless enabled by future schema versions
-        - values must only be present when type is enum
-        - values must be present when type is enum
-        - reference targets must resolve to a valid addressable entity
-        - cross-gene field references require a declared dependency on the target gene
-        - explicit field definitions must remain valid regardless of inferred structure
+    constraints:
+      - a structured field definition must include type
+      - reference may only be present when type is reference
+      - reference must be present when type is reference
+      - optional may be used with reference fields
+      - unique may be used with reference fields
+      - default must not be present when type is reference unless enabled by future schema versions
+      - values must only be present when type is enum
+      - values must be present when type is enum
+      - reference targets must resolve to a valid addressable entity
+      - cross-gene field references require a declared dependency on the target gene
+      - explicit field definitions must remain valid regardless of inferred structure
 
   field_type:
     description: define supported field types
@@ -94,7 +93,7 @@ codons:
       - reference
 
   validation_rules:
-    rules:
+    constraints:
       - field names must be unique within an entity
       - structured fields must be well-formed
       - enum fields must define values

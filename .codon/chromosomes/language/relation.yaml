@@ -25,7 +25,7 @@ codons:
         type: string
         required: true
 
-    rules:
+    constraints:
       - source entity must belong to the declaring gene
       - target entity must belong to the declaring gene
       - internal relations must not reference external genes
