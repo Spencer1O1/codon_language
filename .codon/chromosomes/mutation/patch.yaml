@@ -51,33 +51,27 @@ codons:
 
       risk:
         type: mutation.patch.risk_level
-        description: overall patch risk level
 
       evidence:
         type: list
-        description: optional observed evidence supporting the patch
 
       warnings:
         type: list
-        description: optional cautionary notes about ambiguity, destructiveness, or side effects
 
       suggestions:
         type: list
-        description: optional follow-up recommendations related to the patch
 
       confidence:
         type: mutation.patch.confidence_level
-        description: confidence in the proposed patch
 
       changes:
         type: list
         item_type: mutation.patch.change_definition
-        description: ordered list of semantic mutation changes
 
   change_definition:
     description: |
-      A change applies to exactly one semantic target and contains one or more
-      structured operations against that target.
+      A change applies to exactly one semantic target and contains
+      one or more operations against that target.
 
     required_fields:
       - id
@@ -87,16 +81,13 @@ codons:
     field_definitions:
       id:
         type: string
-        description: unique change identifier within the patch
 
       target:
         type: mutation.patch.change_target
-        description: semantic target of the change
 
       operations:
         type: list
         item_type: mutation.patch.operation_definition
-        description: ordered mutation operations applied to the target
 
   change_target:
     description: define supported semantic patch targets
@@ -114,11 +105,12 @@ codons:
     rules:
       - gene targets normally require the addressed gene to exist
       - a non-existent gene target is valid only when introduced by an add operation at /gene within the same change
-      - gene creation through patching must initialize /gene with a name matching the addressed target
+      - gene creation must initialize /gene.name exactly matching the addressed target gene name
 
   operation_definition:
     description: |
-      An operation is a structured mutation against a specific path inside a semantic target.
+      An operation is a structured mutation against a path inside
+      the addressed semantic target.
 
     required_fields:
       - id
@@ -134,53 +126,38 @@ codons:
     field_definitions:
       id:
         type: string
-        description: unique operation identifier within the containing change
 
       op:
         type: mutation.patch.operation_type
-        description: mutation operation type
 
       path:
         type: string
-        description: logical path within the targeted structure
 
       value:
         type: any
-        description: new value for add or update operations
 
       old_value:
         type: any
-        description: optional expected old value for safer updates and removals
 
       required:
         type: boolean
-        description: whether this operation is essential to patch success
         default: true
 
       reason:
         type: string
-        description: optional per-operation explanation
 
   operation_type:
-    description: define supported mutation operation types
-
     values:
       - add
       - update
-      - remove
-      - move
 
   risk_level:
-    description: define supported patch risk levels
-
     values:
       - low
       - medium
       - high
 
   confidence_level:
-    description: define supported patch confidence levels
-
     values:
       - high
       - medium
@@ -188,8 +165,8 @@ codons:
 
   path_rules:
     description: |
-      Paths reference logical locations within semantic genome structures
-      using slash-separated keys.
+      Paths reference logical locations inside semantic genome
+      structures using slash-separated keys.
 
     examples:
       - /project/name
@@ -201,48 +178,48 @@ codons:
 
     rules:
       - paths must resolve within the addressed target
-      - root-level paths must target genome
-      - gene-local paths must target the addressed gene
+      - root-level paths apply only to genome
+      - gene-local paths apply only to the addressed gene
       - list indices are zero-based
-      - numeric list indices must resolve to an existing element at the time the operation is applied
-      - the path segment "-" appends to a list
-      - the path segment "-" is valid only as the final segment of an add operation targeting a list
+      - numeric indices must resolve to an existing element
+      - The symbol "-" appends to a list and may appear only as the final segment of an add operation
       - operations must respect composed genome boundaries
 
   target_resolution:
     description: define how semantic patch targets map to storage locations
 
     rules:
-      - target resolution to files is handled by the mutation engine
-      - root target resolution maps to genome.yaml
-      - gene target resolution maps to the owning gene file
-      - target resolution must be deterministic
+      - target resolution is handled by the mutation engine
+      - root targets resolve to genome.yaml
+      - gene targets resolve to the canonical gene file within the addressed chromosome
+      - the canonical gene file path must use the addressed chromosome directory and the gene name as the filename stem
+      - gene creation must produce the canonical gene file path for the addressed chromosome and gene
+      - resolution must be deterministic
 
   destructive_change_rules:
-    description: destructive mutations require additional clarity and explicit intent
+    description: destructive mutations require additional clarity
 
     destructive_operations:
       - remove
-      - move
 
     rules:
-      - destructive changes must include a reason
-      - destructive changes should include old_value when possible
+      - destructive operations must include a reason
+      - destructive operations should include old_value when possible
       - destructive patches should carry medium or high risk unless clearly reversible
 
   application_rules:
-  rules:
-    - changes must be applied in document order
-    - operations must be applied in document order within each change
-    - required operation failure must cause patch failure
-    - non-required operation failure may be skipped with warning only when skipping it does not invalidate later required operations or final genome validity
-    - optional operations that create required structural prerequisites must not be skipped safely
-    - patch application must fail safely when required paths or old_value checks do not match
-    - patch application must be atomic across all changes
-    - partial patch application must not be externally committed
-    - if any required change or operation fails, persisted genome state must remain unchanged
-    - implementations may use staging, rollback, or equivalent mechanisms to satisfy atomicity
-    - target resolution and operation application must remain deterministic
+    rules:
+      - changes must be applied in document order
+      - changes targeting the same semantic target must be applied sequentially in document order
+      - operations must be applied in order within each change
+      - required operation failure must abort the patch
+      - non-required operations may be skipped only when doing so does not invalidate later required operations or final genome validity
+      - operations creating structural prerequisites must not be skipped
+      - patch application must be atomic across all changes
+      - partial patch application must not be externally visible or persisted
+      - if any required operation fails, the persisted genome state must remain unchanged
+      - implementations may use staging, rollback, or equivalent mechanisms to ensure atomicity
+      - target resolution and operation execution must remain deterministic
 
   examples:
     single_target_patch:
