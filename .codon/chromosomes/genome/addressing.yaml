@@ -11,7 +11,7 @@ types:
       - canonical form: lower_snake_case using [a-z0-9_]
       - must match regex ^[a-z][a-z0-9_]*$
       - length must be between 1 and 64 characters
-      - must not be a reserved word
+      - reserved words should be avoided; usage produces a warning unless it blocks resolution
 
   gene_identifier:
     description: unique gene identifier within its chromosome
@@ -20,7 +20,7 @@ types:
       - canonical form: lower_snake_case using [a-z0-9_]
       - must match regex ^[a-z][a-z0-9_]*$
       - length must be between 1 and 64 characters
-      - must not be a reserved word
+      - reserved words should be avoided; usage produces a warning unless it blocks resolution
 
   entity_identifier:
     description: unique entity identifier within its gene
@@ -29,7 +29,7 @@ types:
       - canonical form: UpperCamelCase using [A-Za-z0-9]
       - must match regex ^[A-Z][A-Za-z0-9]*$
       - length must be between 1 and 64 characters
-      - must not be a reserved word
+      - reserved words should be avoided; usage produces a warning unless it blocks resolution
 
   capability_identifier:
     description: unique capability identifier within its gene
@@ -38,7 +38,7 @@ types:
       - must be kebab-case using [a-z0-9-]
       - must match regex ^[a-z][a-z0-9-]*$
       - length must be between 3 and 80 characters
-      - must not be a reserved word
+      - reserved words should be avoided; usage produces a warning unless it blocks resolution
 
 codons:
   identifier_scopes:
@@ -138,13 +138,13 @@ codons:
       - types
 
     semantics:
-      - reserved words define names that are never valid as identifiers
+      - reserved words define discouraged names; engines emit warnings unless use prevents resolution, in which case an error is permitted
       - identifier types define canonical casing, allowed characters, and length constraints
 
     constraints:
       general:
         - every named construct must define its identifier form through a declared identifier type
-        - reserved words must not be used for any identifier
+        - reserved words should be avoided for identifiers; engines must at least warn and may escalate to error only when resolution would be ambiguous or impossible
         - definition sites must validate names using the construct's identifier type
         - reference sites must use the same identifier type as the corresponding definition site
         - reference identifiers are subject to the same dependency rules as their target constructs

@@ -27,6 +27,10 @@ func TestValidatorFixtures(t *testing.T) {
 		{"schema_version_invalid", "schema_version_invalid", true, false},
 		{"same_gene_reference", "same_gene_reference", false, false},
 		{"cross_gene_reference_valid", "cross_gene_reference_valid", false, false},
+		{"duplicate_capabilities", "duplicate_capabilities", true, false},
+		{"reserved_gene", "reserved_gene", false, true},
+		{"reserved_entity", "reserved_entity", false, true},
+		{"reserved_capability", "reserved_capability", false, true},
 	}
 
 	for _, tc := range cases {

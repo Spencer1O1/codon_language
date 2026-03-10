@@ -91,6 +91,17 @@ func TestLoad_FilenameMismatchFails(t *testing.T) {
 	}
 }
 
+func TestLoad_OptionalManifestFields(t *testing.T) {
+	root := filepath.Join("..", "..", "fixtures", "loader", "optional_manifest_fields")
+	cg, err := Load(root)
+	if err != nil {
+		t.Fatalf("Load failed: %v", err)
+	}
+	if len(cg.Traits) != 2 || cg.Traits[0] != "foo" || cg.Traits[1] != "bar" {
+		t.Fatalf("traits not loaded: %+v", cg.Traits)
+	}
+}
+
 func findEntity(list []ComposedEntity, name string) *ComposedEntity {
 	for i := range list {
 		if list[i].Name == name {

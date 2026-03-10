@@ -52,8 +52,12 @@ var relationTypes = map[string]struct{}{
 }
 
 func isReserved(word string) bool {
-	_, ok := reservedWords[word]
-	return ok
+	for w := range reservedWords {
+		if strings.EqualFold(w, word) {
+			return true
+		}
+	}
+	return false
 }
 
 // ValidateIdentifier enforces canonical identifier forms and reserved-word bans.
@@ -79,9 +83,6 @@ func ValidateIdentifier(kind, value string) error {
 		return fmt.Errorf("unknown identifier kind %q", kind)
 	}
 
-	if isReserved(value) {
-		return fmt.Errorf("%s identifier %q is a reserved word", kind, value)
-	}
 	if len(value) == 0 || len(value) > 80 {
 		return fmt.Errorf("%s identifier %q length out of bounds", kind, value)
 	}

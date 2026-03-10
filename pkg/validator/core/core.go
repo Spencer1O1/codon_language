@@ -26,6 +26,14 @@ type Finding struct {
 	Message  string
 }
 
+// Summary aggregates findings by severity.
+type Summary struct {
+	Errors   int
+	Warnings int
+	Infos    int
+	Total    int
+}
+
 func (r *Result) Add(path, msg string) {
 	r.AddWithSeverity(Error, path, msg)
 }
@@ -48,6 +56,23 @@ func (r *Result) Err() error {
 		return nil
 	}
 	return fmt.Errorf("validation failed:\n- %s", strings.Join(errs, "\n- "))
+}
+
+// Summary returns counts of findings per severity.
+func (r *Result) Summary() Summary {
+	var s Summary
+	for _, f := range r.Findings {
+		s.Total++
+		switch f.Severity {
+		case Error:
+			s.Errors++
+		case Warning:
+			s.Warnings++
+		case Info:
+			s.Infos++
+		}
+	}
+	return s
 }
 
 // Rule is a validation rule plug‑in.

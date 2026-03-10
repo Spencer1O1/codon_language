@@ -10,6 +10,7 @@ import (
 // Enforce unique relation/reference names within a gene.
 func init() {
 	core.Register(checkRelationReferenceNames)
+	core.Register(checkEntityCapabilityNames)
 }
 
 func checkRelationReferenceNames(genome *loader.ComposedGenome, res *core.Result) {
@@ -28,6 +29,30 @@ func checkRelationReferenceNames(genome *loader.ComposedGenome, res *core.Result
 				res.AddWithSeverity(core.Error, fmt.Sprintf("%s.references[%d]", genePath(gi), i), fmt.Sprintf("duplicate reference name %q (also at references[%d])", r.Name, prev))
 			} else {
 				refNames[r.Name] = i
+			}
+		}
+	}
+}
+
+// Enforce unique entity and capability names within a gene.
+func checkEntityCapabilityNames(genome *loader.ComposedGenome, res *core.Result) {
+	for gi, g := range genome.Genes {
+		entityNames := map[string]int{}
+		for i, e := range g.Entities {
+			if prev, ok := entityNames[e.Name]; ok {
+				res.AddWithSeverity(severityFor(core.CategoryUniqueness, core.Error),
+					genePath(gi), fmt.Sprintf("duplicate entity name %q (also at entities[%d])", e.Name, prev))
+			} else {
+				entityNames[e.Name] = i
+			}
+		}
+		capNames := map[string]int{}
+		for i, c := range g.Capabilities {
+			if prev, ok := capNames[c.Name]; ok {
+				res.AddWithSeverity(severityFor(core.CategoryUniqueness, core.Error),
+					genePath(gi), fmt.Sprintf("duplicate capability name %q (also at capabilities[%d])", c.Name, prev))
+			} else {
+				capNames[c.Name] = i
 			}
 		}
 	}
