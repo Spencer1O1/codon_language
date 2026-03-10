@@ -1,7 +1,7 @@
 gene:
   name: patch_base
 
-purpose: define shared patch types used by patch and patch_validation
+purpose: define shared patch types used by patch and validation
 
 types:
   validation_severity:

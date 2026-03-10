@@ -1,5 +1,5 @@
 gene:
-  name: patch_validation
+  name: validation
 
 dependencies:
   - mutation.patch_base

@@ -1,0 +1,20 @@
+summary: dup change
+rationale: test
+risk: low
+changes:
+  - id: dup
+    target: genome
+    operations:
+      - id: op1
+        op: add
+        path: /project/name
+        value: x
+        reason: set name
+  - id: dup
+    target: genome
+    operations:
+      - id: op2
+        op: add
+        path: /project/type
+        value: y
+        reason: set type

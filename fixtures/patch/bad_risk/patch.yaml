@@ -1,0 +1,12 @@
+summary: bad risk
+rationale: test
+risk: extreme
+changes:
+  - id: c1
+    target: genome
+    operations:
+      - id: op1
+        op: add
+        path: /project/name
+        value: x
+        reason: set name

@@ -1,0 +1,10 @@
+summary: remove
+rationale: test
+risk: medium
+changes:
+  - id: c1
+    target: genome
+    operations:
+      - id: op1
+        op: remove
+        path: /project/type
