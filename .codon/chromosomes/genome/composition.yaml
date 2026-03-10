@@ -69,3 +69,12 @@ codons:
 
     constraints:
       - trait expansion must produce a deterministic expanded genome
+
+  ordering_rules:
+    description: define deterministic ordering for discovery and emission to avoid order-dependent outputs
+
+    constraints:
+      - gene discovery for validation and generation must sort genes by chromosome identifier then gene identifier (both canonical forms)
+      - within a gene, codon collections (entities, capabilities, relations, references, traits) must be processed in stable lexical order by identifier
+      - traits applied at project or gene scope must be applied in lexical order of trait identifiers unless the trait system defines explicit ordering
+      - emitted artifacts (validation reports, generated files) should use the same deterministic ordering to ensure repeatable outputs
