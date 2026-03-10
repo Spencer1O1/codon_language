@@ -1,0 +1,17 @@
+gene:
+  name: rel
+codons:
+  entities:
+    A:
+      fields:
+        id:
+          type: uuid
+    B:
+      fields:
+        id:
+          type: uuid
+  relations:
+    - name: bad
+      from: A
+      to: B
+      type: invalid-type

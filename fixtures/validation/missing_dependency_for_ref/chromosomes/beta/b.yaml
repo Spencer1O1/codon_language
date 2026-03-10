@@ -1,0 +1,9 @@
+gene:
+  name: b
+codons:
+  entities:
+    Profile:
+      fields:
+        user_id:
+          type: reference
+          reference: alpha.a.User

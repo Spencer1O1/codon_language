@@ -31,6 +31,7 @@ func TestValidatorFixtures(t *testing.T) {
 		{"reserved_gene", "reserved_gene", false, true},
 		{"reserved_entity", "reserved_entity", false, true},
 		{"reserved_capability", "reserved_capability", false, true},
+		{"missing_dependency_for_ref", "missing_dependency_for_ref", true, false},
 	}
 
 	for _, tc := range cases {

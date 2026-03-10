@@ -20,6 +20,7 @@ func TestLoaderFixtures(t *testing.T) {
 		{"empty_genome", "empty_genome", true, "no gene files"},
 		{"bad_identifier_capability", "bad_identifier_capability", true, "capability identifier"},
 		{"bad_identifier_chromosome", "bad_identifier_chromosome", true, "chromosome"},
+		{"bad_relation_type", "bad_relation_type", true, "relation type"},
 		{"missing_schema_version", "missing_schema_version", true, "schema_version"},
 		{"optional_manifest_fields", "optional_manifest_fields", false, ""},
 		{"valid_genome", "valid_genome", false, ""},
