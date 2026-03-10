@@ -1,38 +1,28 @@
-APP_NAME=codon
-CMD_PATH=./cmd/codon
-COMMAND?=
-GENOME?=./examples/issue-tracker
+GOCACHE ?= $(CURDIR)/.cache/go-build
+GOMODCACHE ?= $(CURDIR)/.cache/go-mod
 
-.PHONY: dev run build install fmt vet test  lint clean
-
-dev: fmt vet lint genome validate
-
-run:
-	go run $(CMD_PATH) $(COMMAND) $(GENOME)
-
-genome:
-	go run $(CMD_PATH) genome $(GENOME)
-
-validate:
-	go run $(CMD_PATH) validate $(GENOME)
-
-build:
-	go build -o $(APP_NAME) $(CMD_PATH)
-
-install:
-	go install $(CMD_PATH)
-
-fmt:
-	go fmt ./...
-
-vet:
-	go vet ./...
+.PHONY: test build lint fmt vet clean tidy deps
 
 test:
-	go test ./...
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go test ./...
+
+build:
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go build ./cmd/...
 
 lint:
-	golangci-lint run
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) golangci-lint run ./...
+
+fmt:
+	gofmt -w $(shell go list -f '{{.Dir}}' ./...)
+
+vet:
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go vet ./...
+
+tidy:
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go mod tidy
 
 clean:
-	rm -f $(APP_NAME)
+	rm -rf $(GOCACHE) $(GOMODCACHE)
+
+deps:
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go mod download

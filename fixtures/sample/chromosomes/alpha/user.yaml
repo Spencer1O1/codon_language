@@ -1,0 +1,46 @@
+gene:
+  name: user
+purpose: user domain
+dependencies:
+  - identity.auth
+codons:
+  entities:
+    User:
+      fields:
+        email:
+          type: string
+          unique: true
+        status:
+          type: enum
+          values:
+            - active
+            - disabled
+    Session:
+      fields:
+        user_id:
+          type: reference
+          reference: identity.auth.User
+  capabilities:
+    register-user: {}
+    create-session:
+      description: create session
+      inputs:
+        user_id:
+          type: reference
+          reference: identity.auth.User
+      outputs:
+        session_id:
+          type: uuid
+  relations:
+    - from: Session
+      to: User
+      type: many-to-one
+      name: user
+  references:
+    - from: Session
+      to: identity.auth.User
+      type: many-to-one
+      name: ext_user
+      reference: id
+  traits:
+    - audit

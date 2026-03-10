@@ -1,9 +1,0 @@
-project:
-  name: issue_tracker
-
-traits:
-  - authentication
-
-modules:
-  identity: modules/identity.yaml
-  issues: modules/issues.yaml
