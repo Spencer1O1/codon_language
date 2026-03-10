@@ -14,7 +14,7 @@ func parseEntities(raw any) ([]ComposedEntity, error) {
 	}
 	var out []ComposedEntity
 	for name, defRaw := range asMap {
-		if err := validateIdentifier("entity", name); err != nil {
+		if err := ValidateIdentifier("entity", name); err != nil {
 			return nil, err
 		}
 		defMap := map[string]any{}
@@ -49,7 +49,7 @@ func parseCapabilities(raw any) ([]ComposedCapability, error) {
 			if !ok {
 				return nil, fmt.Errorf("capabilities[%d] must be a string or structured map", i)
 			}
-			if err := validateIdentifier("capability", name); err != nil {
+			if err := ValidateIdentifier("capability", name); err != nil {
 				return nil, err
 			}
 			out = append(out, ComposedCapability{Name: name})
@@ -58,7 +58,7 @@ func parseCapabilities(raw any) ([]ComposedCapability, error) {
 	case map[string]any:
 		var out []ComposedCapability
 		for name, rawDef := range v {
-			if err := validateIdentifier("capability", name); err != nil {
+			if err := ValidateIdentifier("capability", name); err != nil {
 				return nil, err
 			}
 			defMap := map[string]any{}
@@ -122,7 +122,7 @@ func parseFieldMap(raw any) (map[string]FieldDefinition, error) {
 func parseFieldDefinition(raw any) (FieldDefinition, error) {
 	// shorthand: string
 	if t, ok := raw.(string); ok {
-		if err := validateFieldType(t); err != nil {
+		if err := ValidateFieldType(t); err != nil {
 			return FieldDefinition{}, err
 		}
 		return FieldDefinition{Type: t}, nil
@@ -139,7 +139,7 @@ func parseFieldDefinition(raw any) (FieldDefinition, error) {
 	if !ok || typeVal == "" {
 		return FieldDefinition{}, fmt.Errorf("structured field must include type")
 	}
-	if err := validateFieldType(typeVal); err != nil {
+	if err := ValidateFieldType(typeVal); err != nil {
 		return FieldDefinition{}, err
 	}
 	fd.Type = typeVal
@@ -161,7 +161,7 @@ func parseFieldDefinition(raw any) (FieldDefinition, error) {
 		fd.Values = values
 	}
 	if ref, ok := m["reference"].(string); ok {
-		if err := validateEntityReference(ref); err != nil {
+		if err := ValidateEntityReference(ref); err != nil {
 			return FieldDefinition{}, err
 		}
 		fd.Reference = ref

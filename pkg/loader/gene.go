@@ -76,7 +76,7 @@ func parseGeneName(path string, raw map[string]any) (string, error) {
 	if !ok || name == "" {
 		return "", fmt.Errorf("%s: gene.name must be a non-empty string", path)
 	}
-	if err := validateIdentifier("gene", name); err != nil {
+	if err := ValidateIdentifier("gene", name); err != nil {
 		return "", fmt.Errorf("%s: %w", path, err)
 	}
 	fileStem := strings.TrimSuffix(filepath.Base(path), ".yaml")
@@ -103,7 +103,7 @@ func parseDependencies(path string, raw map[string]any) ([]string, error) {
 			return nil, fmt.Errorf("%s: %w", path, err)
 		}
 		for _, d := range items {
-			if err := validateGeneReference(d); err != nil {
+			if err := ValidateGeneReference(d); err != nil {
 				return nil, fmt.Errorf("%s: %w", path, err)
 			}
 		}

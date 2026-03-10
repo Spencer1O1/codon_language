@@ -56,7 +56,8 @@ func isReserved(word string) bool {
 	return ok
 }
 
-func validateIdentifier(kind, value string) error {
+// ValidateIdentifier enforces canonical identifier forms and reserved-word bans.
+func ValidateIdentifier(kind, value string) error {
 	switch kind {
 	case "chromosome":
 		if !reChromosome.MatchString(value) {
@@ -87,7 +88,8 @@ func validateIdentifier(kind, value string) error {
 	return nil
 }
 
-func validateGeneReference(ref string) error {
+// ValidateGeneReference ensures chromosome.gene format.
+func ValidateGeneReference(ref string) error {
 	if !reGeneRef.MatchString(ref) {
 		return fmt.Errorf("dependency %q must be chromosome.gene", ref)
 	}
@@ -95,16 +97,17 @@ func validateGeneReference(ref string) error {
 	if len(parts) != 2 {
 		return fmt.Errorf("dependency %q must be chromosome.gene", ref)
 	}
-	if err := validateIdentifier("chromosome", parts[0]); err != nil {
+	if err := ValidateIdentifier("chromosome", parts[0]); err != nil {
 		return err
 	}
-	if err := validateIdentifier("gene", parts[1]); err != nil {
+	if err := ValidateIdentifier("gene", parts[1]); err != nil {
 		return err
 	}
 	return nil
 }
 
-func validateEntityReference(ref string) error {
+// ValidateEntityReference ensures chromosome.gene.Entity format.
+func ValidateEntityReference(ref string) error {
 	if !reEntityRef.MatchString(ref) {
 		return fmt.Errorf("entity reference %q must be chromosome.gene.Entity", ref)
 	}
@@ -112,30 +115,44 @@ func validateEntityReference(ref string) error {
 	if len(parts) != 3 {
 		return fmt.Errorf("entity reference %q must be chromosome.gene.Entity", ref)
 	}
-	if err := validateIdentifier("chromosome", parts[0]); err != nil {
+	if err := ValidateIdentifier("chromosome", parts[0]); err != nil {
 		return err
 	}
-	if err := validateIdentifier("gene", parts[1]); err != nil {
+	if err := ValidateIdentifier("gene", parts[1]); err != nil {
 		return err
 	}
-	if err := validateIdentifier("entity", parts[2]); err != nil {
+	if err := ValidateIdentifier("entity", parts[2]); err != nil {
 		return err
 	}
 	return nil
 }
 
-func validateFieldType(t string) error {
+func ValidateFieldType(t string) error {
 	if _, ok := fieldTypes[t]; !ok {
 		return fmt.Errorf("field type %q is not supported", t)
 	}
 	return nil
 }
 
-func validateRelationType(t string) error {
+func ValidateRelationType(t string) error {
 	if _, ok := relationTypes[t]; !ok {
 		return fmt.Errorf("relation type %q is not supported", t)
 	}
 	return nil
+}
+
+// IsReserved reports if the word is reserved globally.
+func IsReserved(word string) bool {
+	return isReserved(word)
+}
+
+// GenePartFromEntityRef extracts chromosome.gene from chromosome.gene.Entity.
+func GenePartFromEntityRef(ref string) (string, error) {
+	if err := ValidateEntityReference(ref); err != nil {
+		return "", err
+	}
+	parts := strings.Split(ref, ".")
+	return parts[0] + "." + parts[1], nil
 }
 
 func expectKeys(name string, m map[string]any, allowed []string) error {

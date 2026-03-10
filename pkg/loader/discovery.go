@@ -23,7 +23,7 @@ func discoverGeneFiles(chromosomesDir string) ([]geneFile, error) {
 			continue
 		}
 		chromosome := entry.Name()
-		if err := validateIdentifier("chromosome", chromosome); err != nil {
+		if err := ValidateIdentifier("chromosome", chromosome); err != nil {
 			return nil, fmt.Errorf("chromosome %q invalid: %w", chromosome, err)
 		}
 		chromoPath := filepath.Join(chromosomesDir, chromosome)

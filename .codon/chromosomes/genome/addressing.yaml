@@ -147,6 +147,7 @@ codons:
         - reserved words must not be used for any identifier
         - definition sites must validate names using the construct's identifier type
         - reference sites must use the same identifier type as the corresponding definition site
+        - reference identifiers are subject to the same dependency rules as their target constructs
 
       construct_identifier_types:
         chromosome: genome.addressing.chromosome_identifier

@@ -188,3 +188,5 @@ codons:
       - structural constraints must be evaluated on the expanded genome
       - uniqueness constraints must be enforced on the expanded genome
       - validators must report errors from both validation phases separately
+      - the gene dependency graph must be acyclic
+      - because references must declare dependencies, reference cycles are likewise disallowed via dependency acyclicity

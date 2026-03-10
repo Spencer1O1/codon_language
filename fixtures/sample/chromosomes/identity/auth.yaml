@@ -1,3 +1,5 @@
 gene:
   name: auth
-codons: {}
+codons:
+  entities:
+    User: {}

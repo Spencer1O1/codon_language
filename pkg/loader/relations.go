@@ -21,7 +21,7 @@ func parseRelations(raw any) ([]RelationDefinition, error) {
 		if !ok || from == "" {
 			return nil, fmt.Errorf("relations[%d].from must be a string", i)
 		}
-		if err := validateIdentifier("entity", from); err != nil {
+		if err := ValidateIdentifier("entity", from); err != nil {
 			return nil, fmt.Errorf("relations[%d].from: %w", i, err)
 		}
 		rd.From = from
@@ -30,7 +30,7 @@ func parseRelations(raw any) ([]RelationDefinition, error) {
 		if !ok || to == "" {
 			return nil, fmt.Errorf("relations[%d].to must be a string", i)
 		}
-		if err := validateIdentifier("entity", to); err != nil {
+		if err := ValidateIdentifier("entity", to); err != nil {
 			return nil, fmt.Errorf("relations[%d].to: %w", i, err)
 		}
 		rd.To = to
@@ -39,7 +39,7 @@ func parseRelations(raw any) ([]RelationDefinition, error) {
 		if !ok || t == "" {
 			return nil, fmt.Errorf("relations[%d].type must be a string", i)
 		}
-		if err := validateRelationType(t); err != nil {
+		if err := ValidateRelationType(t); err != nil {
 			return nil, fmt.Errorf("relations[%d].type: %w", i, err)
 		}
 		rd.Type = t
@@ -74,7 +74,7 @@ func parseReferences(raw any) ([]ReferenceDefinition, error) {
 		if !ok || from == "" {
 			return nil, fmt.Errorf("references[%d].from must be a string", i)
 		}
-		if err := validateIdentifier("entity", from); err != nil {
+		if err := ValidateIdentifier("entity", from); err != nil {
 			return nil, fmt.Errorf("references[%d].from: %w", i, err)
 		}
 		rd.From = from
@@ -83,7 +83,7 @@ func parseReferences(raw any) ([]ReferenceDefinition, error) {
 		if !ok || to == "" {
 			return nil, fmt.Errorf("references[%d].to must be a string", i)
 		}
-		if err := validateEntityReference(to); err != nil {
+		if err := ValidateEntityReference(to); err != nil {
 			return nil, fmt.Errorf("references[%d].to: %w", i, err)
 		}
 		rd.To = to
@@ -92,7 +92,7 @@ func parseReferences(raw any) ([]ReferenceDefinition, error) {
 		if !ok || t == "" {
 			return nil, fmt.Errorf("references[%d].type must be a string", i)
 		}
-		if err := validateRelationType(t); err != nil {
+		if err := ValidateRelationType(t); err != nil {
 			return nil, fmt.Errorf("references[%d].type: %w", i, err)
 		}
 		rd.Type = t
