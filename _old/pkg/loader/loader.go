@@ -17,6 +17,11 @@ func Load(root string) (*ComposedGenome, error) {
 		return nil, err
 	}
 
+	codonFamilies, err := loadCodonFamilies(root)
+	if err != nil {
+		return nil, fmt.Errorf("load codon_families.yaml: %w", err)
+	}
+
 	chromosomesDir := filepath.Join(root, "chromosomes")
 	if err := ensureDir(chromosomesDir); err != nil {
 		return nil, err
@@ -39,6 +44,7 @@ func Load(root string) (*ComposedGenome, error) {
 		Project:       manifest.Project,
 		Traits:        manifest.Traits,
 		Genes:         genes,
+		CodonFamilies: codonFamilies,
 	}, nil
 }
 

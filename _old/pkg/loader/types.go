@@ -10,6 +10,7 @@ type ComposedGenome struct {
 	Project       Project        `json:"project" yaml:"project"`
 	Traits        []string       `json:"traits,omitempty" yaml:"traits,omitempty"`
 	Genes         []ComposedGene `json:"genes" yaml:"genes"`
+	CodonFamilies map[string]CodonFamily `json:"codon_families,omitempty" yaml:"codon_families,omitempty"`
 }
 
 // MarshalJSON keeps explicit aliasing for stable output. Ordering is applied
@@ -31,6 +32,15 @@ type ComposedGene struct {
 	References   []ReferenceDefinition `json:"references,omitempty" yaml:"references,omitempty"`
 	Traits       []string              `json:"traits,omitempty" yaml:"traits,omitempty"`
 	RawCodons    map[string]any        `json:"raw_codons,omitempty" yaml:"raw_codons,omitempty"`
+}
+
+// CodonFamily describes an extensible codon family declared in codon_families.yaml.
+type CodonFamily struct {
+	Name            string         `json:"name" yaml:"name"`
+	Description     string         `json:"description,omitempty" yaml:"description,omitempty"`
+	Version         string         `json:"version,omitempty" yaml:"version,omitempty"`
+	SchemaRef       string         `json:"schema_ref,omitempty" yaml:"schema_ref,omitempty"`
+	ProjectionHints map[string]any `json:"projection_hints,omitempty" yaml:"projection_hints,omitempty"`
 }
 
 // ComposedEntity is the normalized entity form.
