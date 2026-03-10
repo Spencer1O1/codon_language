@@ -1,0 +1,11 @@
+gene:
+  name: b
+dependencies:
+  - alpha.a
+codons:
+  entities:
+    Profile:
+      fields:
+        user_id:
+          type: reference
+          reference: alpha.a.User

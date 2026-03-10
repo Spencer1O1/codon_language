@@ -21,6 +21,12 @@ func TestValidatorFixtures(t *testing.T) {
 		{"reserved_word", "reserved_word", false, true},
 		{"duplicate_traits", "duplicate_traits", false, true},
 		{"bad_reference_target", "bad_reference_target", true, false},
+		{"dependency_cycle", "dependency_cycle", true, false},
+		{"duplicate_relations", "duplicate_relations", true, false},
+		{"relation_missing_target", "relation_missing_target", true, false},
+		{"schema_version_invalid", "schema_version_invalid", true, false},
+		{"same_gene_reference", "same_gene_reference", false, false},
+		{"cross_gene_reference_valid", "cross_gene_reference_valid", false, false},
 	}
 
 	for _, tc := range cases {

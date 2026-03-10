@@ -1,0 +1,11 @@
+gene:
+  name: b
+purpose: test cycle
+dependencies:
+  - alpha.a
+codons:
+  entities:
+    Thing:
+      fields:
+        id:
+          type: uuid

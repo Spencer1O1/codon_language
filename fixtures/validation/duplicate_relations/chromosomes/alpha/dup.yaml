@@ -1,0 +1,21 @@
+gene:
+  name: dup
+codons:
+  entities:
+    A:
+      fields:
+        id:
+          type: uuid
+    B:
+      fields:
+        id:
+          type: uuid
+  relations:
+    - name: link
+      from: A
+      to: B
+      type: one-to-one
+    - name: link
+      from: B
+      to: A
+      type: one-to-one

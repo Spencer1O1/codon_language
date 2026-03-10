@@ -1,0 +1,13 @@
+gene:
+  name: rel
+codons:
+  entities:
+    User:
+      fields:
+        id:
+          type: uuid
+  relations:
+    - name: bad
+      from: User
+      to: Missing
+      type: one-to-one
