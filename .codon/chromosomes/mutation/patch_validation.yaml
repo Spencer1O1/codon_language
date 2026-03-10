@@ -1,0 +1,69 @@
+gene:
+  name: patch_validation
+
+dependencies:
+  - mutation.patch_base
+
+purpose: define validation rules and severities for patch documents
+
+codons:
+  patch_validation_rules:
+    description: validation rules for patch documents and operations
+
+    schema:
+      members:
+        document_rules:
+          description: rules applied to the overall patch document
+        operation_rules:
+          description: rules applied per operation within a patch
+        application_rules:
+          description: rules that govern proceed/abort behavior based on severities
+
+    document_rules:
+      constraints:
+        - summary, rationale, risk, and changes are required
+        - unknown top-level fields must be rejected unless enabled by future schema versions
+        - risk must use mutation.patch_base.risk_level
+        - confidence must use mutation.patch_base.confidence_level when present
+        - warnings and suggestions must be lists when present
+
+    operation_rules:
+      constraints:
+        - op_type must use mutation.patch_base.operation_type
+        - change ids (if present) must be unique within the patch
+        - required operations must not be skipped
+        - operation paths must be well-formed per mutation.patch_base.change_target schema
+        - add operations must not target existing values unless enabled by future schema versions
+        - update operations must target existing values
+        - remove operations must target existing values
+        - old_value, when provided, must match the current value before applying the operation
+        - map updates must be replace-not-merge unless enabled by future schema versions
+        - list removals must be deterministic and reindex lists after removal
+
+      severity_defaults:
+        - structural violations (missing op_type, bad path shape): error
+        - required operation skipped: error
+        - old_value mismatch: error
+        - add targeting existing value: warning
+        - map merge attempt on update: error
+
+    application_rules:
+      description: map validation outcomes to apply/abort behavior
+      semantics:
+        - engines must abort patch application when any error severity remains after validation
+        - engines may proceed when only warnings or info remain, based on consumer policy
+        - highest_severity is derived from individual operation results
+
+  severity_mapping:
+    description: default mapping of patch validation findings to mutation.patch_base.validation_severity
+    schema:
+      members:
+        structural: error
+        path: error
+        op_type: error
+        old_value_mismatch: error
+        required_op_skipped: error
+        duplicate_op_id: warning
+        add_overwrite: warning
+        merge_attempt: error
+        guidance: info

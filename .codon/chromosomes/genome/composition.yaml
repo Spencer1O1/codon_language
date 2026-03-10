@@ -174,23 +174,12 @@ codons:
       - all valid gene files discovered under chromosomes/ relative to the composition root are included in the composed genome
 
   validation_pipeline:
-    description: define the validation phases applied to a genome
+    description: reference to validation pipeline rules defined in validation chromosome
+    type: validation.pipeline.validation_pipeline
 
-    semantics:
-      - the validation pipeline consists of raw_genome_validation, trait_expansion, and expanded_genome_validation
-      - raw_genome_validation evaluates the source genome before trait expansion
-      - trait_expansion produces the expanded genome
-      - expanded_genome_validation evaluates the expanded genome
-
-    constraints:
-      - raw genome validation must occur before trait expansion
-      - trait expansion must produce a deterministic expanded genome
-      - structural constraints must be evaluated on the expanded genome
-      - uniqueness constraints must be enforced on the expanded genome
-      - validators must report errors from both validation phases separately
-      - the gene dependency graph must be acyclic
-      - because references must declare dependencies, reference cycles are likewise disallowed via dependency acyclicity
-      - references to constructs within the same gene are permitted and do not require declaring the gene as a dependency
+  validation_severity_policy:
+    description: reference to validation severity policy defined in validation chromosome
+    type: validation.pipeline.validation_severity_policy
 
   validation_severity_policy:
     description: classify validation findings into severities and define engine behavior

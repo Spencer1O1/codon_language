@@ -1,0 +1,68 @@
+gene:
+  name: patch_base
+
+purpose: define shared patch types used by patch and patch_validation
+
+types:
+  validation_severity:
+    description: classification of validation outcomes during patch processing
+    values:
+      - error
+      - warning
+      - info
+
+  operation_type:
+    description: define supported mutation operation types
+    values:
+      - add
+      - update
+      - remove
+
+  risk_level:
+    description: define supported patch risk levels (author-declared)
+    values:
+      - low
+      - medium
+      - high
+
+  confidence_level:
+    description: define supported patch confidence levels (author-declared)
+    values:
+      - high
+      - medium
+      - low
+
+  operation_result:
+    description: validation outcome for an individual operation
+    schema:
+      members:
+        op_id:
+          type: string
+        severity:
+          type: mutation.patch_base.validation_severity
+        message:
+          type: string
+        required:
+          type: boolean
+        skipped:
+          type: boolean
+
+codons:
+  change_target:
+    description: define supported semantic patch targets
+
+    schema:
+      forms:
+        root:
+          value: genome
+          description: target the root manifest
+
+        gene:
+          type: genome.addressing.gene_reference
+          example: tracking.issues
+          description: target a specific gene
+
+    constraints:
+      - gene targets normally require the addressed gene to exist
+      - a non-existent gene target is valid only when introduced by an add operation at /gene within the same change
+      - gene creation must initialize /gene.name exactly matching the addressed target gene name

@@ -1,0 +1,44 @@
+gene:
+  name: pipeline
+
+purpose: define validation phases and severity policy for Codon genomes
+
+codons:
+  validation_pipeline:
+    description: define the validation phases applied to a genome
+
+    semantics:
+      - the validation pipeline consists of raw_genome_validation, trait_expansion, and expanded_genome_validation
+      - raw_genome_validation evaluates the source genome before trait expansion
+      - trait_expansion produces the expanded genome
+      - expanded_genome_validation evaluates the expanded genome
+
+    constraints:
+      - raw genome validation must occur before trait expansion
+      - trait expansion must produce a deterministic expanded genome
+      - structural constraints must be evaluated on the expanded genome
+      - uniqueness constraints must be enforced on the expanded genome
+      - validators must report errors from both validation phases separately
+      - the gene dependency graph must be acyclic
+      - because references must declare dependencies, reference cycles are likewise disallowed via dependency acyclicity
+      - references to constructs within the same gene are permitted and do not require declaring the gene as a dependency
+
+  validation_severity_policy:
+    description: classify validation findings into severities and define engine behavior
+
+    semantics:
+      severities:
+        error: fatal violations that must prevent genome acceptance
+        warning: non-fatal issues; engines may proceed but should report
+        info: informational notices with no impact on acceptance
+
+    constraints:
+      - engines must reject genomes when any error severity finding is present
+      - warnings must be reported but do not block acceptance
+      - informational findings must be reported when available
+      - structural and dependency violations are errors
+      - unresolved references or missing dependency declarations are errors
+      - identifier policy violations are errors
+      - reserved-word usage is a warning unless the reserved word blocks resolution, in which case it is an error
+      - duplicate traits or dependencies are warnings
+      - normalization or inference notices are info unless they surface a conflict, which is an error
