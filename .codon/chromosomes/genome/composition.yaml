@@ -113,9 +113,6 @@ codons:
       genome.yaml plus all gene files discovered under chromosomes/
       relative to the composition root.
 
-    constraints:
-      - trait-expanded structures must conform to the same composition rules as handwritten genome structures
-
   ordering_rules:
     description: define deterministic ordering for discovery and emission to avoid order-dependent outputs
 
@@ -160,6 +157,7 @@ codons:
     constraints:
       - the composed genome contract is the interoperability boundary for loaders, validators, and expression engines
       - members not defined by the contract must not appear unless enabled by a future schema version
+      - trait-expanded structures must conform to the same composition rules as handwritten genome structures
 
   filesystem_model:
     description: |
@@ -174,7 +172,6 @@ codons:
       - nested subdirectories inside chromosome directories must be rejected unless enabled by future schema versions
       - each gene file must define exactly one gene
       - all valid gene files discovered under chromosomes/ relative to the composition root are included in the composed genome
-      - trait-expanded structures must conform to the same composition rules as handwritten genome structures
 
   validation_pipeline:
     description: define the validation phases applied to a genome
