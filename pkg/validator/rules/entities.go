@@ -22,7 +22,7 @@ func checkEntities(genome *loader.ComposedGenome, res *core.Result) {
 			}
 			index[e.Name] = ei
 			if err := validateEntityFields(e); err != nil {
-				res.Add(fmt.Sprintf("%s.entities[%d]", genePath(gi), ei), err.Error())
+				res.AddWithSeverity(severityFor(core.CategoryStructural, core.Error), fmt.Sprintf("%s.entities[%d]", genePath(gi), ei), err.Error())
 			}
 		}
 	}

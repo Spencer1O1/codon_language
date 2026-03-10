@@ -27,7 +27,7 @@ func checkReferenceTargets(genome *loader.ComposedGenome, res *core.Result) {
 		for ri, r := range g.References {
 			target := r.To
 			if !exists(entityIndex, target) {
-				res.Add(fmt.Sprintf("%s.references[%d]", genePath(gi), ri), fmt.Sprintf("reference target %q not found", target))
+				res.AddWithSeverity(severityFor(core.CategoryReferences, core.Error), fmt.Sprintf("%s.references[%d]", genePath(gi), ri), fmt.Sprintf("reference target %q not found", target))
 			}
 		}
 
@@ -35,7 +35,7 @@ func checkReferenceTargets(genome *loader.ComposedGenome, res *core.Result) {
 		for _, e := range g.Entities {
 			for fname, f := range e.Fields {
 				if f.Type == "reference" && f.Reference != "" && !exists(entityIndex, f.Reference) {
-					res.Add(fmt.Sprintf("%s.entities[%s].fields[%s]", genePath(gi), e.Name, fname), fmt.Sprintf("reference target %q not found", f.Reference))
+					res.AddWithSeverity(severityFor(core.CategoryReferences, core.Error), fmt.Sprintf("%s.entities[%s].fields[%s]", genePath(gi), e.Name, fname), fmt.Sprintf("reference target %q not found", f.Reference))
 				}
 			}
 		}
@@ -44,12 +44,12 @@ func checkReferenceTargets(genome *loader.ComposedGenome, res *core.Result) {
 		for _, c := range g.Capabilities {
 			for fname, f := range c.Inputs {
 				if f.Type == "reference" && f.Reference != "" && !exists(entityIndex, f.Reference) {
-					res.Add(fmt.Sprintf("%s.capabilities[%s].inputs[%s]", genePath(gi), c.Name, fname), fmt.Sprintf("reference target %q not found", f.Reference))
+					res.AddWithSeverity(severityFor(core.CategoryReferences, core.Error), fmt.Sprintf("%s.capabilities[%s].inputs[%s]", genePath(gi), c.Name, fname), fmt.Sprintf("reference target %q not found", f.Reference))
 				}
 			}
 			for fname, f := range c.Outputs {
 				if f.Type == "reference" && f.Reference != "" && !exists(entityIndex, f.Reference) {
-					res.Add(fmt.Sprintf("%s.capabilities[%s].outputs[%s]", genePath(gi), c.Name, fname), fmt.Sprintf("reference target %q not found", f.Reference))
+					res.AddWithSeverity(severityFor(core.CategoryReferences, core.Error), fmt.Sprintf("%s.capabilities[%s].outputs[%s]", genePath(gi), c.Name, fname), fmt.Sprintf("reference target %q not found", f.Reference))
 				}
 			}
 		}

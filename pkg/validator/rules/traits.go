@@ -15,7 +15,7 @@ func checkTraitDuplicates(genome *loader.ComposedGenome, res *core.Result) {
 	seen := map[string]int{}
 	for i, t := range genome.Traits {
 		if prev, ok := seen[t]; ok {
-			res.Add("genome.traits", fmt.Sprintf("duplicate trait %q (indexes %d and %d)", t, prev, i))
+			res.AddWithSeverity(core.Warning, "genome.traits", fmt.Sprintf("duplicate trait %q (indexes %d and %d)", t, prev, i))
 		} else {
 			seen[t] = i
 		}
@@ -24,7 +24,7 @@ func checkTraitDuplicates(genome *loader.ComposedGenome, res *core.Result) {
 		seenGene := map[string]int{}
 		for i, t := range g.Traits {
 			if prev, ok := seenGene[t]; ok {
-				res.Add(genePath(gi)+".traits", fmt.Sprintf("duplicate trait %q (indexes %d and %d)", t, prev, i))
+				res.AddWithSeverity(core.Warning, genePath(gi)+".traits", fmt.Sprintf("duplicate trait %q (indexes %d and %d)", t, prev, i))
 			} else {
 				seenGene[t] = i
 			}

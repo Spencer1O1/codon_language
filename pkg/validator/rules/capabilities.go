@@ -16,12 +16,12 @@ func checkCapabilities(genome *loader.ComposedGenome, res *core.Result) {
 		index := map[string]int{}
 		for ci, c := range g.Capabilities {
 			if prev, exists := index[c.Name]; exists {
-				res.Add(genePath(gi), fmt.Sprintf("duplicate capability %q (also at capabilities[%d])", c.Name, prev))
+				res.AddWithSeverity(severityFor(core.CategoryUniqueness, core.Error), genePath(gi), fmt.Sprintf("duplicate capability %q (also at capabilities[%d])", c.Name, prev))
 				continue
 			}
 			index[c.Name] = ci
 			if err := validateCapability(c); err != nil {
-				res.Add(fmt.Sprintf("%s.capabilities[%d]", genePath(gi), ci), err.Error())
+				res.AddWithSeverity(severityFor(core.CategoryStructural, core.Error), fmt.Sprintf("%s.capabilities[%d]", genePath(gi), ci), err.Error())
 			}
 		}
 	}

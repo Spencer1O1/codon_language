@@ -17,7 +17,7 @@ func checkDuplicateGenes(genome *loader.ComposedGenome, res *core.Result) {
 	for i, g := range genome.Genes {
 		key := g.Chromosome + "." + g.Name
 		if prev, exists := index[key]; exists {
-			res.Add(fmt.Sprintf("genes[%d]", i), fmt.Sprintf("duplicate gene identifier %q (also at genes[%d])", key, prev))
+			res.AddWithSeverity(severityFor(core.CategoryUniqueness, core.Error), fmt.Sprintf("genes[%d]", i), fmt.Sprintf("duplicate gene identifier %q (also at genes[%d])", key, prev))
 		} else {
 			index[key] = i
 		}

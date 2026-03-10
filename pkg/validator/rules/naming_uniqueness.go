@@ -17,7 +17,7 @@ func checkRelationReferenceNames(genome *loader.ComposedGenome, res *core.Result
 		relNames := map[string]int{}
 		for i, r := range g.Relations {
 			if prev, ok := relNames[r.Name]; ok {
-				res.Add(fmt.Sprintf("%s.relations[%d]", genePath(gi), i), fmt.Sprintf("duplicate relation name %q (also at relations[%d])", r.Name, prev))
+				res.AddWithSeverity(core.Error, fmt.Sprintf("%s.relations[%d]", genePath(gi), i), fmt.Sprintf("duplicate relation name %q (also at relations[%d])", r.Name, prev))
 			} else {
 				relNames[r.Name] = i
 			}
@@ -25,7 +25,7 @@ func checkRelationReferenceNames(genome *loader.ComposedGenome, res *core.Result
 		refNames := map[string]int{}
 		for i, r := range g.References {
 			if prev, ok := refNames[r.Name]; ok {
-				res.Add(fmt.Sprintf("%s.references[%d]", genePath(gi), i), fmt.Sprintf("duplicate reference name %q (also at references[%d])", r.Name, prev))
+				res.AddWithSeverity(core.Error, fmt.Sprintf("%s.references[%d]", genePath(gi), i), fmt.Sprintf("duplicate reference name %q (also at references[%d])", r.Name, prev))
 			} else {
 				refNames[r.Name] = i
 			}
