@@ -4,14 +4,9 @@ gene:
 dependencies:
   - language.field
   - language.inference
+  - genome.addressing
 
 purpose: define the structure and inference rules of entity codons
-
-types:
-  entity_identifier:
-    description: |
-      identifier referencing an entity declared in the current gene
-    type: string
 
 codons:
   entity_definition:
@@ -37,12 +32,15 @@ codons:
         - explicit overrides must conform to language.field.field_definition
 
     schema:
-      fields:
-        description: mapping of entity field names to field definitions
-        type: object
-        key: field_name
-        value_type: language.field.field_definition
-        required: false
+      key: genome.addressing.entity_identifier
+
+      members:
+        fields:
+          description: mapping of entity field names to field definitions
+          type: object
+          key: field_name
+          value_type: language.field.field_definition
+          required: false
 
     processing:
       - fields may be inferred when omitted

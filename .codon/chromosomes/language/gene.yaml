@@ -28,13 +28,13 @@ codons:
       - gene files are the canonical home for gene-owned types, entities, capabilities, relations, references, and traits
       - unknown top-level fields must be rejected unless enabled by the active schema version
 
-  gene_identity:
+  gene:
     description: identify the gene defined by the file
 
     schema:
       members:
         name:
-          type: string
+          type: genome.addressing.gene_identifier
           required: true
 
     constraints:
@@ -43,22 +43,9 @@ codons:
       - filename matching is case-sensitive
       - filename matching must not apply normalization or aliasing
 
-  dependencies:
+  purpose:
     description: |
-      Explicit dependencies on other genes required for schema resolution,
-      semantic interpretation, or processing behavior.
-
-    schema:
-      type: list
-      item_type: genome.addressing.gene_reference
-      required: false
-
-    constraints:
-      - dependencies must reference existing genes
-      - dependencies must use canonical qualified gene references
-      - duplicate dependency entries must be rejected
-      - genes with no external dependencies may omit this field
-      - genes must declare dependencies on any external gene whose definitions are required for schema resolution, semantic interpretation, or processing behavior
+      Describe the purpose of the gene
 
   types:
     description: |
@@ -76,6 +63,23 @@ codons:
       - type names must be unique within the gene
       - types may be referenced by local or fully-qualified identifiers according to the addressing rules
       - types must not conflict with codon names
+
+  dependencies:
+    description: |
+      Explicit dependencies on other genes required for schema resolution,
+      semantic interpretation, or processing behavior.
+
+    schema:
+      type: list
+      item_type: genome.addressing.gene_reference
+      required: false
+
+    constraints:
+      - dependencies must reference existing genes
+      - dependencies must use canonical qualified gene references
+      - duplicate dependency entries must be rejected
+      - genes with no external dependencies may omit this field
+      - genes must declare dependencies on any external gene whose definitions are required for schema resolution, semantic interpretation, or processing behavior
 
   codons:
     description: |

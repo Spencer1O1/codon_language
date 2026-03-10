@@ -7,29 +7,66 @@ types:
   chromosome_identifier:
     description: unique chromosome identifier within a genome
     type: string
+    constraints:
+      - canonical form: lower_snake_case using [a-z0-9_]
+      - must match regex ^[a-z][a-z0-9_]*$
+      - length must be between 1 and 64 characters
+      - must not be a reserved word
 
   gene_identifier:
     description: unique gene identifier within its chromosome
     type: string
+    constraints:
+      - canonical form: lower_snake_case using [a-z0-9_]
+      - must match regex ^[a-z][a-z0-9_]*$
+      - length must be between 1 and 64 characters
+      - must not be a reserved word
+
+  entity_identifier:
+    description: unique entity identifier within its gene
+    type: string
+    constraints:
+      - canonical form: UpperCamelCase using [A-Za-z0-9]
+      - must match regex ^[A-Z][A-Za-z0-9]*$
+      - length must be between 1 and 64 characters
+      - must not be a reserved word
+
+  capability_identifier:
+    description: unique capability identifier within its gene
+    type: string
+    constraints:
+      - must be kebab-case using [a-z0-9-]
+      - must match regex ^[a-z][a-z0-9-]*$
+      - length must be between 3 and 80 characters
+      - must not be a reserved word
 
 codons:
   identifier_scopes:
-    chromosome:
-      type: string
-      description: unique chromosome identifier within a genome
+    description: define identifier types and uniqueness scopes for named constructs
 
-    gene:
-      type: string
-      description: unique gene identifier within its chromosome
+    schema:
+      members:
+        chromosome:
+          type: genome.addressing.chromosome_identifier
+          description: unique chromosome identifier within a genome
 
-    entity:
-      type: string
-      description: unique entity identifier within its gene
+        gene:
+          type: genome.addressing.gene_identifier
+          description: unique gene identifier within its chromosome
+
+        entity:
+          type: genome.addressing.entity_identifier
+          description: unique entity identifier within its gene
+
+        capability:
+          type: genome.addressing.capability_identifier
+          description: unique capability identifier within its gene
 
     constraints:
       - chromosome names must be unique within a genome
       - gene names must be unique within a chromosome
       - entity names must be unique within a gene
+      - capability identifiers must be unique within a gene
 
   reference_forms:
     description: define supported reference forms in the language
@@ -64,18 +101,63 @@ codons:
       - reference resolution must be deterministic
 
   canonical_formats:
-    gene_reference:
-      description: canonical identifier for a gene
-      format: chromosome.gene
-      example: identity.user
+    description: define canonical qualified reference formats
 
-    entity_reference:
-      description: canonical identifier for an entity
-      format: chromosome.gene.entity
-      example: identity.user.User
+    schema:
+      members:
+        gene_reference:
+          description: canonical identifier for a gene
+          format: chromosome.gene
+          example: identity.user
 
-  resolution_rules:
+        entity_reference:
+          description: canonical identifier for an entity
+          format: chromosome.gene.entity
+          example: identity.user.User
+
     constraints:
-      - cross-gene references must use canonical qualified forms
-      - unqualified non-primitive references must be rejected unless explicitly enabled by future schema versions
-      - reference resolution must be deterministic
+      - canonical references must declare identifier forms
+      - canonical reference resolution must be deterministic
+
+  identifier_normalization:
+    description: define shared reserved words and cross-cutting identifier requirements
+
+    reserved_words:
+      - gene
+      - codons
+      - traits
+      - references
+      - entities
+      - capabilities
+      - relations
+      - types
+      - project
+      - schema
+      - schema_version
+      - expression
+      - dependencies
+
+    semantics:
+      - reserved words define names that are never valid as identifiers
+      - identifier types define canonical casing, allowed characters, and length constraints
+
+    constraints:
+      - chromosome identifiers must follow genome.addressing.chromosome_identifier constraints
+      - gene identifiers must follow genome.addressing.gene_identifier constraints
+      - entity identifiers must follow genome.addressing.entity_identifier constraints
+      - capability identifiers must follow genome.addressing.capability_identifier constraints
+      - relation names must be lower_snake_case using [a-z0-9_]
+      - reference names must be lower_snake_case using [a-z0-9_]
+      - reserved words must not be used for any identifier
+
+  identifier_rules:
+    description: global identifier requirements across named constructs
+
+    constraints:
+      - every named construct must define its identifier form through a declared identifier type
+      - definition sites must validate names using the construct's identifier type
+      - reference sites must use the same identifier type as the corresponding definition site
+      - chromosome identifiers must use genome.addressing.chromosome_identifier
+      - gene identifiers must use genome.addressing.gene_identifier
+      - entity identifiers must use genome.addressing.entity_identifier
+      - capability identifiers must use genome.addressing.capability_identifier

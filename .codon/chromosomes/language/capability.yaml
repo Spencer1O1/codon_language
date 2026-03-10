@@ -2,15 +2,11 @@ gene:
   name: capability
 
 dependencies:
+  - genome.addressing
   - language.field
   - language.inference
 
 purpose: define the structure, semantics, and naming rules of capability codons
-
-types:
-  capability_identifier:
-    description: kebab-case capability identifier following verb-noun pattern
-    type: string
 
 codons:
   capability_definition:
@@ -27,12 +23,12 @@ codons:
     schema:
       forms:
         semantic:
-          description: simple semantic identifier
-          type: string
+          description: kebab-case capability identifier following verb-noun pattern
+          type: genome.addressing.capability_identifier
 
         structured:
           description: extended capability definition for cases requiring explicit structure
-          type: object
+          key: genome.addressing.capability_identifier
 
           schema:
             members:
@@ -66,6 +62,7 @@ codons:
       structured:
         create-issue:
           description: create a new issue
+          key: create-issue
           inputs:
             title:
               type: string
@@ -85,18 +82,7 @@ codons:
 
     constraints:
       - capability names must be unique within a gene
-      - semantic capability identifiers must be kebab-case
       - structured capability definitions must be well-formed
       - structured inputs must conform to language.field.field_definition
       - structured outputs must conform to language.field.field_definition
       - effects must be strings
-
-    guidance:
-      naming_convention:
-        style: kebab-case
-        pattern: verb-noun
-
-        examples:
-          - create-issue
-          - assign-user
-          - send-invite
