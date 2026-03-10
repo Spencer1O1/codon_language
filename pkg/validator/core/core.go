@@ -9,18 +9,45 @@ import (
 
 // Result holds validation findings.
 type Result struct {
-	Errors []string
+	Findings []Finding
+}
+
+type Severity string
+
+const (
+	Error   Severity = "error"
+	Warning Severity = "warning"
+	Info    Severity = "info"
+)
+
+type Finding struct {
+	Severity Severity
+	Path     string
+	Message  string
 }
 
 func (r *Result) Add(path, msg string) {
-	r.Errors = append(r.Errors, fmt.Sprintf("%s: %s", path, msg))
+	r.AddWithSeverity(Error, path, msg)
+}
+
+func (r *Result) AddWithSeverity(sev Severity, path, msg string) {
+	r.Findings = append(r.Findings, Finding{Severity: sev, Path: path, Message: msg})
 }
 
 func (r *Result) Err() error {
-	if len(r.Errors) == 0 {
+	if len(r.Findings) == 0 {
 		return nil
 	}
-	return fmt.Errorf("validation failed:\n- %s", strings.Join(r.Errors, "\n- "))
+	var errs []string
+	for _, f := range r.Findings {
+		if f.Severity == Error {
+			errs = append(errs, fmt.Sprintf("%s: %s", f.Path, f.Message))
+		}
+	}
+	if len(errs) == 0 {
+		return nil
+	}
+	return fmt.Errorf("validation failed:\n- %s", strings.Join(errs, "\n- "))
 }
 
 // Rule is a validation rule plug‑in.

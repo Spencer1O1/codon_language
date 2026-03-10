@@ -23,7 +23,7 @@ func checkDependencyDeclarations(genome *loader.ComposedGenome, res *core.Result
 		seenDeps := map[string]int{}
 		for di, dep := range g.Dependencies {
 			if prev, exists := seenDeps[dep]; exists {
-				res.Add(genePath(gi), fmt.Sprintf("duplicate dependency %q (also at index %d)", dep, prev))
+				res.AddWithSeverity(core.Error, genePath(gi), fmt.Sprintf("duplicate dependency %q (also at index %d)", dep, prev))
 			} else {
 				seenDeps[dep] = di
 			}
@@ -33,14 +33,14 @@ func checkDependencyDeclarations(genome *loader.ComposedGenome, res *core.Result
 		for ri, r := range g.References {
 			targetGene, err := loader.GenePartFromEntityRef(r.To)
 			if err != nil {
-				res.Add(fmt.Sprintf("%s.references[%d]", genePath(gi), ri), err.Error())
+				res.AddWithSeverity(core.Error, fmt.Sprintf("%s.references[%d]", genePath(gi), ri), err.Error())
 				continue
 			}
 			if !declaresDependency(g.Dependencies, targetGene) && targetGene != g.Chromosome+"."+g.Name {
-				res.Add(fmt.Sprintf("%s.references[%d]", genePath(gi), ri), fmt.Sprintf("missing dependency on %q for reference target", targetGene))
+				res.AddWithSeverity(core.Error, fmt.Sprintf("%s.references[%d]", genePath(gi), ri), fmt.Sprintf("missing dependency on %q for reference target", targetGene))
 			}
 			if _, ok := geneIndex[targetGene]; !ok {
-				res.Add(fmt.Sprintf("%s.references[%d]", genePath(gi), ri), fmt.Sprintf("reference target gene %q not found in genome", targetGene))
+				res.AddWithSeverity(core.Error, fmt.Sprintf("%s.references[%d]", genePath(gi), ri), fmt.Sprintf("reference target gene %q not found in genome", targetGene))
 			}
 		}
 
@@ -50,11 +50,11 @@ func checkDependencyDeclarations(genome *loader.ComposedGenome, res *core.Result
 				if fdef.Type == "reference" && fdef.Reference != "" {
 					targetGene, err := loader.GenePartFromEntityRef(fdef.Reference)
 					if err != nil {
-						res.Add(fmt.Sprintf("%s.entities[%s].fields[%s]", genePath(gi), e.Name, fname), err.Error())
+						res.AddWithSeverity(core.Error, fmt.Sprintf("%s.entities[%s].fields[%s]", genePath(gi), e.Name, fname), err.Error())
 						continue
 					}
 					if !declaresDependency(g.Dependencies, targetGene) && targetGene != g.Chromosome+"."+g.Name {
-						res.Add(fmt.Sprintf("%s.entities[%s].fields[%s]", genePath(gi), e.Name, fname), fmt.Sprintf("missing dependency on %q for field reference", targetGene))
+						res.AddWithSeverity(core.Error, fmt.Sprintf("%s.entities[%s].fields[%s]", genePath(gi), e.Name, fname), fmt.Sprintf("missing dependency on %q for field reference", targetGene))
 					}
 				}
 			}
@@ -78,11 +78,11 @@ func checkCapRef(res *core.Result, g loader.ComposedGene, capName, ioKind, fname
 	}
 	targetGene, err := loader.GenePartFromEntityRef(fdef.Reference)
 	if err != nil {
-		res.Add(fmt.Sprintf("gene[%s.%s].capabilities[%s].%s[%s]", g.Chromosome, g.Name, capName, ioKind, fname), err.Error())
+		res.AddWithSeverity(core.Error, fmt.Sprintf("gene[%s.%s].capabilities[%s].%s[%s]", g.Chromosome, g.Name, capName, ioKind, fname), err.Error())
 		return
 	}
 	if !declaresDependency(g.Dependencies, targetGene) && targetGene != g.Chromosome+"."+g.Name {
-		res.Add(fmt.Sprintf("gene[%s.%s].capabilities[%s].%s[%s]", g.Chromosome, g.Name, capName, ioKind, fname),
+		res.AddWithSeverity(core.Error, fmt.Sprintf("gene[%s.%s].capabilities[%s].%s[%s]", g.Chromosome, g.Name, capName, ioKind, fname),
 			fmt.Sprintf("missing dependency on %q for capability reference", targetGene))
 	}
 }

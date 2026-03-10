@@ -20,7 +20,7 @@ func checkDependenciesExist(genome *loader.ComposedGenome, res *core.Result) {
 	for _, g := range genome.Genes {
 		for _, dep := range g.Dependencies {
 			if _, ok := geneIndex[dep]; !ok {
-				res.Add(geneKey(g), fmt.Sprintf("dependency %q not found in genome", dep))
+				res.AddWithSeverity(core.Error, geneKey(g), fmt.Sprintf("dependency %q not found in genome", dep))
 			}
 		}
 	}

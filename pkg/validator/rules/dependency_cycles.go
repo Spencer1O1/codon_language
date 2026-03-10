@@ -26,7 +26,7 @@ func checkDependencyCycles(genome *loader.ComposedGenome, res *core.Result) {
 		if stack[node] {
 			// found cycle
 			cycle := append(path, node)
-			res.Add("dependencies", fmt.Sprintf("dependency cycle detected: %s", strings.Join(cycle, " -> ")))
+			res.AddWithSeverity(core.Error, "dependencies", fmt.Sprintf("dependency cycle detected: %s", strings.Join(cycle, " -> ")))
 			return
 		}
 		if visited[node] {
