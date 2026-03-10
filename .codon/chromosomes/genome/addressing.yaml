@@ -119,45 +119,37 @@ codons:
       - canonical references must declare identifier forms
       - canonical reference resolution must be deterministic
 
-  identifier_normalization:
-    description: define shared reserved words and cross-cutting identifier requirements
+  identifier_policy:
+    description: global identifier policy, reserved words, and construct-to-type bindings
 
     reserved_words:
-      - gene
-      - codons
-      - traits
-      - references
-      - entities
       - capabilities
-      - relations
-      - types
+      - codons
+      - dependencies
+      - entities
+      - expression
+      - gene
       - project
+      - references
+      - relations
       - schema
       - schema_version
-      - expression
-      - dependencies
+      - traits
+      - types
 
     semantics:
       - reserved words define names that are never valid as identifiers
       - identifier types define canonical casing, allowed characters, and length constraints
 
     constraints:
-      - chromosome identifiers must follow genome.addressing.chromosome_identifier constraints
-      - gene identifiers must follow genome.addressing.gene_identifier constraints
-      - entity identifiers must follow genome.addressing.entity_identifier constraints
-      - capability identifiers must follow genome.addressing.capability_identifier constraints
-      - relation names must be lower_snake_case using [a-z0-9_]
-      - reference names must be lower_snake_case using [a-z0-9_]
-      - reserved words must not be used for any identifier
+      general:
+        - every named construct must define its identifier form through a declared identifier type
+        - reserved words must not be used for any identifier
+        - definition sites must validate names using the construct's identifier type
+        - reference sites must use the same identifier type as the corresponding definition site
 
-  identifier_rules:
-    description: global identifier requirements across named constructs
-
-    constraints:
-      - every named construct must define its identifier form through a declared identifier type
-      - definition sites must validate names using the construct's identifier type
-      - reference sites must use the same identifier type as the corresponding definition site
-      - chromosome identifiers must use genome.addressing.chromosome_identifier
-      - gene identifiers must use genome.addressing.gene_identifier
-      - entity identifiers must use genome.addressing.entity_identifier
-      - capability identifiers must use genome.addressing.capability_identifier
+      construct_identifier_types:
+        chromosome: genome.addressing.chromosome_identifier
+        gene: genome.addressing.gene_identifier
+        entity: genome.addressing.entity_identifier
+        capability: genome.addressing.capability_identifier
