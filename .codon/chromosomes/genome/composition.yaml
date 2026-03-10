@@ -3,6 +3,82 @@ gene:
 
 purpose: define how a Codon genome is composed from manifest and gene files
 
+types:
+  composed_entity:
+    description: normalized composed representation of an entity
+    schema:
+      members:
+        name:
+          type: genome.addressing.entity_identifier
+        fields:
+          type: object
+          key: string
+          value_type: language.field.field_definition
+          required: false
+          description: mapping of field names to normalized field definitions
+
+  composed_capability:
+    description: normalized composed representation of a capability
+    schema:
+      members:
+        name:
+          type: genome.addressing.capability_identifier
+        description:
+          type: string
+          required: false
+        inputs:
+          type: object
+          key: string
+          value_type: language.field.field_definition
+          required: false
+          description: mapping of input names to normalized field definitions
+        outputs:
+          type: object
+          key: string
+          value_type: language.field.field_definition
+          required: false
+          description: mapping of output names to normalized field definitions
+        effects:
+          type: list 
+          item_type: string
+          required: false
+
+  composed_gene:
+    description: normalized composed representation of a gene
+    schema:
+      members:
+        name:
+          type: genome.addressing.gene_identifier
+        chromosome:
+          type: genome.addressing.chromosome_identifier
+        purpose:
+          type: string
+          required: false
+        dependencies:
+          type: list
+          item_type: genome.addressing.gene_reference
+          required: false
+        entities:
+          type: list
+          item_type: genome.composition.composed_entity
+          required: false
+        capabilities:
+          type: list
+          item_type: genome.composition.composed_capability
+          required: false
+        relations:
+          type: list
+          item_type: language.relation.relation_definition
+          required: false
+        references:
+          type: list
+          item_type: language.reference.reference_definition
+          required: false
+        traits:
+          type: list
+          item_type: string
+          required: false
+
 codons:
   principles:
     items:
@@ -37,6 +113,54 @@ codons:
       genome.yaml plus all gene files discovered under chromosomes/
       relative to the composition root.
 
+    constraints:
+      - trait-expanded structures must conform to the same composition rules as handwritten genome structures
+
+  ordering_rules:
+    description: define deterministic ordering for discovery and emission to avoid order-dependent outputs
+
+    constraints:
+      - gene discovery for validation and generation must sort genes by chromosome identifier then gene identifier (both canonical forms)
+      - within a gene, codon collections (entities, capabilities, relations, references, traits) must be processed in stable lexical order by identifier
+      - traits applied at project or gene scope must be applied in lexical order of trait identifiers unless the trait system defines explicit ordering
+      - emitted artifacts (validation reports, generated files) must use the same deterministic ordering to ensure repeatable outputs
+
+  composed_genome_contract:
+    description: |
+      Define the canonical normalized representation of a composed genome
+      used for interoperability between loaders, validators, and expression engines.
+
+    schema:
+      members:
+        project:
+          type: object
+          description: project metadata from genome.yaml
+
+        schema_version:
+          type: string
+          required: false
+          description: declared schema version of the genome
+
+        traits:
+          type: list
+          item_type: string
+          required: false
+          description: project-level traits after trait expansion
+
+        genes:
+          type: list
+          item_type: genome.composition.composed_gene
+          description: all genes in canonical sorted deterministic order
+
+    processing:
+      - the composed genome contract is produced after loading, resolution, and trait expansion
+      - source-file shorthand and equivalent source forms must be normalized into the contract
+      - canonical ordering must be deterministic
+
+    constraints:
+      - the composed genome contract is the interoperability boundary for loaders, validators, and expression engines
+      - members not defined by the contract must not appear unless enabled by a future schema version
+
   filesystem_model:
     description: |
       Gene files are organized under chromosome directories within
@@ -50,31 +174,20 @@ codons:
       - nested subdirectories inside chromosome directories must be rejected unless enabled by future schema versions
       - each gene file must define exactly one gene
       - all valid gene files discovered under chromosomes/ relative to the composition root are included in the composed genome
-      - gene discovery order must not affect composed genome semantics
       - trait-expanded structures must conform to the same composition rules as handwritten genome structures
 
   validation_pipeline:
     description: define the validation phases applied to a genome
 
-    phases:
-      - raw_genome_validation
-      - trait_expansion
-      - expanded_genome_validation
+    semantics:
+      - the validation pipeline consists of raw_genome_validation, trait_expansion, and expanded_genome_validation
+      - raw_genome_validation evaluates the source genome before trait expansion
+      - trait_expansion produces the expanded genome
+      - expanded_genome_validation evaluates the expanded genome
 
-    processing:
+    constraints:
       - raw genome validation must occur before trait expansion
+      - trait expansion must produce a deterministic expanded genome
       - structural constraints must be evaluated on the expanded genome
       - uniqueness constraints must be enforced on the expanded genome
       - validators must report errors from both validation phases separately
-
-    constraints:
-      - trait expansion must produce a deterministic expanded genome
-
-  ordering_rules:
-    description: define deterministic ordering for discovery and emission to avoid order-dependent outputs
-
-    constraints:
-      - gene discovery for validation and generation must sort genes by chromosome identifier then gene identifier (both canonical forms)
-      - within a gene, codon collections (entities, capabilities, relations, references, traits) must be processed in stable lexical order by identifier
-      - traits applied at project or gene scope must be applied in lexical order of trait identifiers unless the trait system defines explicit ordering
-      - emitted artifacts (validation reports, generated files) should use the same deterministic ordering to ensure repeatable outputs
