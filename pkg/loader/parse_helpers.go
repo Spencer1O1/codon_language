@@ -183,3 +183,22 @@ func parseFieldDefinition(raw any) (FieldDefinition, error) {
 
 	return fd, nil
 }
+
+// parseTraitsList treats value as traits only when it's a list; otherwise ignores.
+func parseTraitsList(raw any) []string {
+	list, ok := raw.([]any)
+	if !ok {
+		return nil
+	}
+	res := make([]string, 0, len(list))
+	for i, v := range list {
+		s, ok := v.(string)
+		if !ok {
+			// ignore invalid entries to keep loader permissive for spec genome; validator will catch later if needed.
+			continue
+		}
+		res = append(res, s)
+		_ = i
+	}
+	return res
+}

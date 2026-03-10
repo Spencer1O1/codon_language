@@ -37,6 +37,9 @@ func TestValidatorFixtures(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			root := filepath.Join("..", "..", "fixtures", "validation", tc.fixture)
+			if tc.fixture == "valid_genome" {
+				root = filepath.Join("..", "..", "fixtures", "shared", "valid_genome")
+			}
 			cg, err := loader.Load(root)
 			if err != nil {
 				if !tc.wantErr {

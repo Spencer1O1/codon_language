@@ -30,6 +30,7 @@ type ComposedGene struct {
 	Relations    []RelationDefinition  `json:"relations,omitempty" yaml:"relations,omitempty"`
 	References   []ReferenceDefinition `json:"references,omitempty" yaml:"references,omitempty"`
 	Traits       []string              `json:"traits,omitempty" yaml:"traits,omitempty"`
+	RawCodons    map[string]any        `json:"raw_codons,omitempty" yaml:"raw_codons,omitempty"`
 }
 
 // ComposedEntity is the normalized entity form.

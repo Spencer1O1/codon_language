@@ -5,21 +5,15 @@ purpose: define the boundary between semantic genome structure and derived imple
 
 codons:
   semantic_model:
-    description: |
-      The genome describes semantic architecture rather than concrete
-      implementation artifacts.
-
-    principles:
+    description: the genome captures semantic architecture, not implementation details
+    semantics:
       - the genome defines domains, models, actions, and relationships
-      - the genome does not directly define implementation layers or files
       - the semantic model must remain independent of programming languages or frameworks
+    guidance:
+      - prefer semantic nouns/verbs over implementation-layer concepts in genome sources
 
   derived_artifacts:
-    description: |
-      Implementation-oriented constructs such as services, controllers,
-      handlers, repositories, API routes, or database schemas are
-      considered derived artifacts.
-
+    description: implementation-oriented constructs that are produced from the semantic model
     examples:
       - services
       - controllers
@@ -27,14 +21,16 @@ codons:
       - repositories
       - api_routes
       - database_tables
+    semantics:
+      - derived artifacts are not part of the semantic genome; they are outputs of expression
+    guidance:
+      - keep implementation artifacts in expression outputs, not in genome source codons
 
   expression_projection:
-    description: |
-      Derived artifacts are produced through expression rules that
-      project semantic genome structure into implementation artifacts.
-
+    description: projections map semantic genome structures into implementation artifacts
     constraints:
-      - core genome schema remains semantic
-      - implementation artifacts are normally derived through expression
-      - capabilities are primary semantic action units for many projections
+      - core genome schema remains purely semantic
+      - implementation artifacts are produced through expression, not authored in genome sources
       - projections must not alter the semantic meaning of the genome
+    guidance:
+      - capabilities are primary semantic action units for many projections

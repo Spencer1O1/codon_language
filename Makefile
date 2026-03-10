@@ -9,6 +9,12 @@ test:
 build:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go build ./cmd/...
 
+patch:
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go build -o bin/codonpatch ./cmd/codonpatch
+
+validate:
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go build -o bin/codonvalidate ./cmd/codonvalidate
+
 lint:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) golangci-lint run ./...
 

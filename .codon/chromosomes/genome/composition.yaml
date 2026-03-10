@@ -78,6 +78,10 @@ types:
           type: list
           item_type: string
           required: false
+        raw_codons:
+          type: object
+          required: false
+          description: original codons map as loaded, including unparsed or spec-specific buckets
 
 codons:
   principles:
@@ -153,6 +157,7 @@ codons:
       - the composed genome contract is produced after loading, resolution, and trait expansion
       - source-file shorthand and equivalent source forms must be normalized into the contract
       - canonical ordering must be deterministic
+      - loaders must preserve unparsed or additional codon buckets in composed_gene.raw_codons for downstream consumers
 
     constraints:
       - the composed genome contract is the interoperability boundary for loaders, validators, and expression engines
@@ -180,23 +185,3 @@ codons:
   validation_severity_policy:
     description: reference to validation severity policy defined in validation chromosome
     type: validation.pipeline.validation_severity_policy
-
-  validation_severity_policy:
-    description: classify validation findings into severities and define engine behavior
-
-    semantics:
-      severities:
-        error: fatal violations that must prevent genome acceptance
-        warning: non-fatal issues; engines may proceed but should report
-        info: informational notices with no impact on acceptance
-
-    constraints:
-      - engines must reject genomes when any error severity finding is present
-      - warnings must be reported but do not block acceptance
-      - informational findings must be reported when available
-      - structural and dependency violations are errors
-      - unresolved references or missing dependency declarations are errors
-      - identifier policy violations are errors
-      - reserved-word usage is a warning unless the reserved word blocks resolution, in which case it is an error
-      - duplicate traits or dependencies are warnings
-      - normalization or inference notices are info unless they surface a conflict, which is an error

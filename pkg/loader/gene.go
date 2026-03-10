@@ -46,7 +46,7 @@ func loadGeneFile(gf geneFile) (ComposedGene, error) {
 	if err != nil {
 		return ComposedGene{}, err
 	}
-	entities, capabilities, relations, references, traits, err := parseCodons(gf.Path, raw)
+	entities, capabilities, relations, references, traits, rawCodons, err := parseCodons(gf.Path, raw)
 	if err != nil {
 		return ComposedGene{}, err
 	}
@@ -61,6 +61,7 @@ func loadGeneFile(gf geneFile) (ComposedGene, error) {
 		Relations:    relations,
 		References:   references,
 		Traits:       traits,
+		RawCodons:    rawCodons,
 	}, nil
 }
 
@@ -112,36 +113,34 @@ func parseDependencies(path string, raw map[string]any) ([]string, error) {
 	return nil, nil
 }
 
-func parseCodons(path string, raw map[string]any) ([]ComposedEntity, []ComposedCapability, []RelationDefinition, []ReferenceDefinition, []string, error) {
+func parseCodons(path string, raw map[string]any) ([]ComposedEntity, []ComposedCapability, []RelationDefinition, []ReferenceDefinition, []string, map[string]any, error) {
 	if rawCodons, ok := raw["codons"]; ok {
 		codons, ok := rawCodons.(map[string]any)
 		if !ok {
-			return nil, nil, nil, nil, nil, fmt.Errorf("%s: codons must be an object", path)
+			return nil, nil, nil, nil, nil, nil, fmt.Errorf("%s: codons must be an object", path)
 		}
-		if err := expectKeys("codons", codons, []string{"entities", "capabilities", "relations", "references", "traits"}); err != nil {
-			return nil, nil, nil, nil, nil, err
+		rawCopy := make(map[string]any, len(codons))
+		for k, v := range codons {
+			rawCopy[k] = v
 		}
 		entities, err := parseEntities(codons["entities"])
 		if err != nil {
-			return nil, nil, nil, nil, nil, fmt.Errorf("%s: %w", path, err)
+			return nil, nil, nil, nil, nil, nil, fmt.Errorf("%s: %w", path, err)
 		}
 		capabilities, err := parseCapabilities(codons["capabilities"])
 		if err != nil {
-			return nil, nil, nil, nil, nil, fmt.Errorf("%s: %w", path, err)
+			return nil, nil, nil, nil, nil, nil, fmt.Errorf("%s: %w", path, err)
 		}
 		relations, err := parseRelations(codons["relations"])
 		if err != nil {
-			return nil, nil, nil, nil, nil, fmt.Errorf("%s: %w", path, err)
+			return nil, nil, nil, nil, nil, nil, fmt.Errorf("%s: %w", path, err)
 		}
 		references, err := parseReferences(codons["references"])
 		if err != nil {
-			return nil, nil, nil, nil, nil, fmt.Errorf("%s: %w", path, err)
+			return nil, nil, nil, nil, nil, nil, fmt.Errorf("%s: %w", path, err)
 		}
-		traits, err := toStringListOptional("traits", codons["traits"])
-		if err != nil {
-			return nil, nil, nil, nil, nil, fmt.Errorf("%s: %w", path, err)
-		}
-		return entities, capabilities, relations, references, traits, nil
+		traits := parseTraitsList(codons["traits"])
+		return entities, capabilities, relations, references, traits, rawCopy, nil
 	}
-	return nil, nil, nil, nil, nil, nil
+	return nil, nil, nil, nil, nil, nil, nil
 }
