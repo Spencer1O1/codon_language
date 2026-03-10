@@ -1,0 +1,12 @@
+summary: oob
+rationale: test
+risk: low
+changes:
+  - id: c1
+    target: genome
+    operations:
+      - id: op1
+        op: add
+        path: /project/tags/5
+        value: x
+        reason: add

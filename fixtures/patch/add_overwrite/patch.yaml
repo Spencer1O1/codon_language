@@ -1,0 +1,12 @@
+summary: overwrite
+rationale: test
+risk: low
+changes:
+  - id: c1
+    target: genome
+    operations:
+      - id: op1
+        op: add
+        path: /project/name
+        value: new
+        reason: change name
