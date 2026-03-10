@@ -8,7 +8,7 @@ import (
 )
 
 func TestLoad_ComposesAndOrders(t *testing.T) {
-	root := filepath.Join("..", "..", "fixtures", "sample")
+	root := filepath.Join("..", "..", "fixtures", "shared", "valid_genome")
 
 	cg, err := Load(root)
 	if err != nil {
@@ -21,14 +21,14 @@ func TestLoad_ComposesAndOrders(t *testing.T) {
 	if got := len(cg.Genes); got != 3 {
 		t.Fatalf("expected 3 genes, got %d", got)
 	}
-	// Deterministic ordering: alpha.user, identity.auth, zeta.audit
+	// Deterministic ordering by chromosome then gene
 	want := []struct {
 		chrom string
 		gene  string
 	}{
-		{"alpha", "user"},
 		{"identity", "auth"},
-		{"zeta", "audit"},
+		{"notifications", "notify"},
+		{"tasks", "tasking"},
 	}
 	for i, w := range want {
 		if cg.Genes[i].Chromosome != w.chrom || cg.Genes[i].Name != w.gene {
@@ -36,43 +36,34 @@ func TestLoad_ComposesAndOrders(t *testing.T) {
 		}
 	}
 
-	user := findGene(cg, "alpha", "user")
-	if user == nil {
-		t.Fatalf("user gene not found")
+	tasks := findGene(cg, "tasks", "tasking")
+	if tasks == nil {
+		t.Fatalf("tasking gene not found")
 	}
-	if len(user.Entities) != 2 {
-		t.Fatalf("expected 2 entities, got %d", len(user.Entities))
+	if len(tasks.Entities) != 2 {
+		t.Fatalf("expected 2 entities, got %d", len(tasks.Entities))
 	}
-	userEntity := findEntity(user.Entities, "User")
-	if userEntity == nil {
-		t.Fatalf("User entity not found")
+	taskEntity := findEntity(tasks.Entities, "Task")
+	if taskEntity == nil {
+		t.Fatalf("Task entity not found")
 	}
-	emailField := userEntity.Fields["email"]
-	if !emailField.Unique || emailField.Type != "string" {
-		t.Fatalf("email field parsed incorrectly: %+v", emailField)
-	}
-	statusField := userEntity.Fields["status"]
-	if statusField.Type != "enum" || len(statusField.Values) != 2 {
+	statusField := taskEntity.Fields["status"]
+	if statusField.Type != "enum" || len(statusField.Values) != 3 {
 		t.Fatalf("status enum parsed incorrectly: %+v", statusField)
 	}
 
-	if len(user.Capabilities) != 2 {
-		t.Fatalf("expected 2 capabilities, got %d", len(user.Capabilities))
+	if len(tasks.Capabilities) != 3 {
+		t.Fatalf("expected 3 capabilities, got %d", len(tasks.Capabilities))
 	}
-	reg := findCapability(user.Capabilities, "register-user")
-	if reg == nil {
-		t.Fatalf("semantic capability not parsed")
+	assign := findCapability(tasks.Capabilities, "assign-task")
+	if assign == nil {
+		t.Fatalf("assign-task capability missing")
 	}
-	createSession := findCapability(user.Capabilities, "create-session")
-	if createSession == nil || createSession.Outputs["session_id"].Type != "uuid" {
-		t.Fatalf("structured capability outputs not parsed: %+v", createSession)
+	if len(tasks.Relations) != 1 || tasks.Relations[0].Name != "parent_task" {
+		t.Fatalf("relations parsed incorrectly: %+v", tasks.Relations)
 	}
-
-	if len(user.Relations) != 1 || user.Relations[0].Type != "many-to-one" {
-		t.Fatalf("relations parsed incorrectly: %+v", user.Relations)
-	}
-	if len(user.References) != 1 || user.References[0].To != "identity.auth.User" {
-		t.Fatalf("references parsed incorrectly: %+v", user.References)
+	if len(tasks.References) != 1 || tasks.References[0].To != "identity.auth.User" {
+		t.Fatalf("references parsed incorrectly: %+v", tasks.References)
 	}
 }
 

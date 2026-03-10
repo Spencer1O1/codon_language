@@ -1,15 +1,17 @@
 gene:
-  name: user
-purpose: user domain
-dependencies:
-  - identity.auth
+  name: auth
+purpose: identity and access control
 codons:
   entities:
     User:
       fields:
+        id:
+          type: uuid
         email:
           type: string
           unique: true
+        display_name:
+          type: string
         status:
           type: enum
           values:
@@ -17,18 +19,28 @@ codons:
             - disabled
     Session:
       fields:
+        id:
+          type: uuid
         user_id:
           type: reference
           reference: identity.auth.User
+        created_at:
+          type: datetime
   capabilities:
     register-user: {}
-    create-session:
-      description: create session
+    login:
+      description: establish a session for a user
       inputs:
-        user_id:
-          type: reference
-          reference: identity.auth.User
+        email:
+          type: string
+        password:
+          type: string
       outputs:
+        session_id:
+          type: uuid
+    logout:
+      description: end a session
+      inputs:
         session_id:
           type: uuid
   relations:
@@ -36,11 +48,3 @@ codons:
       to: User
       type: many-to-one
       name: user
-  references:
-    - from: Session
-      to: identity.auth.User
-      type: many-to-one
-      name: ext_user
-      reference: id
-  traits:
-    - audit

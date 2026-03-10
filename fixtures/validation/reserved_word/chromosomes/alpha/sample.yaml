@@ -1,0 +1,5 @@
+gene:
+  name: sample
+codons:
+  traits:
+    - project

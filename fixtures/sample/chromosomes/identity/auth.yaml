@@ -1,5 +1,0 @@
-gene:
-  name: auth
-codons:
-  entities:
-    User: {}

@@ -1,0 +1,64 @@
+gene:
+  name: tasking
+purpose: task management
+dependencies:
+  - identity.auth
+codons:
+  entities:
+    Task:
+      fields:
+        id:
+          type: uuid
+        title:
+          type: string
+        status:
+          type: enum
+          values: [open, in_progress, done]
+        assignee:
+          type: reference
+          reference: identity.auth.User
+        due_date:
+          type: datetime
+    Subtask:
+      fields:
+        id:
+          type: uuid
+        task_ref:
+          type: reference
+          reference: tasks.tasking.Task
+        title:
+          type: string
+  relations:
+    - from: Subtask
+      to: Task
+      type: many-to-one
+      name: parent_task
+  capabilities:
+    create-task:
+      description: create a new task
+      inputs:
+        title:
+          type: string
+        assignee:
+          type: reference
+          reference: identity.auth.User
+      outputs:
+        task_id:
+          type: uuid
+    assign-task:
+      description: assign a task to a user
+      inputs:
+        task_id:
+          type: reference
+          reference: tasks.tasking.Task
+        assignee:
+          type: reference
+          reference: identity.auth.User
+    close-task: {}
+  references:
+    - from: Task
+      to: identity.auth.User
+      type: many-to-one
+      name: assignee_ref
+  traits:
+    - audit

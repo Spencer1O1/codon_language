@@ -1,7 +1,0 @@
-gene:
-  name: audit
-codons:
-  entities:
-    AuditLog:
-      fields:
-        id: uuid

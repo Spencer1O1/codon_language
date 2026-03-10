@@ -1,0 +1,9 @@
+gene:
+  name: user
+codons:
+  entities:
+    User:
+      fields:
+        ref_field:
+          type: reference
+          reference: beta.other.Other

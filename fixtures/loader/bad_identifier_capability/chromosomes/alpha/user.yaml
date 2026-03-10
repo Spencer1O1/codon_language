@@ -1,0 +1,5 @@
+gene:
+  name: user
+codons:
+  capabilities:
+    BADCAP: {}
