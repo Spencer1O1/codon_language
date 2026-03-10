@@ -303,10 +303,6 @@ codons:
       - destructive operations must include a reason
       - if old_value is supplied it must match before the operation is applied
 
-    semantics:
-      - remove against object paths deletes the addressed key
-      - remove against list paths deletes the addressed element and reindexes the list
-
     guidance:
       - destructive operations should include old_value when possible
       - destructive patches should carry medium or high risk unless clearly reversible
@@ -334,6 +330,40 @@ codons:
         - warning: failure of a non-required operation that is safely skipped
         - info: non-blocking notices such as normalization or no-op updates
       - engines may proceed to commit a patch only when no errors occurred; warnings may proceed if all required operations succeeded and overall validity is maintained; infos never block progress
+
+  operation_semantics:
+    description: define deterministic behaviors for patch operations on maps and lists
+
+    add:
+      semantics:
+        - object paths: add inserts or replaces the value at the addressed key
+        - list paths: add inserts at the addressed zero-based index; path '-' appends
+      constraints:
+        - for object paths, add must create or overwrite exactly one key
+        - for list paths, add must respect zero-based indices or '-' append
+        - add operations must be deterministic for the same input state and patch
+      guidance:
+        - prefer add for introducing new keys or list elements; use update to modify existing ones
+
+    update:
+      semantics:
+        - object paths: update replaces the entire value at the addressed key; no deep merge is performed
+        - list paths: update replaces the element at the addressed zero-based index
+      constraints:
+        - the addressed path must exist at the time of application
+        - when old_value is supplied, it must match the current value before applying the update
+        - update operations must be deterministic for the same input state and patch
+      guidance:
+        - prefer using add when introducing new keys or list elements; update should modify existing ones
+
+    remove:
+      semantics:
+        - object paths: remove deletes the addressed key
+        - list paths: remove deletes the addressed element and reindexes the list
+      constraints:
+        - the addressed path must exist at the time of application
+        - when old_value is supplied, it must match the current value before applying the removal
+        - remove operations must be deterministic for the same input state and patch
 
   validation_results:
     description: structure for reporting validation output from patch application

@@ -23,11 +23,11 @@ codons:
     schema:
       members:
         from:
-          type: language.entity.entity_identifier
+          type: genome.addressing.entity_identifier
           required: true
 
         to:
-          type: language.entity.entity_identifier
+          type: genome.addressing.entity_identifier
           required: true
 
         type:
