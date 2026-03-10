@@ -18,18 +18,28 @@ func TestLoad_ComposesAndOrders(t *testing.T) {
 	if cg.SchemaVersion != "1.0.0" {
 		t.Fatalf("schema_version = %s", cg.SchemaVersion)
 	}
-	if got := len(cg.Genes); got != 2 {
-		t.Fatalf("expected 2 genes, got %d", got)
+	if got := len(cg.Genes); got != 3 {
+		t.Fatalf("expected 3 genes, got %d", got)
 	}
-	// Deterministic ordering: alpha.user then zeta.audit
-	if cg.Genes[0].Chromosome != "alpha" || cg.Genes[0].Name != "user" {
-		t.Fatalf("gene[0] = %s.%s", cg.Genes[0].Chromosome, cg.Genes[0].Name)
+	// Deterministic ordering: alpha.user, identity.auth, zeta.audit
+	want := []struct {
+		chrom string
+		gene  string
+	}{
+		{"alpha", "user"},
+		{"identity", "auth"},
+		{"zeta", "audit"},
 	}
-	if cg.Genes[1].Chromosome != "zeta" || cg.Genes[1].Name != "audit" {
-		t.Fatalf("gene[1] = %s.%s", cg.Genes[1].Chromosome, cg.Genes[1].Name)
+	for i, w := range want {
+		if cg.Genes[i].Chromosome != w.chrom || cg.Genes[i].Name != w.gene {
+			t.Fatalf("gene[%d] = %s.%s, want %s.%s", i, cg.Genes[i].Chromosome, cg.Genes[i].Name, w.chrom, w.gene)
+		}
 	}
 
-	user := cg.Genes[0]
+	user := findGene(cg, "alpha", "user")
+	if user == nil {
+		t.Fatalf("user gene not found")
+	}
 	if len(user.Entities) != 2 {
 		t.Fatalf("expected 2 entities, got %d", len(user.Entities))
 	}
@@ -103,6 +113,15 @@ func findCapability(list []ComposedCapability, name string) *ComposedCapability 
 	for i := range list {
 		if list[i].Name == name {
 			return &list[i]
+		}
+	}
+	return nil
+}
+
+func findGene(cg *ComposedGenome, chrom, gene string) *ComposedGene {
+	for i := range cg.Genes {
+		if cg.Genes[i].Chromosome == chrom && cg.Genes[i].Name == gene {
+			return &cg.Genes[i]
 		}
 	}
 	return nil
