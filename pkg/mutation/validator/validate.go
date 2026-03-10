@@ -3,6 +3,7 @@ package validator
 import (
 	"fmt"
 	"os"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -164,6 +165,7 @@ func validateOperation(op Operation, path string, res *Result, seenOps map[strin
 	// State-based checks (best effort, only when state provided).
 	if state != nil {
 		exists, current := resolvePath(state, op.Path)
+		checkListIndexTypes(op, path+".path", res, state)
 		switch op.Op {
 		case "add":
 			if exists {
@@ -181,6 +183,18 @@ func validateOperation(op Operation, path string, res *Result, seenOps map[strin
 				res.add("old_value_mismatch", severityByCode["old_value_mismatch"], path+".old_value", "old_value does not match current value")
 			}
 		}
+
+		// Detect merge attempts: update on map where provided value omits existing keys.
+		if op.Op == "update" && exists {
+			if curMap, ok := current.(map[string]any); ok {
+				if newMap, ok2 := op.Value.(map[string]any); ok2 {
+					missing := missingKeys(curMap, newMap)
+					if len(missing) > 0 {
+						res.add("merge_attempt", severityByCode["merge_attempt"], path+".value", fmt.Sprintf("map update must replace entire object; missing keys: %s", strings.Join(missing, ", ")))
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -195,6 +209,21 @@ func validatePath(op Operation, path string, res *Result) {
 	if len(segments) == 0 {
 		res.add("path", severityByCode["path"], path, "path must address a location")
 		return
+	}
+	for i, seg := range segments {
+		if seg == "" {
+			res.add("path", severityByCode["path"], path, "empty path segment not allowed")
+			return
+		}
+		if seg == "-" {
+			if op.Op != "add" || i != len(segments)-1 {
+				res.add("path", severityByCode["path"], path, "'-' list append allowed only as final segment of add")
+			}
+			continue
+		}
+		if _, err := strconv.Atoi(seg); err == nil {
+			// numeric index allowed
+		}
 	}
 	if op.Op != "add" && segments[len(segments)-1] == "-" {
 		res.add("path", severityByCode["path"], path, "'-' list append allowed only for add operations")
@@ -265,7 +294,17 @@ func resolvePath(state map[string]any, path string) (bool, any) {
 }
 
 func valuesEqual(a, b any) bool {
-	return fmt.Sprintf("%v", a) == fmt.Sprintf("%v", b)
+	return reflect.DeepEqual(a, b)
+}
+
+func missingKeys(current, new map[string]any) []string {
+	var missing []string
+	for k := range current {
+		if _, ok := new[k]; !ok {
+			missing = append(missing, k)
+		}
+	}
+	return missing
 }
 
 // checkAddIndexBounds ensures add to list with numeric index is in bounds (<= len).
@@ -294,5 +333,42 @@ func checkAddIndexBounds(op Operation, path string, res *Result, state map[strin
 	}
 	if idx > len(list) {
 		res.add("path", severityByCode["path"], path, "add list index out of bounds")
+	}
+}
+
+// checkListIndexTypes flags non-integer indices when traversing lists with state info.
+func checkListIndexTypes(op Operation, path string, res *Result, state map[string]any) {
+	if state == nil {
+		return
+	}
+	segs := strings.Split(op.Path, "/")[1:]
+	cur := any(state)
+	for i, seg := range segs {
+		switch node := cur.(type) {
+		case map[string]any:
+			next, ok := node[seg]
+			if !ok {
+				return
+			}
+			cur = next
+		case []any:
+			if seg == "-" {
+				if op.Op != "add" || i != len(segs)-1 {
+					res.add("path", severityByCode["path"], path, "'-' list append allowed only as final segment of add")
+				}
+				return
+			}
+			if _, err := strconv.Atoi(seg); err != nil {
+				res.add("path", severityByCode["path"], path, "list index must be integer")
+				return
+			}
+			idx, _ := strconv.Atoi(seg)
+			if idx < 0 || idx >= len(node) {
+				return
+			}
+			cur = node[idx]
+		default:
+			return
+		}
 	}
 }

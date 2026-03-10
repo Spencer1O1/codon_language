@@ -27,6 +27,7 @@ func TestPatchValidatorFixtures(t *testing.T) {
 		{"update_missing_errors", "update_missing", 1, 0, map[string]any{"project": map[string]any{"name": "old"}}},
 		{"old_value_mismatch_errors", "old_value_mismatch", 1, 0, map[string]any{"project": map[string]any{"name": "old"}}},
 		{"add_index_oob", "add_index_oob", 1, 0, map[string]any{"project": map[string]any{"tags": []any{"a"}}}},
+		{"list_index_nonint", "list_index_nonint", 1, 0, map[string]any{"project": map[string]any{"tags": []any{"a"}}}},
 	}
 
 	for _, tc := range cases {
