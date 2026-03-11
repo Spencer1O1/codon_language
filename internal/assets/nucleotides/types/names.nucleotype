@@ -1,0 +1,3 @@
+export entity_name = string
+export capability_name = string
+export relation_name = string

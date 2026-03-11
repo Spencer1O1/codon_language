@@ -1,0 +1,12 @@
+families:
+  gene_format:
+    version: 1.0.0
+    description: shape of a gene file
+    type: |
+      { 
+        gene: string, 
+        description: Optional<string>, 
+        imports: Optional<List<string>>, 
+        codons: Map<string, TypeExprOrValue>, 
+        traits: Optional<List<string>> 
+      }

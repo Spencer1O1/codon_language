@@ -1,0 +1,7 @@
+field_key = Regex<"^[a-z][a-z0-9_]*$">
+export field<T> = Map<field_key, {
+  type: T,
+  default: Optional<T>,
+  unique: Optional<boolean>,
+  optional: Optional<boolean>,
+}>

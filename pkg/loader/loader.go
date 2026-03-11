@@ -1,12 +1,14 @@
 package loader
 
 import (
-	fmt "fmt"
-	os "os"
+	"fmt"
+	"io/fs"
+	"os"
 	path "path/filepath"
-	sort "sort"
-	strings "strings"
+	"sort"
+	"strings"
 
+	"github.com/Spencer1O1/codon-language/internal/assets"
 	tp "github.com/Spencer1O1/codon-language/pkg/nucleotype"
 	goyaml "gopkg.in/yaml.v3"
 )
@@ -44,40 +46,73 @@ func LoadGenome(root string) (*Genome, error) {
 }
 
 func loadFamilies(root string) (map[string]Family, error) {
+	families := map[string]Family{}
+	// embedded defaults
+	if err := loadFamiliesFromFS(assets.Families, "codon_families", families); err != nil {
+		return nil, err
+	}
+	// disk overrides/extensions
 	glob := path.Join(root, "codon_families", "*.codon")
 	files, err := path.Glob(glob)
 	if err != nil {
 		return nil, err
 	}
 	sort.Strings(files)
-	families := map[string]Family{}
 	for _, f := range files {
 		data, err := os.ReadFile(f)
 		if err != nil {
 			continue
 		}
-		var doc struct {
-			Families map[string]struct {
-				Version     string `yaml:"version"`
-				Description string `yaml:"description"`
-				Type        string `yaml:"type"`
-			} `yaml:"families"`
-		}
-		if err := goyaml.Unmarshal(data, &doc); err != nil {
-			return nil, fmt.Errorf("parse family %s: %w", f, err)
-		}
-		for name, cf := range doc.Families {
-			if strings.TrimSpace(cf.Type) == "" {
-				continue
-			}
-			ast, err := tp.Parse(cf.Type)
-			if err != nil {
-				return nil, fmt.Errorf("parse family %s type %s: %w", f, name, err)
-			}
-			families[name] = Family{Version: cf.Version, Description: cf.Description, TypeExpr: cf.Type, TypeAST: ast}
+		if err := parseFamilyDoc(data, f, families); err != nil {
+			return nil, err
 		}
 	}
 	return families, nil
+}
+
+func loadFamiliesFromFS(fsys fs.FS, dir string, dest map[string]Family) error {
+	entries, err := fs.ReadDir(fsys, dir)
+	if err != nil {
+		// if directory missing in embedded fs, treat as empty
+		return nil
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		data, err := fs.ReadFile(fsys, path.Join(dir, e.Name()))
+		if err != nil {
+			return err
+		}
+		if err := parseFamilyDoc(data, e.Name(), dest); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func parseFamilyDoc(data []byte, filename string, dest map[string]Family) error {
+	var doc struct {
+		Families map[string]struct {
+			Version     string `yaml:"version"`
+			Description string `yaml:"description"`
+			Type        string `yaml:"type"`
+		} `yaml:"families"`
+	}
+	if err := goyaml.Unmarshal(data, &doc); err != nil {
+		return fmt.Errorf("parse family %s: %w", filename, err)
+	}
+	for name, cf := range doc.Families {
+		if strings.TrimSpace(cf.Type) == "" {
+			continue
+		}
+		ast, err := tp.Parse(cf.Type)
+		if err != nil {
+			return fmt.Errorf("parse family %s type %s: %w", filename, name, err)
+		}
+		dest[name] = Family{Version: cf.Version, Description: cf.Description, TypeExpr: cf.Type, TypeAST: ast}
+	}
+	return nil
 }
 
 func loadGenes(root string) ([]Gene, error) {
@@ -127,26 +162,59 @@ func toStringList(v any) []string {
 // BuildTypeEnv builds a symbol table from nucleotide declarations.
 func BuildTypeEnv(root string) (map[string]tp.TypeNode, error) {
 	env := map[string]tp.TypeNode{}
+	// embedded defaults
+	if err := loadTypesFromFS(assets.Nucleotypes, "nucleotides/types", env); err != nil {
+		return nil, err
+	}
+	// disk overrides/extensions
 	files, err := path.Glob(path.Join(root, "nucleotides", "types", "*.nucleotype"))
 	if err != nil {
 		return nil, err
 	}
+	sort.Strings(files)
 	for _, f := range files {
 		data, err := os.ReadFile(f)
 		if err != nil {
 			return nil, err
 		}
-		decls, err := tp.ParseDecls(string(data))
-		if err != nil {
-			return nil, fmt.Errorf("parse %s: %w", f, err)
-		}
-		for _, d := range decls {
-			ast := tp.Resolve(d.Type, env)
-			env[d.Name] = ast
+		if err := parseTypesDoc(string(data), f, env); err != nil {
+			return nil, err
 		}
 	}
 	// inject primitives as terminals
 	env["primitive"] = tp.NameType{Name: "primitive"}
 	env["any"] = tp.NameType{Name: "any"}
 	return env, nil
+}
+
+func loadTypesFromFS(fsys fs.FS, dir string, env map[string]tp.TypeNode) error {
+	entries, err := fs.ReadDir(fsys, dir)
+	if err != nil {
+		return nil
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		data, err := fs.ReadFile(fsys, path.Join(dir, e.Name()))
+		if err != nil {
+			return err
+		}
+		if err := parseTypesDoc(string(data), e.Name(), env); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func parseTypesDoc(src string, filename string, env map[string]tp.TypeNode) error {
+	decls, err := tp.ParseDecls(src)
+	if err != nil {
+		return fmt.Errorf("parse %s: %w", filename, err)
+	}
+	for _, d := range decls {
+		ast := tp.Resolve(d.Type, env)
+		env[d.Name] = ast
+	}
+	return nil
 }
