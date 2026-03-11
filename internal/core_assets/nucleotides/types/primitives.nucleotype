@@ -9,3 +9,6 @@ export yaml = primitive
 
 # Type expression placeholder (string form of a type grammar)
 export TypeExpr = primitive
+
+# Reference path (string path resolved per reference rules)
+export ref = primitive
