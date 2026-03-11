@@ -1,4 +1,4 @@
-families:
+codons:
   gene_format:
     version: 1.0.0
     description: shape of a gene file

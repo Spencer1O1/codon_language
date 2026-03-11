@@ -34,7 +34,7 @@ type Gene struct {
 
 // LoadGenome loads families and genes from a loader root.
 func LoadGenome(root string) (*Genome, error) {
-	families, err := loadFamilies(root)
+	codonSchemas, err := loadCodonSchemas(root)
 	if err != nil {
 		return nil, err
 	}
@@ -42,13 +42,13 @@ func LoadGenome(root string) (*Genome, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Genome{Families: families, Genes: genes}, nil
+	return &Genome{Families: codonSchemas, Genes: genes}, nil
 }
 
-func loadFamilies(root string) (map[string]Family, error) {
-	families := map[string]Family{}
+func loadCodonSchemas(root string) (map[string]Family, error) {
+	codonSchemas := map[string]Family{}
 	// embedded defaults
-	if err := loadFamiliesFromFS(core_assets.Families, "codon_schemas", families); err != nil {
+	if err := loadCodonSchemasFromFS(core_assets.CodonSchemas, "codon_schemas", codonSchemas); err != nil {
 		return nil, err
 	}
 	// disk overrides/extensions
@@ -62,14 +62,14 @@ func loadFamilies(root string) (map[string]Family, error) {
 		if err != nil {
 			continue
 		}
-		if err := parseFamilyDoc(data, f, families); err != nil {
+		if err := parseFamilyDoc(data, f, codonSchemas); err != nil {
 			return nil, err
 		}
 	}
-	return families, nil
+	return codonSchemas, nil
 }
 
-func loadFamiliesFromFS(fsys fs.FS, dir string, dest map[string]Family) error {
+func loadCodonSchemasFromFS(fsys fs.FS, dir string, dest map[string]Family) error {
 	entries, err := fs.ReadDir(fsys, dir)
 	if err != nil {
 		// if directory missing in embedded fs, treat as empty
@@ -92,17 +92,17 @@ func loadFamiliesFromFS(fsys fs.FS, dir string, dest map[string]Family) error {
 
 func parseFamilyDoc(data []byte, filename string, dest map[string]Family) error {
 	var doc struct {
-		Families map[string]struct {
+		Codons map[string]struct {
 			Version     string `yaml:"version"`
 			Description string `yaml:"description"`
 			Schema      string `yaml:"schema"`
 			TypeLegacy  string `yaml:"type"`
-		} `yaml:"families"`
+		} `yaml:"codons"`
 	}
 	if err := goyaml.Unmarshal(data, &doc); err != nil {
 		return fmt.Errorf("parse family %s: %w", filename, err)
 	}
-	for name, cf := range doc.Families {
+	for name, cf := range doc.Codons {
 		src := cf.Schema
 		if strings.TrimSpace(src) == "" {
 			src = cf.TypeLegacy // backward compat

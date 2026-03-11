@@ -1,7 +1,7 @@
-# Core codon families expressed with typed definitions.
+# Core codon schemas expressed with typed definitions.
 # Built-ins: primitives, objects, fields, and exported nucleotides are auto-imported.
 
-families:
+codons:
   entities:
     version: 1.0.0
     description: persistent domain models owned by a gene
