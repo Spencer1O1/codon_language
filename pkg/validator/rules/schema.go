@@ -17,12 +17,12 @@ func init() {
 func schemaRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 	for _, gene := range g.Genes {
 		for codonName, val := range gene.Codons {
-			fam, ok := g.Families[codonName]
+			schema, ok := g.Schemas[codonName]
 			if !ok {
-				// basicShape already reports missing families
+				// basicShape already reports missing schemas
 				continue
 			}
-			if err := validateValueAgainstType(val, fam.TypeAST); err != nil {
+			if err := validateValueAgainstType(val, schema.TypeAST); err != nil {
 				res.Add(core.Issue{Severity: core.SeverityError, Code: "schema_mismatch", Message: fmt.Sprintf("%v", err), Gene: gene.Name, Codon: codonName})
 			}
 		}

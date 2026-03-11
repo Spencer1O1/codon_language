@@ -46,7 +46,7 @@ func runLoad(root string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("families: %d, genes: %d\n", len(g.Families), len(g.Genes))
+	fmt.Printf("codon schemas: %d, genes: %d\n", len(g.Schemas), len(g.Genes))
 	return nil
 }
 

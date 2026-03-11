@@ -12,16 +12,16 @@ func init() {
 	core.Register(basicShape)
 }
 
-// basicShape checks that each codon has a family and matches top-level shape.
+// basicShape checks that each codon has a codon schema and matches top-level shape.
 func basicShape(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 	for _, gene := range g.Genes {
 		for bucket, val := range gene.Codons {
-			fam, ok := g.Families[bucket]
+			schema, ok := g.Schemas[bucket]
 			if !ok {
-				res.Add(core.Issue{Severity: core.SeverityError, Code: "family_missing", Message: fmt.Sprintf("codon %s has no family definition", bucket), Gene: gene.Name, Codon: bucket})
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "schema_missing", Message: fmt.Sprintf("codon %s has no codon schema definition", bucket), Gene: gene.Name, Codon: bucket})
 				continue
 			}
-			switch ft := fam.TypeAST.(type) {
+			switch ft := schema.TypeAST.(type) {
 			case nt.ObjectType:
 				if _, ok := val.(map[string]any); !ok {
 					res.Add(core.Issue{Severity: core.SeverityError, Code: "shape_mismatch", Message: "expected object", Gene: gene.Name, Codon: bucket})

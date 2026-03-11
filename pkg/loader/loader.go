@@ -15,13 +15,13 @@ import (
 
 // Genome is a minimal composed genome for loader.
 type Genome struct {
-	Families map[string]Family
+	Schemas  map[string]CodonSchema
 	Genes    []Gene
 	Manifest map[string]any
 	Root     string
 }
 
-type Family struct {
+type CodonSchema struct {
 	Version     string
 	Description string
 	TypeExpr    string
@@ -49,11 +49,11 @@ func LoadGenome(root string) (*Genome, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Genome{Families: codonSchemas, Genes: genes, Manifest: manifest, Root: root}, nil
+	return &Genome{Schemas: codonSchemas, Genes: genes, Manifest: manifest, Root: root}, nil
 }
 
-func loadCodonSchemas(root string) (map[string]Family, error) {
-	codonSchemas := map[string]Family{}
+func loadCodonSchemas(root string) (map[string]CodonSchema, error) {
+	codonSchemas := map[string]CodonSchema{}
 	// embedded defaults
 	if err := loadCodonSchemasFromFS(core_assets.CodonSchemas, "codon_schemas", codonSchemas); err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func loadCodonSchemas(root string) (map[string]Family, error) {
 		if err != nil {
 			continue
 		}
-		if err := parseFamilyDoc(data, f, codonSchemas); err != nil {
+		if err := parseSchemaDoc(data, f, codonSchemas); err != nil {
 			return nil, err
 		}
 	}
@@ -89,7 +89,7 @@ func loadManifest(root string) (map[string]any, error) {
 	return manifest, nil
 }
 
-func loadCodonSchemasFromFS(fsys fs.FS, dir string, dest map[string]Family) error {
+func loadCodonSchemasFromFS(fsys fs.FS, dir string, dest map[string]CodonSchema) error {
 	entries, err := fs.ReadDir(fsys, dir)
 	if err != nil {
 		// if directory missing in embedded fs, treat as empty
@@ -103,14 +103,14 @@ func loadCodonSchemasFromFS(fsys fs.FS, dir string, dest map[string]Family) erro
 		if err != nil {
 			return err
 		}
-		if err := parseFamilyDoc(data, e.Name(), dest); err != nil {
+		if err := parseSchemaDoc(data, e.Name(), dest); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func parseFamilyDoc(data []byte, filename string, dest map[string]Family) error {
+func parseSchemaDoc(data []byte, filename string, dest map[string]CodonSchema) error {
 	var doc struct {
 		Codons map[string]struct {
 			Version     string `yaml:"version"`
@@ -120,7 +120,7 @@ func parseFamilyDoc(data []byte, filename string, dest map[string]Family) error 
 		} `yaml:"codons"`
 	}
 	if err := goyaml.Unmarshal(data, &doc); err != nil {
-		return fmt.Errorf("parse family %s: %w", filename, err)
+		return fmt.Errorf("parse codon schema file %s: %w", filename, err)
 	}
 	for name, cf := range doc.Codons {
 		src := cf.Schema
@@ -132,9 +132,9 @@ func parseFamilyDoc(data []byte, filename string, dest map[string]Family) error 
 		}
 		ast, err := tp.Parse(src)
 		if err != nil {
-			return fmt.Errorf("parse family %s type %s: %w", filename, name, err)
+			return fmt.Errorf("parse codon schema %s type %s: %w", filename, name, err)
 		}
-		dest[name] = Family{Version: cf.Version, Description: cf.Description, TypeExpr: src, TypeAST: ast}
+		dest[name] = CodonSchema{Version: cf.Version, Description: cf.Description, TypeExpr: src, TypeAST: ast}
 	}
 	return nil
 }
