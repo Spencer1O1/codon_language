@@ -1,0 +1,28 @@
+gene: assets
+description: Physical sites and assets under maintenance
+codons:
+  entities:
+    site:
+      id: uuid
+      organization_id: uuid   # identity.user.organization_id
+      name: string
+      geofence: string
+    asset:
+      id: uuid
+      site_id: uuid           # assets.site
+      name: string
+      category: string
+  relations:
+    organization_sites:
+      from: identity.identity.organization
+      to: site
+      type: one-to-many
+      ownership: from
+      cascade: restrict
+    site_assets:
+      from: site
+      to: asset
+      type: one-to-many
+      ownership: from
+      cascade: restrict
+  traits: []

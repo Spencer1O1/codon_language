@@ -3,4 +3,4 @@ project:
   name: breakfix
   type: full_stack
 traits:
-  platform: authentication
+  identity: authentication

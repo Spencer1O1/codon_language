@@ -1,0 +1,23 @@
+gene: mobile_api
+description: Mobile app endpoints for capture & status
+codons:
+  capabilities:
+    mobile_submit_report:
+      description: Public mobile flow to submit report with photo.
+      effects: ["create_ticket"]
+      inputs:
+        asset_id: { type: uuid }
+        reporter_id: { type: uuid }
+        photo_url: { type: string }
+        location: { type: string }
+      outputs:
+        ticket_id: { type: uuid }
+    mobile_ticket_status:
+      description: View status of a ticket from mobile.
+      effects: ["read_ticket"]
+      inputs:
+        ticket_id: { type: uuid }
+      outputs:
+        status: { type: string }
+        severity: { type: string }
+  traits: []

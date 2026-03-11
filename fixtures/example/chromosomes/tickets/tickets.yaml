@@ -1,18 +1,17 @@
-gene: ticketing
+gene: tickets
 description: Ticket lifecycle, photos, and routing
 codons:
   entities:
     ticket:
       id: uuid
-      asset_id: uuid
-      reporter_id: uuid
-      assignee_id: uuid
+      asset_id: uuid           # assets.asset
+      reporter_id: uuid        # identity.user
+      assignee_id: uuid        # identity.user
       status: Union<"open","assigned","in_progress","closed">
       severity: Union<"low","medium","high">
     photo:
       id: uuid
-      ticket_id:
-        ref: ticket
+      ticket_id: uuid          # tickets.ticket
       url: string
       captured_at: datetime
   capabilities:
@@ -38,20 +37,13 @@ codons:
       description: Maintenance worker updates status.
       effects: ["update_ticket"]
       inputs:
-        ticket_id: { type: ref }
+        ticket_id: { type: uuid }
         status: { type: string }
       outputs:
         ticket_id: { type: uuid }
-    view_dashboard:
-      description: Org/admin dashboard to monitor tickets and assets.
-      effects: ["read_dashboard"]
-      inputs:
-        organization_id: { type: uuid }
-      outputs:
-        summary_json: { type: json }
   relations:
     asset_tickets:
-      from: domain.domain_entities.asset
+      from: assets.assets.asset
       to: ticket
       type: one-to-many
       ownership: from

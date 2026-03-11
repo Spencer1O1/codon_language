@@ -1,0 +1,20 @@
+gene: web_api
+description: Admin/maintainer web dashboard endpoints
+codons:
+  capabilities:
+    view_dashboard:
+      description: Org/admin dashboard to monitor tickets and assets.
+      effects: ["read_dashboard"]
+      inputs:
+        organization_id: { type: uuid }
+      outputs:
+        summary_json: { type: json }
+    assign_ticket:
+      description: Assign a ticket to a maintainer.
+      effects: ["assign_ticket"]
+      inputs:
+        ticket_id: { type: uuid }
+        assignee_id: { type: uuid }
+      outputs:
+        ticket_id: { type: uuid }
+  traits: []

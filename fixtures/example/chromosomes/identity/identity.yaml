@@ -1,0 +1,13 @@
+gene: identity
+description: Users and organizations (auth applies here)
+codons:
+  entities:
+    organization:
+      id: uuid
+      name: string
+    user:
+      id: uuid
+      email: string
+      role: Union<"admin","maintainer","requester">
+      organization_id: uuid
+  traits: []

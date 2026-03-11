@@ -1,10 +1,10 @@
-gene: classification
+gene: classifier
 description: AI classification of damage photos
 codons:
   entities:
     classification:
       id: uuid
-      photo_id: uuid
+      photo_id: uuid          # tickets.photo
       label: string
       confidence: number
   capabilities:
@@ -17,7 +17,7 @@ codons:
         classification_id: { type: uuid }
   relations:
     photo_classifications:
-      from: ticketing.ticketing.photo
+      from: tickets.tickets.photo
       to: classification
       type: one-to-many
       ownership: from
