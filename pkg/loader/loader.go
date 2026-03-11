@@ -16,6 +16,7 @@ import (
 // Genome is a minimal composed genome for loader.
 type Genome struct {
 	Schemas  map[string]CodonSchema
+	TypeEnv  map[string]tp.TypeNode
 	Genes    []Gene
 	Manifest map[string]any
 	Root     string
@@ -35,7 +36,7 @@ type Gene struct {
 	Path       string
 }
 
-// LoadGenome loads families and genes from a loader root.
+// LoadGenome loads codon schemas and genes from a loader root.
 func LoadGenome(root string) (*Genome, error) {
 	codonSchemas, err := loadCodonSchemas(root)
 	if err != nil {
@@ -49,7 +50,11 @@ func LoadGenome(root string) (*Genome, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Genome{Schemas: codonSchemas, Genes: genes, Manifest: manifest, Root: root}, nil
+	typeEnv, err := BuildTypeEnv(root)
+	if err != nil {
+		return nil, err
+	}
+	return &Genome{Schemas: codonSchemas, Genes: genes, Manifest: manifest, Root: root, TypeEnv: typeEnv}, nil
 }
 
 func loadCodonSchemas(root string) (map[string]CodonSchema, error) {
@@ -137,6 +142,11 @@ func parseSchemaDoc(data []byte, filename string, dest map[string]CodonSchema) e
 		dest[name] = CodonSchema{Version: cf.Version, Description: cf.Description, TypeExpr: src, TypeAST: ast}
 	}
 	return nil
+}
+
+// ParseSchemaDocInto parses schemas into an existing map (used for trait-local schemas).
+func ParseSchemaDocInto(data []byte, filename string, dest map[string]CodonSchema) error {
+	return parseSchemaDoc(data, filename, dest)
 }
 
 func loadGenes(root string) ([]Gene, error) {
@@ -239,4 +249,9 @@ func parseTypesDoc(src string, filename string, env map[string]tp.TypeNode) erro
 		env[d.Name] = ast
 	}
 	return nil
+}
+
+// ParseTypesDoc exported for reuse (e.g., trait-local nucleotypes).
+func ParseTypesDoc(src string, filename string, env map[string]tp.TypeNode) error {
+	return parseTypesDoc(src, filename, env)
 }

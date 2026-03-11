@@ -3,4 +3,6 @@ project:
   name: breakfix
   type: full_stack
 traits:
+  {}
+chromosome_traits:
   identity: authentication

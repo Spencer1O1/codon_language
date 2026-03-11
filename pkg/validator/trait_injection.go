@@ -6,8 +6,10 @@ import (
 	path "path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 
 	"github.com/Spencer1O1/codon-language/pkg/loader"
+	tp "github.com/Spencer1O1/codon-language/pkg/nucleotype"
 	"github.com/Spencer1O1/codon-language/pkg/validator/core"
 	goyaml "gopkg.in/yaml.v3"
 )
@@ -15,6 +17,7 @@ import (
 // applyTraitInjection mutates the genome by injecting genome and gene traits per spec.
 func applyTraitInjection(g *loader.Genome, res *core.Result) {
 	applyGenomeTraits(g, res)
+	applyChromosomeTraits(g, res)
 	applyGeneTraits(g, res)
 }
 
@@ -41,16 +44,62 @@ func applyGenomeTraits(g *loader.Genome, res *core.Result) {
 		if !ok {
 			continue
 		}
-		tf, err := loadGenomeTraitFile(path.Join(g.Root, "traits", "genome", name+".yaml"))
-		if err != nil {
-			res.Add(core.Issue{Severity: core.SeverityError, Code: "genome_trait_file_exists", Message: err.Error()})
-			continue
+		name = strings.TrimSuffix(path.Base(name), ".yaml")
+			tf, schemas, err := loadTraitFile(path.Join(g.Root, "traits", "genome", name))
+			if err != nil {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "genome_trait_file_exists", Message: err.Error()})
+				continue
+			}
+			if err := mergeNucleotypesWithEnv(g, path.Join(g.Root, "traits", "genome", name), res); err != nil {
+				// issues recorded; continue
+			}
+		if err := mergeSchemas(g, schemas, res); err != nil {
+			// mergeSchemas reports issues; continue to attempt codon injection
 		}
 		injectedSeen := map[string]map[string]any{}
 		for geneName, codons := range tf.Genes {
 			genePtr := findGenePtr(g.Genes, chrom, geneName)
 			if genePtr == nil {
-				// create new gene
+				g.Genes = append(g.Genes, loader.Gene{Chromosome: chrom, Name: geneName, Codons: deepCopyMap(codons)})
+				genePtr = &g.Genes[len(g.Genes)-1]
+			} else {
+				mergeCodons(genePtr, codons, injectedSeen, res)
+			}
+		}
+	}
+}
+
+// applyChromosomeTraits applies traits scoped to a chromosome (manifest: chromosome_traits map).
+func applyChromosomeTraits(g *loader.Genome, res *core.Result) {
+	traitsRaw, ok := g.Manifest["chromosome_traits"]
+	if !ok {
+		return
+	}
+	traits, ok := traitsRaw.(map[string]any)
+	if !ok {
+		return
+	}
+	for chrom, val := range traits {
+		name, ok := val.(string)
+		if !ok {
+			continue
+		}
+		name = strings.TrimSuffix(path.Base(name), ".yaml")
+		tp, schemas, err := loadTraitFile(path.Join(g.Root, "traits", "chromosome", name))
+		if err != nil {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "chromosome_trait_file_exists", Message: err.Error()})
+			continue
+		}
+		if err := mergeNucleotypesWithEnv(g, path.Join(g.Root, "traits", "chromosome", name), res); err != nil {
+			// continue
+		}
+		if err := mergeSchemas(g, schemas, res); err != nil {
+			// continue
+		}
+		injectedSeen := map[string]map[string]any{}
+		for geneName, codons := range tp.Genes {
+			genePtr := findGenePtr(g.Genes, chrom, geneName)
+			if genePtr == nil {
 				g.Genes = append(g.Genes, loader.Gene{Chromosome: chrom, Name: geneName, Codons: deepCopyMap(codons)})
 				genePtr = &g.Genes[len(g.Genes)-1]
 			} else {
@@ -77,12 +126,23 @@ func applyGeneTraits(g *loader.Genome, res *core.Result) {
 			if !ok {
 				continue
 			}
-			tf, err := loadGeneTraitFile(path.Join(g.Root, "traits", "gene", name+".yaml"))
+			name = strings.TrimSuffix(path.Base(name), ".yaml")
+			tf, schemas, err := loadTraitFile(path.Join(g.Root, "traits", "gene", name))
 			if err != nil {
 				res.Add(core.Issue{Severity: core.SeverityError, Code: "gene_trait_file_exists", Message: err.Error(), Gene: gene.Name, Codon: "traits"})
 				continue
 			}
-			mergeCodons(gene, tf.Codons, injectedSeen, res)
+				if err := mergeNucleotypesWithEnv(g, path.Join(g.Root, "traits", "gene", name), res); err != nil {
+					// issues recorded; continue
+				}
+			if err := mergeSchemas(g, schemas, res); err != nil {
+				// issues recorded; continue
+			}
+			codons := tf.Genes[gene.Name]
+			if codons == nil {
+				codons = tf.Genes[""]
+			}
+			mergeCodons(gene, codons, injectedSeen, res)
 		}
 	}
 }
@@ -203,41 +263,124 @@ func deepCopySlice(in []any) []any {
 	return out
 }
 
-func loadGenomeTraitFile(path string) (*genomeTraitFile, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	var tf genomeTraitFile
-	if err := goyaml.Unmarshal(data, &tf); err != nil {
-		return nil, err
-	}
-	return &tf, nil
-}
-
-func loadGeneTraitFile(path string) (*geneTraitFile, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	var tf geneTraitFile
-	if err := goyaml.Unmarshal(data, &tf); err != nil {
-		return nil, err
-	}
-	// if no codons key, treat whole doc as codons map
-	if len(tf.Codons) == 0 {
-		var anyMap map[string]any
-		if err := goyaml.Unmarshal(data, &anyMap); err == nil {
-			tf.Codons = anyMap
-		}
-	}
-	return &tf, nil
-}
-
 func findGenePtr(genes []loader.Gene, chrom, name string) *loader.Gene {
 	for i := range genes {
 		if genes[i].Chromosome == chrom && genes[i].Name == name {
 			return &genes[i]
+		}
+	}
+	return nil
+}
+
+// loadTraitFile loads a genome or gene trait and any co-located custom schemas.
+// traitPath may be a directory (containing <name>.yaml and optional custom_schemas.yaml)
+// or a legacy flat file path stem.
+func loadTraitFile(traitPath string) (*genomeTraitFile, map[string]loader.CodonSchema, error) {
+	traitPath = strings.TrimSuffix(traitPath, ".yaml")
+	// if traitPath is a directory, expect trait.yaml inside
+	if info, err := os.Stat(traitPath); err == nil && info.IsDir() {
+		file := path.Join(traitPath, "trait.yaml")
+		if info2, err2 := os.Stat(file); err2 == nil && !info2.IsDir() {
+			return loadTraitFileFrom(file, traitPath)
+		}
+		return nil, nil, fmt.Errorf("trait file not found: %s", file)
+	}
+	return nil, nil, fmt.Errorf("trait file not found: %s", traitPath)
+}
+
+func loadTraitFileFrom(file, dir string) (*genomeTraitFile, map[string]loader.CodonSchema, error) {
+	data, err := os.ReadFile(file)
+	if err != nil {
+		return nil, nil, err
+	}
+	var tf genomeTraitFile
+	if err := goyaml.Unmarshal(data, &tf); err != nil {
+		return nil, nil, err
+	}
+	if len(tf.Genes) == 0 {
+		// maybe it's a gene trait (flat codons)
+		var gt geneTraitFile
+		if err := goyaml.Unmarshal(data, &gt); err == nil && len(gt.Codons) > 0 {
+			tf = genomeTraitFile{Genes: map[string]map[string]any{
+				"": gt.Codons,
+			}}
+		}
+	}
+	schemas := map[string]loader.CodonSchema{}
+	// load optional custom schemas
+	customPath := path.Join(dir, "custom_schemas.yaml")
+	if b, err := os.ReadFile(customPath); err == nil {
+		if err := loader.ParseSchemaDocInto(b, customPath, schemas); err != nil {
+			return &tf, schemas, err
+		}
+	}
+	// also support codon_schemas/*.yaml inside trait dir
+	if entries, err := os.ReadDir(path.Join(dir, "codon_schemas")); err == nil {
+		for _, e := range entries {
+			if e.IsDir() {
+				continue
+			}
+			b, err := os.ReadFile(path.Join(dir, "codon_schemas", e.Name()))
+			if err != nil {
+				return &tf, schemas, err
+			}
+			if err := loader.ParseSchemaDocInto(b, e.Name(), schemas); err != nil {
+				return &tf, schemas, err
+			}
+		}
+	}
+	return &tf, schemas, nil
+}
+
+// mergeSchemas adds new schemas to the genome, detecting conflicts.
+func mergeSchemas(g *loader.Genome, add map[string]loader.CodonSchema, res *core.Result) error {
+	for name, sc := range add {
+		if existing, ok := g.Schemas[name]; ok {
+			if existing.TypeExpr != sc.TypeExpr || existing.Version != sc.Version {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "schema_conflict", Message: fmt.Sprintf("schema %s conflicts with existing definition", name)})
+				continue
+			}
+			continue // identical is fine
+		}
+		g.Schemas[name] = sc
+	}
+	return nil
+}
+
+// mergeNucleotypes loads trait-local nucleotypes into the type env with conflict checks.
+func mergeNucleotypesWithEnv(g *loader.Genome, traitDir string, res *core.Result) error {
+	dir := traitDir
+	if info, err := os.Stat(traitDir); err == nil && info.IsDir() {
+		dir = traitDir
+	} else {
+		dir = path.Dir(traitDir)
+	}
+	ntDir := path.Join(dir, "nucleotides", "types")
+	entries, err := os.ReadDir(ntDir)
+	if err != nil {
+		return nil // no local nucleotypes; ok
+	}
+	for _, e := range entries {
+		if e.IsDir() {
+			continue
+		}
+		data, err := os.ReadFile(path.Join(ntDir, e.Name()))
+		if err != nil {
+			return err
+		}
+		localEnv := map[string]tp.TypeNode{}
+		if err := loader.ParseTypesDoc(string(data), e.Name(), localEnv); err != nil {
+			return err
+		}
+		for name, t := range localEnv {
+			if existing, ok := g.TypeEnv[name]; ok {
+				if !tp.Equal(existing, t) {
+					res.Add(core.Issue{Severity: core.SeverityError, Code: "nucleotype_conflict", Message: fmt.Sprintf("nucleotype %s conflicts with existing definition", name)})
+					continue
+				}
+			} else {
+				g.TypeEnv[name] = t
+			}
 		}
 	}
 	return nil

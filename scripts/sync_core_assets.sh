@@ -20,5 +20,5 @@ if compgen -G "$SRC_TYPES"/*.nucleotype > /dev/null; then
   cp "$SRC_TYPES"/*.nucleotype "$DEST_TYPES"/
 fi
 
-echo "Synced families -> $DEST_FAM"
-echo "Synced nucleotypes -> $DEST_TYPES"
+echo "Synced codon schemas -> $DEST_FAM"
+echo "Synced nucleotypes   -> $DEST_TYPES"
