@@ -32,6 +32,7 @@ type Gene struct {
 	Name       string
 	Chromosome string
 	Codons     map[string]any
+	Path       string
 }
 
 // LoadGenome loads families and genes from a loader root.
@@ -163,7 +164,7 @@ func loadGenes(root string) ([]Gene, error) {
 			codons = c
 		}
 		chrom := chromosomeFromPath(root, p)
-		genes = append(genes, Gene{Name: name, Chromosome: chrom, Codons: codons})
+		genes = append(genes, Gene{Name: name, Chromosome: chrom, Codons: codons, Path: p})
 	}
 	return genes, nil
 }

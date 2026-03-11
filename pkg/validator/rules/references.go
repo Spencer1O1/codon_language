@@ -17,6 +17,9 @@ func init() {
 
 func referenceRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 	for _, gene := range g.Genes {
+		if gene.Chromosome == "language" {
+			continue // skip doc/examples genes
+		}
 		for codonName, val := range gene.Codons {
 			walkRefs(val, g, gene, codonName, res)
 		}
@@ -57,33 +60,44 @@ func checkRef(ref string, genome *loader.Genome, gene loader.Gene, codon string,
 	}
 
 	// attempt resolution when fully qualified
-	if len(parts) == 4 {
-		chrom, geneName, codonName, entry := parts[0], parts[1], parts[2], parts[3]
-		foundGene := false
-		foundCodon := false
-		foundEntry := false
-		for _, g := range genome.Genes {
-			if g.Chromosome == chrom && g.Name == geneName {
-				foundGene = true
-				if c, ok := g.Codons[codonName].(map[string]any); ok {
-					foundCodon = true
-					if _, ok := c[entry]; ok {
-						foundEntry = true
-					}
-				}
-			}
-		}
-		if !foundGene {
-			res.Add(core.Issue{Severity: core.SeverityError, Code: "ref_target_must_exist", Message: "ref gene not found: " + ref, Gene: gene.Name, Codon: codon})
-			return
-		}
-		if !foundCodon {
-			res.Add(core.Issue{Severity: core.SeverityError, Code: "ref_target_must_exist", Message: "ref codon not found: " + ref, Gene: gene.Name, Codon: codon})
-			return
-		}
-		if !foundEntry {
+	switch len(parts) {
+	case 1:
+		if !hasEntry(&gene, codon, parts[0]) {
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "ref_target_must_exist", Message: "ref entry not found: " + ref, Gene: gene.Name, Codon: codon})
-			return
+		}
+	case 2:
+		if !hasEntry(&gene, parts[0], parts[1]) {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "ref_target_must_exist", Message: "ref entry not found: " + ref, Gene: gene.Name, Codon: codon})
+		}
+	case 3:
+		if !hasEntry(findGene(genome, gene.Chromosome, parts[0]), parts[1], parts[2]) {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "ref_target_must_exist", Message: "ref entry not found: " + ref, Gene: gene.Name, Codon: codon})
+		}
+	case 4:
+		target := findGene(genome, parts[0], parts[1])
+		if !hasEntry(target, parts[2], parts[3]) {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "ref_target_must_exist", Message: "ref entry not found: " + ref, Gene: gene.Name, Codon: codon})
 		}
 	}
+}
+
+func findGene(genome *loader.Genome, chrom, geneName string) *loader.Gene {
+	for i, g := range genome.Genes {
+		if g.Chromosome == chrom && g.Name == geneName {
+			return &genome.Genes[i]
+		}
+	}
+	return nil
+}
+
+func hasEntry(g *loader.Gene, codonName, entry string) bool {
+	if g == nil {
+		return false
+	}
+	c, ok := g.Codons[codonName].(map[string]any)
+	if !ok {
+		return false
+	}
+	_, ok = c[entry]
+	return ok
 }
