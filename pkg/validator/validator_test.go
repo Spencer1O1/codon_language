@@ -48,6 +48,39 @@ func TestValidate_IdentifierBad(t *testing.T) {
 	assertErrors(t, root, "identifier_invalid")
 }
 
+func TestValidate_OverqualifiedWarn(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "overqualified", ".codon")
+	g, err := loader.LoadGenome(root)
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	env, err := loader.BuildTypeEnv(root)
+	if err != nil {
+		t.Fatalf("env: %v", err)
+	}
+	res := Validate(g, env)
+	if res.HasErrors() {
+		t.Fatalf("expected no errors, got %+v", res.Issues)
+	}
+	_, warns, _ := res.Summary()
+	if warns == 0 {
+		t.Fatalf("expected warnings for overqualified refs/relations, got none")
+	}
+	foundRef := false
+	foundRel := false
+	for _, is := range res.Issues {
+		if is.Code == "ref_overqualified" {
+			foundRef = true
+		}
+		if is.Code == "relation_overqualified" {
+			foundRel = true
+		}
+	}
+	if !foundRef || !foundRel {
+		t.Fatalf("expected both ref_overqualified and relation_overqualified warnings, got %+v", res.Issues)
+	}
+}
+
 // helper
 func assertErrors(t *testing.T, root string, substr string) {
 	t.Helper()

@@ -48,11 +48,13 @@ func relationsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result
 				if err := validateEntityRef(from, g, gene, res); err != nil {
 					res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_target_must_exist", Message: fmt.Sprintf("relation %s from: %v", name, err), Gene: gene.Name, Codon: "relations"})
 				}
+				warnRelationOverqual(from, g, gene, res, name)
 			}
 			if tok {
 				if err := validateEntityRef(to, g, gene, res); err != nil {
 					res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_target_must_exist", Message: fmt.Sprintf("relation %s to: %v", name, err), Gene: gene.Name, Codon: "relations"})
 				}
+				warnRelationOverqual(to, g, gene, res, name)
 			}
 		}
 	}
@@ -94,4 +96,25 @@ func validateEntityRef(ref string, genome *loader.Genome, gene loader.Gene, res 
 		return fmt.Errorf("ref must be entry, gene.entry, or chrom.gene.entry: %s", ref)
 	}
 	return nil
+}
+
+// warnRelationOverqual emits a warning when a relation target is over-qualified.
+// Minimal forms:
+// - same gene: entry
+// - same chromosome, different gene: gene.entry
+// - cross chromosome: chrom.gene.entry
+func warnRelationOverqual(ref string, genome *loader.Genome, gene loader.Gene, res *core.Result, relName string) {
+	parts := strings.Split(ref, ".")
+	switch len(parts) {
+	case 2:
+		// gene.entry but same gene
+		if parts[0] == gene.Name {
+			res.Add(core.Issue{Severity: core.SeverityWarn, Code: "relation_overqualified", Message: fmt.Sprintf("relation %s target %s could be shortened to %s", relName, ref, parts[1]), Gene: gene.Name, Codon: "relations"})
+		}
+	case 3:
+		// chrom.gene.entry but same chromosome
+		if parts[0] == gene.Chromosome && parts[1] == gene.Name {
+			res.Add(core.Issue{Severity: core.SeverityWarn, Code: "relation_overqualified", Message: fmt.Sprintf("relation %s target %s could be shortened to %s", relName, ref, parts[2]), Gene: gene.Name, Codon: "relations"})
+		}
+	}
 }

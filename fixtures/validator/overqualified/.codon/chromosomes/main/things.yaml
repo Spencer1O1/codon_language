@@ -1,0 +1,16 @@
+gene: things
+description: overqualified refs and relations should warn
+codons:
+  entities:
+    foo:
+      id: uuid
+    bar:
+      target:
+        ref: things.entities.foo   # overqualified, should warn
+  relations:
+    foo_to_bar:
+      from: main.things.foo        # overqualified, should warn
+      to: bar
+      type: one-to-one
+      ownership: from
+      cascade: restrict

@@ -75,8 +75,12 @@ func checkRef(ref string, genome *loader.Genome, gene loader.Gene, codon string,
 		target := findGene(genome, gene.Chromosome, parts[0])
 		if !hasEntry(target, parts[1], parts[2]) {
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "ref_target_must_exist", Message: "ref entry not found: " + ref, Gene: gene.Name, Codon: codon})
-		} else if hasEntry(&gene, parts[1], parts[2]) {
-			res.Add(core.Issue{Severity: core.SeverityWarn, Code: "ref_overqualified", Message: "reference could be shortened to " + parts[1] + "." + parts[2], Gene: gene.Name, Codon: codon})
+		} else if gene.Name == parts[0] && hasEntry(&gene, parts[1], parts[2]) {
+			// same chromosome, same gene: gene.entry -> entry
+			res.Add(core.Issue{Severity: core.SeverityWarn, Code: "ref_overqualified", Message: "reference could be shortened to " + parts[2], Gene: gene.Name, Codon: codon})
+		} else if gene.Chromosome == parts[0] && hasEntry(&gene, parts[1], parts[2]) {
+			// same chromosome, different gene but overqualified with chromosome: chrom.gene.entry -> gene.entry
+			res.Add(core.Issue{Severity: core.SeverityWarn, Code: "ref_overqualified", Message: "reference could be shortened to " + parts[0] + "." + parts[2], Gene: gene.Name, Codon: codon})
 		}
 	case 4:
 		target := findGene(genome, parts[0], parts[1])
