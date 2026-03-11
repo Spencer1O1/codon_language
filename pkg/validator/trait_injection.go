@@ -5,6 +5,7 @@ import (
 	"os"
 	path "path/filepath"
 	"reflect"
+	"sort"
 
 	"github.com/Spencer1O1/codon-language/pkg/loader"
 	"github.com/Spencer1O1/codon-language/pkg/validator/core"
@@ -92,9 +93,12 @@ func mergeCodons(gene *loader.Gene, injected map[string]any, injectedSeen map[st
 	}
 	for codonName, val := range injected {
 		if authored, ok := gene.Codons[codonName]; ok {
-			if !reflect.DeepEqual(authored, val) {
-				res.Add(core.Issue{Severity: core.SeverityWarn, Code: "trait_conflict_authored_wins", Message: fmt.Sprintf("codon %s on gene %s overridden by authored value", codonName, gene.Name), Gene: gene.Name, Codon: codonName})
+			merged, issue := mergeValue(authored, val, gene.Name, codonName)
+			if issue != nil {
+				res.Add(*issue)
+				continue
 			}
+			gene.Codons[codonName] = merged
 			continue
 		}
 		if prev, ok := injectedSeen[codonName]; ok {
@@ -140,6 +144,63 @@ func asMapAny(v any) map[string]any {
 		return m
 	}
 	return nil
+}
+
+// mergeValue applies trait merge policy:
+// - maps: additive deep merge; conflicts on scalar-vs-map emit error and keep authored.
+// - lists: append injected elements; no de-dupe.
+// - scalars: authored wins; warn.
+func mergeValue(authored, injected any, geneName, codon string) (any, *core.Issue) {
+	switch a := authored.(type) {
+	case map[string]any:
+		b, ok := injected.(map[string]any)
+		if !ok {
+			return authored, &core.Issue{Severity: core.SeverityError, Code: "trait_shape_conflict", Message: fmt.Sprintf("codon %s on gene %s: authored map vs injected non-map", codon, geneName), Gene: geneName, Codon: codon}
+		}
+		return mergeMaps(a, b, geneName, codon)
+	case []any:
+		if b, ok := injected.([]any); ok {
+			// append; we could dedupe but keep simple
+			return append(deepCopySlice(a), deepCopySlice(b)...), nil
+		}
+		return authored, &core.Issue{Severity: core.SeverityError, Code: "trait_shape_conflict", Message: fmt.Sprintf("codon %s on gene %s: authored list vs injected non-list", codon, geneName), Gene: geneName, Codon: codon}
+	default:
+		// scalar authored wins
+		if reflect.DeepEqual(authored, injected) {
+			return authored, nil
+		}
+		return authored, &core.Issue{Severity: core.SeverityWarn, Code: "trait_conflict_authored_wins", Message: fmt.Sprintf("codon %s on gene %s: injected value ignored; authored wins", codon, geneName), Gene: geneName, Codon: codon}
+	}
+}
+
+func mergeMaps(a, b map[string]any, geneName, codon string) (map[string]any, *core.Issue) {
+	out := deepCopyMap(a)
+	// stable order for determinism in tests
+	keys := make([]string, 0, len(b))
+	for k := range b {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		if av, exists := out[k]; exists {
+			mv, issue := mergeValue(av, b[k], geneName, fmt.Sprintf("%s.%s", codon, k))
+			if issue != nil {
+				return out, issue
+			}
+			out[k] = mv
+		} else {
+			out[k] = deepCopyMapAny(b[k])
+		}
+	}
+	return out, nil
+}
+
+func deepCopySlice(in []any) []any {
+	out := make([]any, len(in))
+	for i, v := range in {
+		out[i] = deepCopyMapAny(v)
+	}
+	return out
 }
 
 func loadGenomeTraitFile(path string) (*genomeTraitFile, error) {
