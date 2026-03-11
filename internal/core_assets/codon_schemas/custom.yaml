@@ -2,7 +2,7 @@ families:
   gene_format:
     version: 1.0.0
     description: shape of a gene file
-    type: |
+    schema: |
       { 
         gene: TypeExpr, 
         description: TypeExpr, 
@@ -14,7 +14,7 @@ families:
   genome_manifest_format:
     version: 1.0.0
     description: shape of a genome (manifest) file
-    type: |
+    schema: |
       {
         schema_version: TypeExpr,
         project: TypeExpr,

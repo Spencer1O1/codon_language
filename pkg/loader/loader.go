@@ -48,11 +48,11 @@ func LoadGenome(root string) (*Genome, error) {
 func loadFamilies(root string) (map[string]Family, error) {
 	families := map[string]Family{}
 	// embedded defaults
-	if err := loadFamiliesFromFS(core_assets.Families, "codon_families", families); err != nil {
+	if err := loadFamiliesFromFS(core_assets.Families, "codon_schemas", families); err != nil {
 		return nil, err
 	}
 	// disk overrides/extensions
-	files, err := path.Glob(path.Join(root, "codon_families", "*.yaml"))
+	files, err := path.Glob(path.Join(root, "codon_schemas", "*.yaml"))
 	if err != nil {
 		return nil, err
 	}
@@ -95,21 +95,26 @@ func parseFamilyDoc(data []byte, filename string, dest map[string]Family) error 
 		Families map[string]struct {
 			Version     string `yaml:"version"`
 			Description string `yaml:"description"`
-			Type        string `yaml:"type"`
+			Schema      string `yaml:"schema"`
+			TypeLegacy  string `yaml:"type"`
 		} `yaml:"families"`
 	}
 	if err := goyaml.Unmarshal(data, &doc); err != nil {
 		return fmt.Errorf("parse family %s: %w", filename, err)
 	}
 	for name, cf := range doc.Families {
-		if strings.TrimSpace(cf.Type) == "" {
+		src := cf.Schema
+		if strings.TrimSpace(src) == "" {
+			src = cf.TypeLegacy // backward compat
+		}
+		if strings.TrimSpace(src) == "" {
 			continue
 		}
-		ast, err := tp.Parse(cf.Type)
+		ast, err := tp.Parse(src)
 		if err != nil {
 			return fmt.Errorf("parse family %s type %s: %w", filename, name, err)
 		}
-		dest[name] = Family{Version: cf.Version, Description: cf.Description, TypeExpr: cf.Type, TypeAST: ast}
+		dest[name] = Family{Version: cf.Version, Description: cf.Description, TypeExpr: src, TypeAST: ast}
 	}
 	return nil
 }

@@ -4,10 +4,10 @@ set -euo pipefail
 ROOT=${1:-.codon}
 ASSETS_DIR="internal/core_assets"
 
-SRC_FAM="$ROOT/codon_families"
+SRC_FAM="$ROOT/codon_schemas"
 SRC_TYPES="$ROOT/nucleotides/types"
 
-DEST_FAM="$ASSETS_DIR/codon_families"
+DEST_FAM="$ASSETS_DIR/codon_schemas"
 DEST_TYPES="$ASSETS_DIR/nucleotides/types"
 
 mkdir -p "$DEST_FAM" "$DEST_TYPES"
