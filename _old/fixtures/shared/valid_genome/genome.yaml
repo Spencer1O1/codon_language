@@ -1,9 +1,0 @@
-schema_version: 1.0.0
-project:
-  name: tasker_app
-  description: Full-stack task management genome
-traits:
-  - authentication
-  - auditing
-expression:
-  active_style: go-language-engine

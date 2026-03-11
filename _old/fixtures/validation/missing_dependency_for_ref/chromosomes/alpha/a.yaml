@@ -1,8 +1,0 @@
-gene:
-  name: a
-codons:
-  entities:
-    User:
-      fields:
-        id:
-          type: uuid

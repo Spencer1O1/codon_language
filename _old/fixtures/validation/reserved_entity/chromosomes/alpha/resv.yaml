@@ -1,8 +1,0 @@
-gene:
-  name: resv
-codons:
-  entities:
-    Project:
-      fields:
-        id:
-          type: uuid
