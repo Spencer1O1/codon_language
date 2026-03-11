@@ -1,0 +1,36 @@
+families:
+  gene_format:
+    version: 1.0.0
+    description: shape of a gene file
+    type: |
+      { 
+        gene: string, 
+        description: Optional<string>, 
+        imports: Optional<List<string>>, 
+        codons: Map<string, TypeExprOrValue>, 
+        traits: Optional<List<gene_trait_name>> 
+      }
+
+  genome_manifest_format:
+    version: 1.0.0
+    description: shape of a genome (manifest) file
+    type: |
+      {
+        schema_version: TypeExpr,
+        project: TypeExpr,
+        traits: TypeExpr
+      }
+
+  genome_manifest_doc:
+    version: 1.0.0
+    description: documentation and validation rules for root genome (manifest)
+    type: |
+      {
+        semantics: Optional<List<string>>,
+        validation_rules: List<{
+          code: string,
+          severity: Union<"error", "warn", "info">,
+          message: string,
+        }>,
+        examples: Optional<List<object>>,
+      }

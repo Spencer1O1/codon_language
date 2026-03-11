@@ -52,8 +52,7 @@ func loadFamilies(root string) (map[string]Family, error) {
 		return nil, err
 	}
 	// disk overrides/extensions
-	glob := path.Join(root, "codon_families", "*.codon")
-	files, err := path.Glob(glob)
+	files, err := path.Glob(path.Join(root, "codon_families", "*.yaml"))
 	if err != nil {
 		return nil, err
 	}

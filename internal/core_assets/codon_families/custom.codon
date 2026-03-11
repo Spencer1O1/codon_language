@@ -11,6 +11,20 @@ families:
         traits: Optional<List<gene_trait_name>> 
       }
 
+  gene_doc:
+    version: 1.0.0
+    description: documentation and validation rules for genes
+    type: |
+      {
+        semantics: Optional<List<string>>,
+        validation_rules: List<{
+          code: string,
+          severity: Union<"error", "warn", "info">,
+          message: string,
+        }>,
+        examples: Optional<List<object>>,
+      }
+
   language_doc:
     version: 1.0.0
     description: documentation and validation rules for core families
@@ -25,9 +39,9 @@ families:
         examples: Optional<List<object>>,
       }>
 
-  manifest_format:
+  genome_format:
     version: 1.0.0
-    description: shape of a manifest file
+    description: shape of a genome (manifest) file
     type: |
       {
         schema_version: TypeExpr,
@@ -35,9 +49,23 @@ families:
         traits: TypeExpr
       }
 
-  manifest:
+  genome_doc:
     version: 1.0.0
-    description: root genome manifest schema
+    description: documentation and validation rules for root genome (manifest)
+    type: |
+      {
+        semantics: Optional<List<string>>,
+        validation_rules: List<{
+          code: string,
+          severity: Union<"error", "warn", "info">,
+          message: string,
+        }>,
+        examples: Optional<List<object>>,
+      }
+
+  genome_layout:
+    version: 1.0.0
+    description: expected filesystem layout for a genome
     type: |
       {
         semantics: Optional<List<string>>,

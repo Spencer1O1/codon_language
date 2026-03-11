@@ -12,8 +12,8 @@ DEST_TYPES="$ASSETS_DIR/nucleotides/types"
 
 mkdir -p "$DEST_FAM" "$DEST_TYPES"
 
-if compgen -G "$SRC_FAM/*.codon" > /dev/null; then
-  cp "$SRC_FAM"/*.codon "$DEST_FAM"/
+if compgen -G "$SRC_FAM/*.yaml" > /dev/null; then
+  cp "$SRC_FAM"/*.yaml "$DEST_FAM"/
 fi
 
 if compgen -G "$SRC_TYPES"/*.nucleotype > /dev/null; then
