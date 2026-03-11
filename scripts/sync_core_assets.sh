@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT=${1:-.codon}
-ASSETS_DIR="internal/assets"
+ASSETS_DIR="internal/core_assets"
 
 SRC_FAM="$ROOT/codon_families"
 SRC_TYPES="$ROOT/nucleotides/types"

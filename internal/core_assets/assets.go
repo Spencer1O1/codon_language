@@ -1,4 +1,4 @@
-package assets
+package core_assets
 
 import "embed"
 

@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Spencer1O1/codon-language/internal/assets"
+	"github.com/Spencer1O1/codon-language/internal/core_assets"
 	tp "github.com/Spencer1O1/codon-language/pkg/nucleotype"
 	goyaml "gopkg.in/yaml.v3"
 )
@@ -48,7 +48,7 @@ func LoadGenome(root string) (*Genome, error) {
 func loadFamilies(root string) (map[string]Family, error) {
 	families := map[string]Family{}
 	// embedded defaults
-	if err := loadFamiliesFromFS(assets.Families, "codon_families", families); err != nil {
+	if err := loadFamiliesFromFS(core_assets.Families, "codon_families", families); err != nil {
 		return nil, err
 	}
 	// disk overrides/extensions
@@ -163,7 +163,7 @@ func toStringList(v any) []string {
 func BuildTypeEnv(root string) (map[string]tp.TypeNode, error) {
 	env := map[string]tp.TypeNode{}
 	// embedded defaults
-	if err := loadTypesFromFS(assets.Nucleotypes, "nucleotides/types", env); err != nil {
+	if err := loadTypesFromFS(core_assets.Nucleotypes, "nucleotides/types", env); err != nil {
 		return nil, err
 	}
 	// disk overrides/extensions

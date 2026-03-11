@@ -16,8 +16,8 @@ load:
 validate:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go run ./cmd/codon validate $(ROOT)
 
-sync-assets:
-	./scripts/sync_assets.sh $(ROOT)
+sync-core-assets:
+	./scripts/sync_core_assets.sh $(ROOT)
 
 lint:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) golangci-lint run ./...
