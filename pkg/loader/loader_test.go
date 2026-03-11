@@ -8,11 +8,12 @@ import (
 )
 
 func TestLoadAndValidate(t *testing.T) {
-	g, err := loader.LoadGenome("..")
+	root := "../../.codon"
+	g, err := loader.LoadGenome(root)
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	env, err := loader.BuildTypeEnv("..")
+	env, err := loader.BuildTypeEnv(root)
 	if err != nil {
 		t.Fatalf("type env: %v", err)
 	}

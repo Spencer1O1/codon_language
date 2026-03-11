@@ -17,6 +17,8 @@ import (
 type Genome struct {
 	Families map[string]Family
 	Genes    []Gene
+	Manifest map[string]any
+	Root     string
 }
 
 type Family struct {
@@ -37,11 +39,15 @@ func LoadGenome(root string) (*Genome, error) {
 	if err != nil {
 		return nil, err
 	}
+	manifest, err := loadManifest(root)
+	if err != nil {
+		return nil, err
+	}
 	genes, err := loadGenes(root)
 	if err != nil {
 		return nil, err
 	}
-	return &Genome{Families: codonSchemas, Genes: genes}, nil
+	return &Genome{Families: codonSchemas, Genes: genes, Manifest: manifest, Root: root}, nil
 }
 
 func loadCodonSchemas(root string) (map[string]Family, error) {
@@ -66,6 +72,19 @@ func loadCodonSchemas(root string) (map[string]Family, error) {
 		}
 	}
 	return codonSchemas, nil
+}
+
+func loadManifest(root string) (map[string]any, error) {
+	path := path.Join(root, "genome.yaml")
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, err
+	}
+	var manifest map[string]any
+	if err := goyaml.Unmarshal(data, &manifest); err != nil {
+		return nil, fmt.Errorf("parse manifest %s: %w", path, err)
+	}
+	return manifest, nil
 }
 
 func loadCodonSchemasFromFS(fsys fs.FS, dir string, dest map[string]Family) error {
