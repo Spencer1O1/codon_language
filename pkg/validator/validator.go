@@ -10,6 +10,7 @@ import (
 // Validate runs all registered rules against the loaded genome.
 func Validate(g *loader.Genome, env map[string]nt.TypeNode) core.Result {
 	res := core.Result{}
+	applyTraitInjection(g, &res)
 	for _, rule := range core.All() {
 		rule(g, env, &res)
 	}

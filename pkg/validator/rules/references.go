@@ -70,14 +70,17 @@ func checkRef(ref string, genome *loader.Genome, gene loader.Gene, codon string,
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "ref_target_must_exist", Message: "ref entry not found: " + ref, Gene: gene.Name, Codon: codon})
 		}
 	case 3:
-		if !hasEntry(findGene(genome, gene.Chromosome, parts[0]), parts[1], parts[2]) {
+		target := findGene(genome, gene.Chromosome, parts[0])
+		if !hasEntry(target, parts[1], parts[2]) {
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "ref_target_must_exist", Message: "ref entry not found: " + ref, Gene: gene.Name, Codon: codon})
 		}
+		checkDependency(genome, gene, target, res)
 	case 4:
 		target := findGene(genome, parts[0], parts[1])
 		if !hasEntry(target, parts[2], parts[3]) {
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "ref_target_must_exist", Message: "ref entry not found: " + ref, Gene: gene.Name, Codon: codon})
 		}
+		checkDependency(genome, gene, target, res)
 	}
 }
 
@@ -100,4 +103,14 @@ func hasEntry(g *loader.Gene, codonName, entry string) bool {
 	}
 	_, ok = c[entry]
 	return ok
+}
+
+// checkDependency placeholder: if target is in a different chromosome, emit info to declare dependency.
+func checkDependency(genome *loader.Genome, from loader.Gene, to *loader.Gene, res *core.Result) {
+	if to == nil {
+		return
+	}
+	if from.Chromosome != to.Chromosome {
+		res.Add(core.Issue{Severity: core.SeverityWarn, Code: "ref_cross_chromosome", Message: "cross-chromosome ref; ensure dependency is declared", Gene: from.Name, Codon: ""})
+	}
 }

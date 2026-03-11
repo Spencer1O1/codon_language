@@ -4,10 +4,10 @@ codons:
     description: shape of a gene file
     schema: |
       { 
-        gene: TypeExpr, 
-        description: TypeExpr, 
-        codons: TypeExpr, 
-        traits: TypeExpr 
+        gene: { type_expr: TypeExpr }, 
+        description: { type_expr: TypeExpr }, 
+        codons: { type_expr: TypeExpr }, 
+        traits: { type_expr: TypeExpr } 
       }
 
   genome_manifest_format:
@@ -15,7 +15,7 @@ codons:
     description: shape of a genome (manifest) file
     schema: |
       {
-        schema_version: TypeExpr,
-        project: TypeExpr,
-        traits: TypeExpr
+        schema_version: { type_expr: TypeExpr },
+        project: { type_expr: TypeExpr },
+        traits: { type_expr: TypeExpr }
       }
