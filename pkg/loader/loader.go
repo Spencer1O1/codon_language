@@ -29,8 +29,9 @@ type Family struct {
 }
 
 type Gene struct {
-	Name   string
-	Codons map[string]any
+	Name       string
+	Chromosome string
+	Codons     map[string]any
 }
 
 // LoadGenome loads families and genes from a loader root.
@@ -161,9 +162,22 @@ func loadGenes(root string) ([]Gene, error) {
 		if c, ok := raw["codons"].(map[string]any); ok {
 			codons = c
 		}
-		genes = append(genes, Gene{Name: name, Codons: codons})
+		chrom := chromosomeFromPath(root, p)
+		genes = append(genes, Gene{Name: name, Chromosome: chrom, Codons: codons})
 	}
 	return genes, nil
+}
+
+func chromosomeFromPath(root, full string) string {
+	rel, err := path.Rel(path.Join(root, "chromosomes"), full)
+	if err != nil {
+		return ""
+	}
+	parts := strings.Split(rel, string(os.PathSeparator))
+	if len(parts) > 0 {
+		return parts[0]
+	}
+	return ""
 }
 
 // BuildTypeEnv builds a symbol table from nucleotide declarations.
