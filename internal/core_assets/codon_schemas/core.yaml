@@ -29,7 +29,9 @@ codons:
           "one-to-many", 
           "many-to-one", 
           "many-to-many
-        "> 
+        ">,
+        ownership: Optional<Union<"from", "to">>,
+        cascade: Optional<Union<"cascade", "restrict", "nullify">>,
       }>
 
   traits:
