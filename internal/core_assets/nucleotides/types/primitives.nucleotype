@@ -6,3 +6,6 @@ export uuid = primitive
 export datetime = primitive
 export json = primitive
 export yaml = primitive
+
+# Type expression placeholder (string form of a type grammar)
+export TypeExpr = primitive
