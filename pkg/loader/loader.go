@@ -27,9 +27,8 @@ type Family struct {
 }
 
 type Gene struct {
-	Name    string
-	Codons  map[string]any
-	Imports []string
+	Name   string
+	Codons map[string]any
 }
 
 // LoadGenome loads families and genes from a loader root.
@@ -139,28 +138,13 @@ func loadGenes(root string) ([]Gene, error) {
 		if !ok || name == "" {
 			return nil, fmt.Errorf("gene file %s missing gene name", p)
 		}
-		imports := toStringList(raw["imports"])
 		codons := map[string]any{}
 		if c, ok := raw["codons"].(map[string]any); ok {
 			codons = c
 		}
-		genes = append(genes, Gene{Name: name, Codons: codons, Imports: imports})
+		genes = append(genes, Gene{Name: name, Codons: codons})
 	}
 	return genes, nil
-}
-
-func toStringList(v any) []string {
-	arr, ok := v.([]any)
-	if !ok {
-		return nil
-	}
-	out := make([]string, 0, len(arr))
-	for _, e := range arr {
-		if s, ok := e.(string); ok {
-			out = append(out, s)
-		}
-	}
-	return out
 }
 
 // BuildTypeEnv builds a symbol table from nucleotide declarations.

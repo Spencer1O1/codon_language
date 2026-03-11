@@ -6,7 +6,6 @@ codons:
       { 
         gene: TypeExpr, 
         description: TypeExpr, 
-        imports: TypeExpr, 
         codons: TypeExpr, 
         traits: TypeExpr 
       }
