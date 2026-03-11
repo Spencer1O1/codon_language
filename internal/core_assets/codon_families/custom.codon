@@ -8,5 +8,43 @@ families:
         description: Optional<string>, 
         imports: Optional<List<string>>, 
         codons: Map<string, TypeExprOrValue>, 
-        traits: Optional<List<string>> 
+        traits: Optional<List<gene_trait_name>> 
+      }
+
+  language_doc:
+    version: 1.0.0
+    description: documentation and validation rules for core families
+    type: |
+      Map<string, {
+        semantics: Optional<List<string>>,
+        validation_rules: List<{
+          code: string,
+          severity: Union<"error", "warn", "info">,
+          message: string,
+        }>,
+        examples: Optional<List<object>>,
+      }>
+
+  manifest_format:
+    version: 1.0.0
+    description: shape of a manifest file
+    type: |
+      {
+        schema_version: TypeExpr,
+        project: TypeExpr,
+        traits: TypeExpr
+      }
+
+  manifest:
+    version: 1.0.0
+    description: root genome manifest schema
+    type: |
+      {
+        semantics: Optional<List<string>>,
+        validation_rules: List<{
+          code: string,
+          severity: Union<"error", "warn", "info">,
+          message: string,
+        }>,
+        examples: Optional<List<object>>,
       }

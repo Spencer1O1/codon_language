@@ -2,7 +2,7 @@ GOCACHE ?= $(CURDIR)/.cache/go-build
 GOMODCACHE ?= $(CURDIR)/.cache/go-mod
 ROOT ?= .codon
 
-.PHONY: test build lint fmt vet clean tidy deps load validate sync-assets
+.PHONY: test build lint fmt vet clean tidy deps load validate sync-assets sync-core-assets
 
 test:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go test -count=1 ./...
@@ -18,6 +18,8 @@ validate:
 
 sync-core-assets:
 	./scripts/sync_core_assets.sh $(ROOT)
+
+sync-assets: sync-core-assets
 
 lint:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) golangci-lint run ./...

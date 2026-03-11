@@ -34,5 +34,5 @@ families:
 
   traits:
     version: 1.0.0
-    description: trait tags applied at genome/gene level
-    type: List<string>
+    description: list of trait names applied within a gene scope
+    type: List<gene_trait_name>

@@ -1,3 +1,8 @@
+export chromosome_name = string
+export gene_name = string
+export genome_trait_name = string
+export gene_trait_name = string
+
 export entity_name = string
 export capability_name = string
 export relation_name = string
