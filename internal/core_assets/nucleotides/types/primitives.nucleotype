@@ -12,3 +12,6 @@ export TypeExpr = primitive
 
 # Reference path (string path resolved per reference rules)
 export ref = primitive
+
+# Regex<T> treats T as a regex pattern literal
+export Regex<T> = primitive
