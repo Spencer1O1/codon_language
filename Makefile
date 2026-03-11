@@ -1,13 +1,20 @@
 GOCACHE ?= $(CURDIR)/.cache/go-build
 GOMODCACHE ?= $(CURDIR)/.cache/go-mod
+ROOT ?= .codon
 
-.PHONY: test build lint fmt vet clean tidy deps
+.PHONY: test build lint fmt vet clean tidy deps load validate
 
 test:
-	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go test ./...
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go test -count=1 ./...
 
 build:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go build ./cmd/...
+
+load:
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go run ./cmd/codon load $(ROOT)
+
+validate:
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go run ./cmd/codon validate $(ROOT)
 
 lint:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) golangci-lint run ./...
