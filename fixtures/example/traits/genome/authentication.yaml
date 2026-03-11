@@ -1,0 +1,15 @@
+genes:
+  capabilities:
+    auth_capability:
+      description: Issue and verify access tokens.
+      effects: ["issue_token"]
+      inputs:
+        user_id: { type: ref }
+      outputs:
+        token: { type: string }
+  entities:
+    entities:
+      auth_session:
+        id: uuid
+        user_id: ref
+        issued_at: datetime

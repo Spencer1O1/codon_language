@@ -162,6 +162,11 @@ func isScalar(v any) bool {
 func validateMapKey(key string, t nt.TypeNode, env map[string]nt.TypeNode) error {
 	switch kt := t.(type) {
 	case nt.NameType:
+		// primitives as map keys: accept string form
+		switch kt.Name {
+		case "string", "number", "boolean", "uuid", "datetime", "json", "yaml", "ref", "TypeExpr", "primitive", "any":
+			return nil
+		}
 		if resolved, ok := env[kt.Name]; ok {
 			return validateMapKey(key, resolved, env)
 		}
@@ -193,4 +198,4 @@ func extractRegexPattern(args []nt.TypeNode) string {
 	return ""
 }
 
-var refPattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]*(\\.[A-Za-z][A-Za-z0-9_]*){0,3}$`)
+var refPattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*){0,3}$`)

@@ -1,0 +1,26 @@
+gene: domain_entities
+description: Core domain entities for organizations, sites, assets, and users
+codons:
+  entities:
+    organization:
+      id: uuid
+      name: string
+    site:
+      id: uuid
+      organization_id:
+        ref: organization
+      name: string
+      geofence: string
+    asset:
+      id: uuid
+      site_id:
+        ref: site
+      name: string
+      category: string
+    user:
+      id: uuid
+      email: string
+      role: Union<"admin","maintainer","requester">
+      organization_id:
+        ref: organization
+  traits: []

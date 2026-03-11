@@ -1,0 +1,17 @@
+codons:
+  capabilities:
+    audit_log:
+      description: Record an audit trail event.
+      effects: ["audit"]
+      inputs:
+        actor_id: { type: ref }
+        action: { type: string }
+        resource: { type: string }
+      outputs: {}
+  entities:
+    audit_record:
+      id: uuid
+      actor_id: ref
+      action: string
+      resource: string
+      created_at: datetime

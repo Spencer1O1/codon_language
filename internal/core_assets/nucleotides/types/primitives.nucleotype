@@ -15,3 +15,6 @@ export ref = primitive
 
 # Regex<T> treats T as a regex pattern literal
 export Regex<T> = primitive
+
+# Any value (escape hatch for schemas that accept arbitrary YAML)
+export any = primitive

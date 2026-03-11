@@ -2,6 +2,8 @@ package rules
 
 import (
 	"fmt"
+	"regexp"
+	"strings"
 
 	"github.com/Spencer1O1/codon-language/pkg/loader"
 	nt "github.com/Spencer1O1/codon-language/pkg/nucleotype"
@@ -38,6 +40,58 @@ func relationsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result
 					res.Add(core.Issue{Severity: core.SeverityError, Code: "cascade_value_allowed", Message: fmt.Sprintf("relation %s cascade must be cascade|restrict|nullify", name), Gene: gene.Name, Codon: "relations"})
 				}
 			}
+
+			// from/to target existence
+			from, fok := rel["from"].(string)
+			to, tok := rel["to"].(string)
+			if fok {
+				if err := validateEntityRef(from, g, gene, res); err != nil {
+					res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_target_must_exist", Message: fmt.Sprintf("relation %s from: %v", name, err), Gene: gene.Name, Codon: "relations"})
+				}
+			}
+			if tok {
+				if err := validateEntityRef(to, g, gene, res); err != nil {
+					res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_target_must_exist", Message: fmt.Sprintf("relation %s to: %v", name, err), Gene: gene.Name, Codon: "relations"})
+				}
+			}
 		}
 	}
+}
+
+var relIdentRe = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]*$`)
+
+// validateEntityRef reuses ref-style resolution for entity names, and warns on overqualification.
+func validateEntityRef(ref string, genome *loader.Genome, gene loader.Gene, res *core.Result) error {
+	parts := strings.Split(ref, ".")
+	if len(parts) < 1 || len(parts) > 4 {
+		return fmt.Errorf("ref must have 1-4 identifiers: %s", ref)
+	}
+	for _, p := range parts {
+		if !relIdentRe.MatchString(p) {
+			return fmt.Errorf("invalid identifier %s in %s", p, ref)
+		}
+	}
+	switch len(parts) {
+	case 1:
+		// same gene, implicit entities codon
+		if !hasEntry(&gene, "entities", parts[0]) {
+			return fmt.Errorf("entity not found: %s", ref)
+		}
+		return nil
+	case 2:
+		// same chromosome: gene.entity
+		target := findGene(genome, gene.Chromosome, parts[0])
+		if !hasEntry(target, "entities", parts[1]) {
+			return fmt.Errorf("entity not found: %s", ref)
+		}
+	case 3:
+		// cross chromosome: chrom.gene.entity
+		target := findGene(genome, parts[0], parts[1])
+		if !hasEntry(target, "entities", parts[2]) {
+			return fmt.Errorf("entity not found: %s", ref)
+		}
+	default:
+		return fmt.Errorf("ref must be entry, gene.entry, or chrom.gene.entry: %s", ref)
+	}
+	return nil
 }

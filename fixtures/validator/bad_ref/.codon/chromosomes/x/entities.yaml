@@ -1,0 +1,7 @@
+gene: entities
+codons:
+  entities:
+    thing:
+      id: uuid
+      link:
+        ref: y.entities.entities.other

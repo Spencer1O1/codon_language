@@ -16,6 +16,9 @@ load:
 validate:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go run ./cmd/codon validate $(ROOT)
 
+validate-example:
+	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go run ./cmd/codon validate fixtures/example
+
 sync-core-assets:
 	./scripts/sync_core_assets.sh $(ROOT)
 

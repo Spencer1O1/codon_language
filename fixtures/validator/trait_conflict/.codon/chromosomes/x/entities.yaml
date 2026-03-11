@@ -1,0 +1,8 @@
+gene: entities
+codons:
+  entities:
+    thing:
+      id: uuid
+      tag:
+        value: string
+  traits: [conflict]

@@ -1,0 +1,25 @@
+gene: classification
+description: AI classification of damage photos
+codons:
+  entities:
+    classification:
+      id: uuid
+      photo_id: uuid
+      label: string
+      confidence: number
+  capabilities:
+    classify_damage:
+      description: AI model classifies uploaded photo.
+      effects: ["classify_photo"]
+      inputs:
+        photo_id: { type: uuid }
+      outputs:
+        classification_id: { type: uuid }
+  relations:
+    photo_classifications:
+      from: ticketing.ticketing.photo
+      to: classification
+      type: one-to-many
+      ownership: from
+      cascade: restrict
+  traits: []

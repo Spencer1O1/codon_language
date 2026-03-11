@@ -1,0 +1,5 @@
+codons:
+  entities:
+    thing:
+      tag: false
+      extra: string

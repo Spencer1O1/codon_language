@@ -1,0 +1,5 @@
+gene: Bad*Gene
+codons:
+  entities:
+    BadField!:
+      oops: string

@@ -1,0 +1,5 @@
+gene: entities
+codons:
+  entities:
+    unknown_type:
+      foo: MadeUpType

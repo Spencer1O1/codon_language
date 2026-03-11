@@ -1,0 +1,65 @@
+gene: ticketing
+description: Ticket lifecycle, photos, and routing
+codons:
+  entities:
+    ticket:
+      id: uuid
+      asset_id: uuid
+      reporter_id: uuid
+      assignee_id: uuid
+      status: Union<"open","assigned","in_progress","closed">
+      severity: Union<"low","medium","high">
+    photo:
+      id: uuid
+      ticket_id:
+        ref: ticket
+      url: string
+      captured_at: datetime
+  capabilities:
+    submit_report:
+      description: Public user submits a maintenance report with photo and geolocation.
+      effects: ["create_ticket"]
+      inputs:
+        asset_id: { type: uuid }
+        reporter_id: { type: uuid }
+        photo_url: { type: string }
+        location: { type: string }
+        notes: { type: Optional<string> }
+      outputs:
+        ticket_id: { type: uuid }
+    route_ticket:
+      description: Route ticket to organization based on geofence.
+      effects: ["route_ticket"]
+      inputs:
+        ticket_id: { type: uuid }
+      outputs:
+        assignee_id: { type: uuid }
+    update_ticket_status:
+      description: Maintenance worker updates status.
+      effects: ["update_ticket"]
+      inputs:
+        ticket_id: { type: ref }
+        status: { type: string }
+      outputs:
+        ticket_id: { type: uuid }
+    view_dashboard:
+      description: Org/admin dashboard to monitor tickets and assets.
+      effects: ["read_dashboard"]
+      inputs:
+        organization_id: { type: uuid }
+      outputs:
+        summary_json: { type: json }
+  relations:
+    asset_tickets:
+      from: domain.domain_entities.asset
+      to: ticket
+      type: one-to-many
+      ownership: from
+      cascade: restrict
+    ticket_photos:
+      from: ticket
+      to: photo
+      type: one-to-many
+      ownership: from
+      cascade: restrict
+  traits: [auditable]
