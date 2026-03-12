@@ -16,11 +16,17 @@ func entityRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 		if !ok {
 			continue
 		}
+		seen := map[string]bool{}
 		for name, raw := range codon {
 			if strings.TrimSpace(name) == "" {
 				res.Add(core.Issue{Severity: core.SeverityError, Code: "entity_key_required", Message: "entity names must be non-empty", Gene: gene.Name, Codon: "entities"})
 				continue
 			}
+			if seen[name] {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "entity_name_unique_within_entities", Message: "entity names must be unique within the entities codon", Gene: gene.Name, Codon: "entities"})
+				continue
+			}
+			seen[name] = true
 			fields, ok := raw.(map[string]any)
 			if !ok {
 				continue

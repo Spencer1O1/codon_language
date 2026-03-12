@@ -16,11 +16,17 @@ func capabilityRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Resul
 		if !ok {
 			continue
 		}
+		seen := map[string]bool{}
 		for name, raw := range codon {
 			if strings.TrimSpace(name) == "" {
 				res.Add(core.Issue{Severity: core.SeverityError, Code: "capability_key_required", Message: "capability names must be non-empty", Gene: gene.Name, Codon: "capabilities"})
 				continue
 			}
+			if seen[name] {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "capability_name_unique_within_capabilities", Message: "capability names must be unique within the capabilities codon", Gene: gene.Name, Codon: "capabilities"})
+				continue
+			}
+			seen[name] = true
 			obj, ok := raw.(map[string]any)
 			if !ok {
 				continue

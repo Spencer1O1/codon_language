@@ -20,11 +20,17 @@ func relationsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result
 		if !ok {
 			continue
 		}
+		seen := map[string]bool{}
 		for name, raw := range codon {
 			if strings.TrimSpace(name) == "" {
 				res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_key_required", Message: "relation names must be non-empty", Gene: gene.Name, Codon: "relations"})
 				continue
 			}
+			if seen[name] {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_name_unique_within_relations", Message: "relation names must be unique within the relations codon", Gene: gene.Name, Codon: "relations"})
+				continue
+			}
+			seen[name] = true
 			rel, ok := raw.(map[string]any)
 			if !ok {
 				res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_shape", Message: "relation must be an object", Gene: gene.Name, Codon: "relations"})
