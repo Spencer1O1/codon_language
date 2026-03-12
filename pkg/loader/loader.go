@@ -9,18 +9,21 @@ import (
 	"strings"
 
 	"github.com/Spencer1O1/codon-language/internal/core_assets"
+	"github.com/Spencer1O1/codon-language/internal/engine_assets"
 	tp "github.com/Spencer1O1/codon-language/pkg/nucleotype"
 	goyaml "gopkg.in/yaml.v3"
 )
 
 // Genome is a minimal composed genome for loader.
 type Genome struct {
-	Schemas  map[string]CodonSchema
-	TypeEnv  map[string]tp.TypeNode
-	Genes    []Gene
-	Manifest map[string]any
-	Root     string
-	Issues   []Issue
+	Schemas      map[string]CodonSchema
+	SchemaExport []string
+	TypeEnv      map[string]tp.TypeNode
+	TypeExport   []string
+	Genes        []Gene
+	Manifest     map[string]any
+	Root         string
+	Issues       []Issue
 }
 
 type CodonSchema struct {
@@ -46,7 +49,7 @@ type Issue struct {
 
 // LoadGenome loads codon schemas and genes from a loader root.
 func LoadGenome(root string) (*Genome, error) {
-	codonSchemas, issues, err := loadCodonSchemas(root)
+	codonSchemas, schemaExport, issues, err := loadCodonSchemas(root)
 	if err != nil {
 		return nil, err
 	}
@@ -58,24 +61,38 @@ func LoadGenome(root string) (*Genome, error) {
 	if err != nil {
 		return nil, err
 	}
-	typeEnv, err := BuildTypeEnv(root)
+	typeEnv, exportedTypes, err := BuildTypeEnv(root)
 	if err != nil {
 		return nil, err
 	}
-	return &Genome{Schemas: codonSchemas, Genes: genes, Manifest: manifest, Root: root, TypeEnv: typeEnv, Issues: issues}, nil
+	return &Genome{
+		Schemas:      codonSchemas,
+		SchemaExport: schemaExport,
+		TypeEnv:      typeEnv,
+		TypeExport:   exportedTypes,
+		Genes:        genes,
+		Manifest:     manifest,
+		Root:         root,
+		Issues:       issues,
+	}, nil
 }
 
-func loadCodonSchemas(root string) (map[string]CodonSchema, []Issue, error) {
+func loadCodonSchemas(root string) (map[string]CodonSchema, []string, []Issue, error) {
 	codonSchemas := map[string]CodonSchema{}
+	var exportSchemas []string
 	var issues []Issue
 	// embedded defaults
-	if err := loadCodonSchemasFromFS(core_assets.CodonSchemas, "codon_schemas", codonSchemas); err != nil {
-		return nil, issues, err
+	if err := loadCodonSchemasFromFS(core_assets.CodonSchemas, "codon_schemas", codonSchemas, true, &exportSchemas); err != nil {
+		return nil, exportSchemas, issues, err
+	}
+	// engine-only embedded
+	if err := loadCodonSchemasFromFS(engine_assets.CodonSchemas, "codon_schemas", codonSchemas, false, nil); err != nil {
+		return nil, exportSchemas, issues, err
 	}
 	// disk overrides/extensions
 	files, err := path.Glob(path.Join(root, "codon_schemas", "*.yaml"))
 	if err != nil {
-		return nil, issues, err
+		return nil, exportSchemas, issues, err
 	}
 	sort.Strings(files)
 	for _, f := range files {
@@ -83,11 +100,14 @@ func loadCodonSchemas(root string) (map[string]CodonSchema, []Issue, error) {
 		if err != nil {
 			continue
 		}
-		if err := parseSchemaDoc(data, f, codonSchemas); err != nil {
+		names, err := parseSchemaDoc(data, f, codonSchemas)
+		if err != nil {
 			issues = append(issues, Issue{Severity: "error", Code: "schema_parseable", Message: err.Error()})
+		} else {
+			exportSchemas = append(exportSchemas, names...)
 		}
 	}
-	return codonSchemas, issues, nil
+	return codonSchemas, exportSchemas, issues, nil
 }
 
 func loadManifest(root string) (map[string]any, error) {
@@ -103,7 +123,7 @@ func loadManifest(root string) (map[string]any, error) {
 	return manifest, nil
 }
 
-func loadCodonSchemasFromFS(fsys fs.FS, dir string, dest map[string]CodonSchema) error {
+func loadCodonSchemasFromFS(fsys fs.FS, dir string, dest map[string]CodonSchema, export bool, exportList *[]string) error {
 	entries, err := fs.ReadDir(fsys, dir)
 	if err != nil {
 		// if directory missing in embedded fs, treat as empty
@@ -117,14 +137,18 @@ func loadCodonSchemasFromFS(fsys fs.FS, dir string, dest map[string]CodonSchema)
 		if err != nil {
 			return err
 		}
-		if err := parseSchemaDoc(data, e.Name(), dest); err != nil {
+		names, err := parseSchemaDoc(data, e.Name(), dest)
+		if err != nil {
 			return err
+		}
+		if export && exportList != nil {
+			*exportList = append(*exportList, names...)
 		}
 	}
 	return nil
 }
 
-func parseSchemaDoc(data []byte, filename string, dest map[string]CodonSchema) error {
+func parseSchemaDoc(data []byte, filename string, dest map[string]CodonSchema) ([]string, error) {
 	var doc struct {
 		Codons map[string]struct {
 			Version     string `yaml:"version"`
@@ -134,8 +158,9 @@ func parseSchemaDoc(data []byte, filename string, dest map[string]CodonSchema) e
 		} `yaml:"codons"`
 	}
 	if err := goyaml.Unmarshal(data, &doc); err != nil {
-		return fmt.Errorf("parse codon schema file %s: %w", filename, err)
+		return nil, fmt.Errorf("parse codon schema file %s: %w", filename, err)
 	}
+	var names []string
 	for name, cf := range doc.Codons {
 		src := cf.Schema
 		if strings.TrimSpace(src) == "" {
@@ -146,16 +171,18 @@ func parseSchemaDoc(data []byte, filename string, dest map[string]CodonSchema) e
 		}
 		ast, err := tp.Parse(src)
 		if err != nil {
-			return fmt.Errorf("parse codon schema %s type %s: %w", filename, name, err)
+			return nil, fmt.Errorf("parse codon schema %s type %s: %w", filename, name, err)
 		}
 		dest[name] = CodonSchema{Version: cf.Version, Description: cf.Description, TypeExpr: src, TypeAST: ast, Source: filename}
+		names = append(names, name)
 	}
-	return nil
+	return names, nil
 }
 
 // ParseSchemaDocInto parses schemas into an existing map (used for trait-local schemas).
 func ParseSchemaDocInto(data []byte, filename string, dest map[string]CodonSchema) error {
-	return parseSchemaDoc(data, filename, dest)
+	_, err := parseSchemaDoc(data, filename, dest)
+	return err
 }
 
 func loadGenes(root string) ([]Gene, error) {
@@ -203,34 +230,66 @@ func chromosomeFromPath(root, full string) string {
 }
 
 // BuildTypeEnv builds a symbol table from nucleotide declarations.
-func BuildTypeEnv(root string) (map[string]tp.TypeNode, error) {
+// Returns the full env and the list of exported type names (public).
+func BuildTypeEnv(root string) (map[string]tp.TypeNode, []string, error) {
 	env := map[string]tp.TypeNode{}
-	// embedded defaults
-	if err := loadTypesFromFS(core_assets.Nucleotypes, "nucleotides/types", env); err != nil {
-		return nil, err
+	var exported []string
+	// embedded defaults (public primitives)
+	if err := loadTypesFromFS(core_assets.Nucleotypes, "nucleotides/types", env, true, &exported); err != nil {
+		return nil, exported, err
+	}
+	// engine-only embedded types (not exported)
+	if err := loadTypesFromFS(engine_assets.Nucleotypes, "nucleotides/types", env, false, nil); err != nil {
+		return nil, exported, err
+	}
+	// hardcoded internal nucleotypes (not shipped to consumers)
+	coreNames := `export chromosome_name = string
+export gene_name = string
+export genome_trait_name = string
+export chromosome_trait_name = string
+export gene_trait_name = string
+
+export entity_name = string
+export capability_name = string
+export relation_name = string
+`
+	if _, err := parseTypesDoc(coreNames, "builtin:names", env); err != nil {
+		return nil, exported, err
+	}
+	coreFields := `field_key = Regex<"^[a-z][a-z0-9_]*$">
+export field<T> = Map<field_key, {
+  type: T,
+  default: Optional<T>,
+  unique: Optional<boolean>,
+  optional: Optional<boolean>,
+}>
+`
+	if _, err := parseTypesDoc(coreFields, "builtin:fields", env); err != nil {
+		return nil, exported, err
 	}
 	// disk overrides/extensions
 	files, err := path.Glob(path.Join(root, "nucleotides", "types", "*.nucleotype"))
 	if err != nil {
-		return nil, err
+		return nil, exported, err
 	}
 	sort.Strings(files)
 	for _, f := range files {
 		data, err := os.ReadFile(f)
 		if err != nil {
-			return nil, err
+			return nil, exported, err
 		}
-		if err := parseTypesDoc(string(data), f, env); err != nil {
-			return nil, err
+		names, err := parseTypesDoc(string(data), f, env)
+		if err != nil {
+			return nil, exported, err
 		}
+		exported = append(exported, names...)
 	}
 	// inject primitives as terminals
 	env["primitive"] = tp.NameType{Name: "primitive"}
-	env["any"] = tp.NameType{Name: "any"}
-	return env, nil
+	return env, exported, nil
 }
 
-func loadTypesFromFS(fsys fs.FS, dir string, env map[string]tp.TypeNode) error {
+func loadTypesFromFS(fsys fs.FS, dir string, env map[string]tp.TypeNode, export bool, exportList *[]string) error {
 	entries, err := fs.ReadDir(fsys, dir)
 	if err != nil {
 		return nil
@@ -239,30 +298,40 @@ func loadTypesFromFS(fsys fs.FS, dir string, env map[string]tp.TypeNode) error {
 		if e.IsDir() {
 			continue
 		}
+		isPrimitive := e.Name() == "primitives.nucleotype"
+		if export && !isPrimitive {
+			continue
+		}
 		data, err := fs.ReadFile(fsys, path.Join(dir, e.Name()))
 		if err != nil {
 			return err
 		}
-		if err := parseTypesDoc(string(data), e.Name(), env); err != nil {
+		names, err := parseTypesDoc(string(data), e.Name(), env)
+		if err != nil {
 			return err
+		}
+		if export && exportList != nil {
+			*exportList = append(*exportList, names...)
 		}
 	}
 	return nil
 }
 
-func parseTypesDoc(src string, filename string, env map[string]tp.TypeNode) error {
+func parseTypesDoc(src string, filename string, env map[string]tp.TypeNode) ([]string, error) {
 	decls, err := tp.ParseDecls(src)
 	if err != nil {
-		return fmt.Errorf("parse %s: %w", filename, err)
+		return nil, fmt.Errorf("parse %s: %w", filename, err)
 	}
+	var names []string
 	for _, d := range decls {
-		ast := tp.Resolve(d.Type, env)
-		env[d.Name] = ast
+		env[d.Name] = d.Type
+		names = append(names, d.Name)
 	}
-	return nil
+	return names, nil
 }
 
 // ParseTypesDoc exported for reuse (e.g., trait-local nucleotypes).
 func ParseTypesDoc(src string, filename string, env map[string]tp.TypeNode) error {
-	return parseTypesDoc(src, filename, env)
+	_, err := parseTypesDoc(src, filename, env)
+	return err
 }

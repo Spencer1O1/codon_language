@@ -2,10 +2,10 @@ package core_assets
 
 import "embed"
 
-// Embedded defaults for core codon schemas and nucleotypes.
+// Public assets embedded for consumers (core codon schemas + primitives only).
 
 //go:embed codon_schemas/*.yaml
 var CodonSchemas embed.FS
 
-//go:embed nucleotides/types/*.nucleotype
+//go:embed nucleotides/types/primitives.nucleotype
 var Nucleotypes embed.FS

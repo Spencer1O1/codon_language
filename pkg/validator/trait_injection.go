@@ -45,14 +45,14 @@ func applyGenomeTraits(g *loader.Genome, res *core.Result) {
 			continue
 		}
 		name = strings.TrimSuffix(path.Base(name), ".yaml")
-			tf, schemas, err := loadTraitFile(path.Join(g.Root, "traits", "genome", name))
-			if err != nil {
-				res.Add(core.Issue{Severity: core.SeverityError, Code: "genome_trait_file_exists", Message: err.Error()})
-				continue
-			}
-			if err := mergeNucleotypesWithEnv(g, path.Join(g.Root, "traits", "genome", name), res); err != nil {
-				// issues recorded; continue
-			}
+		tf, schemas, err := loadTraitFile(path.Join(g.Root, "traits", "genome", name))
+		if err != nil {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "genome_trait_file_exists", Message: err.Error()})
+			continue
+		}
+		if err := mergeNucleotypesWithEnv(g, path.Join(g.Root, "traits", "genome", name), res); err != nil {
+			// issues recorded; continue
+		}
 		if err := mergeSchemas(g, schemas, res); err != nil {
 			// mergeSchemas reports issues; continue to attempt codon injection
 		}
@@ -132,9 +132,9 @@ func applyGeneTraits(g *loader.Genome, res *core.Result) {
 				res.Add(core.Issue{Severity: core.SeverityError, Code: "gene_trait_file_exists", Message: err.Error(), Gene: gene.Name, Codon: "traits"})
 				continue
 			}
-				if err := mergeNucleotypesWithEnv(g, path.Join(g.Root, "traits", "gene", name), res); err != nil {
-					// issues recorded; continue
-				}
+			if err := mergeNucleotypesWithEnv(g, path.Join(g.Root, "traits", "gene", name), res); err != nil {
+				// issues recorded; continue
+			}
 			if err := mergeSchemas(g, schemas, res); err != nil {
 				// issues recorded; continue
 			}
@@ -343,6 +343,7 @@ func mergeSchemas(g *loader.Genome, add map[string]loader.CodonSchema, res *core
 			continue // identical is fine
 		}
 		g.Schemas[name] = sc
+		g.SchemaExport = appendIfMissing(g.SchemaExport, name)
 	}
 	return nil
 }
@@ -380,8 +381,18 @@ func mergeNucleotypesWithEnv(g *loader.Genome, traitDir string, res *core.Result
 				}
 			} else {
 				g.TypeEnv[name] = t
+				g.TypeExport = appendIfMissing(g.TypeExport, name)
 			}
 		}
 	}
 	return nil
+}
+
+func appendIfMissing(list []string, name string) []string {
+	for _, n := range list {
+		if n == name {
+			return list
+		}
+	}
+	return append(list, name)
 }

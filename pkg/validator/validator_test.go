@@ -16,11 +16,7 @@ func TestValidate_HappyPathExample(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	env, err := loader.BuildTypeEnv(root)
-	if err != nil {
-		t.Fatalf("env: %v", err)
-	}
-	res := Validate(g, env)
+	res := Validate(g, g.TypeEnv)
 	if res.HasErrors() {
 		t.Fatalf("expected no errors, got %+v", res.Issues)
 	}
@@ -106,11 +102,7 @@ func TestValidate_OverqualifiedWarn(t *testing.T) {
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	env, err := loader.BuildTypeEnv(root)
-	if err != nil {
-		t.Fatalf("env: %v", err)
-	}
-	res := Validate(g, env)
+	res := Validate(g, g.TypeEnv)
 	if res.HasErrors() {
 		t.Fatalf("expected no errors, got %+v", res.Issues)
 	}
@@ -237,11 +229,7 @@ func assertErrors(t *testing.T, root string, substr string) {
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	env, err := loader.BuildTypeEnv(root)
-	if err != nil {
-		t.Fatalf("env: %v", err)
-	}
-	res := Validate(g, env)
+	res := Validate(g, g.TypeEnv)
 	if !res.HasErrors() {
 		t.Fatalf("expected errors containing %s, got none", substr)
 	}
@@ -260,7 +248,7 @@ func assertErrors(t *testing.T, root string, substr string) {
 // fixturePath builds a path relative to repo root (tests run from pkg/validator).
 func fixturePath(parts ...string) string {
 	all := append([]string{"..", ".."}, parts...)
-		return filepath.Join(all...)
+	return filepath.Join(all...)
 }
 
 // loadAndValidate is a small helper shared by trait merge tests.
@@ -270,12 +258,8 @@ func loadAndValidate(t *testing.T, root string) (*loader.Genome, map[string]nt.T
 	if err != nil {
 		t.Fatalf("load: %v", err)
 	}
-	env, err := loader.BuildTypeEnv(root)
-	if err != nil {
-		t.Fatalf("env: %v", err)
-	}
-	res := Validate(g, env)
-	return g, env, res
+	res := Validate(g, g.TypeEnv)
+	return g, g.TypeEnv, res
 }
 
 func findGene(t *testing.T, g *loader.Genome, chrom, name string) *loader.Gene {

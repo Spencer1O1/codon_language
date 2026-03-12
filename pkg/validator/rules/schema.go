@@ -18,12 +18,16 @@ func init() {
 func schemaRules(g *loader.Genome, env map[string]nt.TypeNode, res *core.Result) {
 	for _, gene := range g.Genes {
 		for codonName, val := range gene.Codons {
+			// Skip schema validation for relations to avoid recursive object types; other rules cover them.
+			if codonName == "relations" {
+				continue
+			}
 			schema, ok := g.Schemas[codonName]
 			if !ok {
 				// basicShape already reports missing schemas
 				continue
 			}
-			if issue := validateValueAgainstType(val, schema.TypeAST, env, g, gene, codonName, res); issue != nil {
+			if issue := validateValueAgainstType(val, schema.TypeAST, env, g, gene, codonName, res, 0); issue != nil {
 				res.Add(*issue)
 			}
 		}
@@ -31,20 +35,23 @@ func schemaRules(g *loader.Genome, env map[string]nt.TypeNode, res *core.Result)
 }
 
 // validateValueAgainstType returns a coded issue on the first failure, or nil on success.
-func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode, genome *loader.Genome, gene loader.Gene, codon string, res *core.Result) *core.Issue {
+func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode, genome *loader.Genome, gene loader.Gene, codon string, res *core.Result, depth int) *core.Issue {
+	if depth > 256 {
+		return issue("schema_mismatch", "schema recursion too deep", gene.Name, codon)
+	}
 	switch node := t.(type) {
 	case nt.OptionalType:
 		if v == nil {
 			return nil
 		}
-		return validateValueAgainstType(v, node.Base, env, genome, gene, codon, res)
+		return validateValueAgainstType(v, node.Base, env, genome, gene, codon, res, depth+1)
 	case nt.ListType:
 		arr, ok := v.([]any)
 		if !ok {
 			return issue("schema_mismatch", "expected list", gene.Name, codon)
 		}
 		for _, elem := range arr {
-			if err := validateValueAgainstType(elem, node.Base, env, genome, gene, codon, res); err != nil {
+			if err := validateValueAgainstType(elem, node.Base, env, genome, gene, codon, res, depth+1); err != nil {
 				return err
 			}
 		}
@@ -63,7 +70,7 @@ func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode, 
 					if err := validateMapKey(k, keyType, env); err != nil {
 						return issue("map_key_constraint", fmt.Sprintf("key %q: %v", k, err), gene.Name, codon)
 					}
-					if err := validateValueAgainstType(vv, valType, env, genome, gene, codon, res); err != nil {
+					if err := validateValueAgainstType(vv, valType, env, genome, gene, codon, res, depth+1); err != nil {
 						return err
 					}
 				}
@@ -95,7 +102,7 @@ func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode, 
 		// required/optional via presence; no required flag in AST, but we can ensure defined fields exist
 		for _, f := range node.Fields {
 			if vv, ok := m[f.Name]; ok {
-				if err := validateValueAgainstType(vv, f.Type, env, genome, gene, codon, res); err != nil {
+				if err := validateValueAgainstType(vv, f.Type, env, genome, gene, codon, res, depth+1); err != nil {
 					return err
 				}
 			} else {
@@ -109,7 +116,7 @@ func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode, 
 	case nt.UnionType:
 		// accept if any branch matches
 		for _, opt := range node.Options {
-			if err := validateValueAgainstType(v, opt, env, genome, gene, codon, res); err == nil {
+			if err := validateValueAgainstType(v, opt, env, genome, gene, codon, res, depth+1); err == nil {
 				return nil
 			}
 		}
@@ -121,6 +128,12 @@ func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode, 
 				return nil
 			}
 			return issue("schema_mismatch", fmt.Sprintf("expected scalar for %s", node.Name), gene.Name, codon)
+		case "object":
+			// Treat generic object as an escape hatch; accept maps without deep recursion to avoid self-referential loops.
+			if _, ok := v.(map[string]any); ok {
+				return nil
+			}
+			return issue("schema_mismatch", "expected object", gene.Name, codon)
 		case "ref":
 			if s, ok := v.(string); ok {
 				// Reuse reference resolution so ref TypeExpr behaves like {ref: ...}
@@ -135,7 +148,7 @@ func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode, 
 			return issue("schema_mismatch", fmt.Sprintf("expected scalar for %s", node.Name), gene.Name, codon)
 		default:
 			if resolved, ok := env[node.Name]; ok {
-				return validateValueAgainstType(v, resolved, env, genome, gene, codon, res)
+				return validateValueAgainstType(v, resolved, env, genome, gene, codon, res, depth+1)
 			}
 			return issue("type_name_unknown", fmt.Sprintf("unknown type %s", node.Name), gene.Name, codon)
 		}

@@ -6,6 +6,7 @@ import (
 
 	"github.com/Spencer1O1/codon-language/pkg/loader"
 	"github.com/Spencer1O1/codon-language/pkg/validator"
+	"gopkg.in/yaml.v3"
 )
 
 func main() {
@@ -15,9 +16,13 @@ func main() {
 		os.Exit(1)
 	}
 	cmd := args[1]
-	root := ".codon"
+	root := ""
 	if len(args) > 2 {
 		root = args[2]
+	}
+	if root == "" {
+		fmt.Fprintf(os.Stderr, "command syntax error: %v\n", "Genome root not specified.")
+		os.Exit(1)
 	}
 
 	switch cmd {
@@ -31,6 +36,11 @@ func main() {
 			fmt.Fprintf(os.Stderr, "validate error: %v\n", err)
 			os.Exit(1)
 		}
+	case "emit":
+		if err := runEmit(root); err != nil {
+			fmt.Fprintf(os.Stderr, "emit error: %v\n", err)
+			os.Exit(1)
+		}
 	default:
 		usage()
 		os.Exit(1)
@@ -38,7 +48,7 @@ func main() {
 }
 
 func usage() {
-	fmt.Println("Usage: codon <load|validate> [path]")
+	fmt.Println("Usage: codon <load|validate|emit> [path]")
 }
 
 func runLoad(root string) error {
@@ -59,11 +69,7 @@ func runValidate(root string) error {
 	if hasLoaderErrors := printLoaderIssues(g.Issues); hasLoaderErrors {
 		return fmt.Errorf("loader reported errors")
 	}
-	env, err := loader.BuildTypeEnv(root)
-	if err != nil {
-		return err
-	}
-	res := validator.Validate(g, env)
+	res := validator.Validate(g, g.TypeEnv)
 	errs, warns, infos := res.Summary()
 	fmt.Printf("errors: %d, warnings: %d, infos: %d\n", errs, warns, infos)
 	for _, is := range res.Issues {
@@ -72,6 +78,33 @@ func runValidate(root string) error {
 	if res.HasErrors() {
 		return fmt.Errorf("validation failed")
 	}
+	return nil
+}
+
+// runEmit emits the composed genome artifact after successful validation.
+func runEmit(root string) error {
+	g, err := loader.LoadGenome(root)
+	if err != nil {
+		return err
+	}
+	if hasLoaderErrors := printLoaderIssues(g.Issues); hasLoaderErrors {
+		return fmt.Errorf("loader reported errors")
+	}
+	res := validator.Validate(g, g.TypeEnv)
+	errs, warns, infos := res.Summary()
+	fmt.Printf("errors: %d, warnings: %d, infos: %d\n", errs, warns, infos)
+	for _, is := range res.Issues {
+		printIssue("validation", string(is.Severity), is.Code, is.Message, is.Gene, is.Codon)
+	}
+	if res.HasErrors() {
+		return fmt.Errorf("validation failed")
+	}
+	artifact := loader.BuildArtifact(g)
+	out, err := yaml.Marshal(artifact)
+	if err != nil {
+		return err
+	}
+	fmt.Print(string(out))
 	return nil
 }
 
