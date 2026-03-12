@@ -1,0 +1,5 @@
+gene: object
+codons:
+  entities:
+    sample:
+      id: uuid

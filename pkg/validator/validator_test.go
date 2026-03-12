@@ -50,6 +50,11 @@ func TestValidate_IdentifierBad(t *testing.T) {
 	assertErrors(t, root, "identifier_invalid")
 }
 
+func TestValidate_IdentifierReserved(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "identifier_reserved", ".codon")
+	assertErrors(t, root, "identifier_reserved")
+}
+
 func TestValidate_OverqualifiedWarn(t *testing.T) {
 	root := fixturePath("fixtures", "validator", "overqualified", ".codon")
 	g, err := loader.LoadGenome(root)
