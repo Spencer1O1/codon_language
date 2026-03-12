@@ -1,0 +1,5 @@
+projections:
+  bad_proj:
+    target: 123
+    binding: 456
+    capabilities: [1, "ok"]

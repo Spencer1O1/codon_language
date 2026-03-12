@@ -36,6 +36,32 @@ func targetsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) 
 		if kind == "" || stack == "" {
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "target_requires_kind_and_stack", Message: "target.kind and target.stack are required", Codon: "targets"})
 		}
+		if kindVal, ok := m["kind"]; ok {
+			if _, ok := kindVal.(string); !ok {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "target_kind_must_be_string", Message: "target.kind must be a string", Codon: "targets"})
+			}
+		}
+		if stack != "" {
+			if _, ok := m["stack"].(string); !ok {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "target_stack_must_be_string", Message: "target.stack must be a string", Codon: "targets"})
+			}
+		}
+		if out, ok := m["output_root"]; ok {
+			if _, ok := out.(string); !ok {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "target_output_root_string", Message: "output_root must be a string when provided", Codon: "targets"})
+			}
+		}
+		if ow, ok := m["overwrite"]; ok {
+			if ovs, ok := ow.(string); ok && ovs != "" {
+				switch ovs {
+				case "safe", "force":
+				default:
+					res.Add(core.Issue{Severity: core.SeverityError, Code: "target_overwrite_value", Message: "overwrite must be safe|force when provided", Codon: "targets"})
+				}
+			} else {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "target_overwrite_value", Message: "overwrite must be a string (safe|force) when provided", Codon: "targets"})
+			}
+		}
 		if _, ok := m["output_root"]; !ok {
 			res.Add(core.Issue{Severity: core.SeverityInfo, Code: "target_output_root_recommended", Message: "output_root is recommended for targets", Codon: "targets"})
 		}

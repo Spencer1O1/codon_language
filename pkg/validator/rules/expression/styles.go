@@ -31,6 +31,8 @@ func stylesRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 			if v, vok := m["version"]; vok {
 				if s, ok := v.(string); ok && s == "" {
 					res.Add(core.Issue{Severity: core.SeverityError, Code: "style_version_recommended", Message: "style version should be non-empty when provided", Codon: "styles"})
+				} else if !ok {
+					res.Add(core.Issue{Severity: core.SeverityError, Code: "style_version_string", Message: "style.version must be a string when provided", Codon: "styles"})
 				}
 			}
 		}

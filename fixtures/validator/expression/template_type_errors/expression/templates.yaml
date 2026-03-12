@@ -1,0 +1,6 @@
+templates:
+  bad:
+    source: 123
+    checksum: 10
+    variables: ["oops"]
+    postprocess: [1, "fmt"]

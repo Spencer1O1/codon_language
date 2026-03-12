@@ -31,12 +31,36 @@ func templatesRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result
 		if !ok {
 			continue
 		}
-		src, _ := m["source"].(string)
-		if src == "" {
+		srcVal, srcOK := m["source"]
+		src, _ := srcVal.(string)
+		if !srcOK {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "template_source_required", Message: "template source is required", Codon: "templates"})
+		} else if _, ok := srcVal.(string); !ok {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "template_source_string", Message: "template.source must be a string", Codon: "templates"})
+		} else if src == "" {
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "template_source_required", Message: "template source is required", Codon: "templates"})
 		}
 		if _, ok := m["checksum"]; !ok {
 			res.Add(core.Issue{Severity: core.SeverityInfo, Code: "template_checksum_recommended", Message: "template checksum is recommended", Codon: "templates"})
+		} else if _, ok := m["checksum"].(string); !ok {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "template_checksum_string", Message: "template.checksum must be a string", Codon: "templates"})
+		}
+		if v, ok := m["variables"]; ok {
+			if _, ok := v.(map[string]any); !ok {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "template_variables_map", Message: "template.variables must be a map", Codon: "templates"})
+			}
+		}
+		if v, ok := m["postprocess"]; ok {
+			list, ok := v.([]any)
+			if !ok {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "template_postprocess_strings", Message: "template.postprocess must be a list of strings", Codon: "templates"})
+			} else {
+				for _, e := range list {
+					if _, ok := e.(string); !ok {
+						res.Add(core.Issue{Severity: core.SeverityError, Code: "template_postprocess_strings", Message: "template.postprocess must be a list of strings", Codon: "templates"})
+					}
+				}
+			}
 		}
 	}
 }

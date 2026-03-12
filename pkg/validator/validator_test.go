@@ -219,6 +219,13 @@ func TestExpression_SelectorsMissing(t *testing.T) {
 	assertErrors(t, root, "projection_selectors_nonempty")
 }
 
+func TestExpression_ProjectionTypes(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression", "projection_type_errors")
+	assertErrors(t, root, "projection_target_string")
+	assertErrors(t, root, "projection_binding_string")
+	assertErrors(t, root, "projection_selector_elements_string")
+}
+
 func TestExpression_TargetMissingKindStack(t *testing.T) {
 	root := fixturePath("fixtures", "validator", "expression", "target_missing_fields")
 	assertErrors(t, root, "target_requires_kind_and_stack")
@@ -227,6 +234,14 @@ func TestExpression_TargetMissingKindStack(t *testing.T) {
 func TestExpression_TemplateMissingSource(t *testing.T) {
 	root := fixturePath("fixtures", "validator", "expression", "template_missing_source")
 	assertErrors(t, root, "template_source_required")
+}
+
+func TestExpression_TemplateTypes(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression", "template_type_errors")
+	assertErrors(t, root, "template_source_string")
+	assertErrors(t, root, "template_checksum_string")
+	assertErrors(t, root, "template_variables_map")
+	assertErrors(t, root, "template_postprocess_strings")
 }
 
 func TestExpression_TargetsShape(t *testing.T) {
