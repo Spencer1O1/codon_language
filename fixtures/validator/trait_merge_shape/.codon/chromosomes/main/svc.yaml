@@ -1,0 +1,7 @@
+gene: svc
+description: shape conflict should error
+codons:
+  entities:
+    foo:
+      type_expr: uuid
+  traits: [badshape]

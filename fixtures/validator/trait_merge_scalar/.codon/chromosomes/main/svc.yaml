@@ -1,0 +1,7 @@
+gene: svc
+description: scalar conflict should warn and keep authored
+codons:
+  entities:
+    foo:
+      type_expr: uuid
+  traits: [override]

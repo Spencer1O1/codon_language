@@ -1,0 +1,5 @@
+genes:
+  svc:
+    entities:
+      foo:
+        tags: [b, c]

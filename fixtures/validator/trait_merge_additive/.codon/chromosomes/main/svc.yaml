@@ -1,0 +1,7 @@
+gene: svc
+description: additive trait merge
+codons:
+  entities:
+    foo:
+      type_expr: uuid
+  traits: [augment]

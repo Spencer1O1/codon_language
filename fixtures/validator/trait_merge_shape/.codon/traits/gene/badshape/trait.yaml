@@ -1,0 +1,4 @@
+genes:
+  svc:
+    entities:
+      foo: string   # shape conflict (map vs scalar)

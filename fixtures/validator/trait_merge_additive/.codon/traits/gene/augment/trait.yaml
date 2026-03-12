@@ -1,0 +1,5 @@
+genes:
+  svc:
+    entities:
+      bar:
+        type_expr: string

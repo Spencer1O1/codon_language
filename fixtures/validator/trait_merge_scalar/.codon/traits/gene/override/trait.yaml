@@ -1,0 +1,5 @@
+genes:
+  svc:
+    entities:
+      foo:
+        type_expr: string   # different scalar, should warn and keep authored
