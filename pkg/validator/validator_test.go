@@ -27,77 +27,77 @@ func TestValidate_HappyPathExample(t *testing.T) {
 }
 
 func TestValidate_BadRef(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "bad_ref", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "bad_ref")
 	assertErrors(t, root, "ref_target_must_exist")
 }
 
 func TestValidate_TraitConflictShape(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "trait_conflict", ".codon")
+	root := fixturePath("fixtures", "validator", "traits", "trait_conflict")
 	assertErrors(t, root, "trait_shape_conflict")
 }
 
 func TestValidate_ManifestMissingProject(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "manifest_missing_project", ".codon")
+	root := fixturePath("fixtures", "validator", "manifest", "missing_project")
 	assertErrors(t, root, "project_name_required")
 }
 
 func TestValidate_IdentifierBad(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "identifier_bad", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "identifier_bad")
 	assertErrors(t, root, "identifier_syntax")
 }
 
 func TestValidate_IdentifierReserved(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "identifier_reserved", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "identifier_reserved")
 	assertErrors(t, root, "identifier_reserved")
 }
 
 func TestValidate_RefTargetMissing(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "ref_target_missing", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "ref_target_missing")
 	assertErrors(t, root, "ref_target_must_exist")
 }
 
 func TestValidate_RelationTargetMissing(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "relation_missing_target", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "relation_missing_target")
 	assertErrors(t, root, "relation_target_must_exist")
 }
 
 func TestValidate_RelationBadCascade(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "relation_bad_cascade", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "relation_bad_cascade")
 	assertErrors(t, root, "cascade_value_allowed")
 }
 
 func TestValidate_RelationBadOwnership(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "relation_bad_ownership", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "relation_bad_ownership")
 	assertErrors(t, root, "ownership_side_must_be_valid")
 }
 
 func TestValidate_CapabilityMissingEffects(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "capability_missing_effects", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "capability_missing_effects")
 	assertErrors(t, root, "effects_required")
 }
 
 func TestValidate_EntityMissingType(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "entity_missing_type", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "entity_missing_type")
 	assertErrors(t, root, "field_type_required")
 }
 
 func TestValidate_RefTypeUsage(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "ref_type_usage", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "ref_type_usage")
 	assertErrors(t, root, "ref_type_usage")
 }
 
 func TestValidate_ValidationRulesEmpty(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "validation_rules_empty", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "validation_rules_empty")
 	assertErrors(t, root, "rules_required")
 }
 
 func TestValidate_CodonSchemaMissingVersion(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "codon_schema_missing_version", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "codon_schema_missing_version")
 	assertErrors(t, root, "schema_version_required")
 }
 
 func TestValidate_OverqualifiedWarn(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "overqualified", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "overqualified")
 	g, err := loader.LoadGenome(root)
 	if err != nil {
 		t.Fatalf("load: %v", err)
@@ -126,7 +126,7 @@ func TestValidate_OverqualifiedWarn(t *testing.T) {
 }
 
 func TestTraitMerge_Additive(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "trait_merge_additive", ".codon")
+	root := fixturePath("fixtures", "validator", "traits", "trait_merge_additive")
 	g, env, res := loadAndValidate(t, root)
 	if res.HasErrors() {
 		t.Fatalf("expected no errors, got %+v", res.Issues)
@@ -143,7 +143,7 @@ func TestTraitMerge_Additive(t *testing.T) {
 }
 
 func TestTraitMerge_ScalarConflictWarn(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "trait_merge_scalar", ".codon")
+	root := fixturePath("fixtures", "validator", "traits", "trait_merge_scalar")
 	g, env, res := loadAndValidate(t, root)
 	if res.HasErrors() {
 		t.Fatalf("expected no errors, got %+v", res.Issues)
@@ -167,7 +167,7 @@ func TestTraitMerge_ScalarConflictWarn(t *testing.T) {
 }
 
 func TestTraitMerge_ShapeConflict(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "trait_merge_shape", ".codon")
+	root := fixturePath("fixtures", "validator", "traits", "trait_merge_shape")
 	_, _, res := loadAndValidate(t, root)
 	if !res.HasErrors() {
 		t.Fatalf("expected shape conflict error")
@@ -184,7 +184,7 @@ func TestTraitMerge_ShapeConflict(t *testing.T) {
 }
 
 func TestTraitMerge_ListAppend(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "trait_merge_list", ".codon")
+	root := fixturePath("fixtures", "validator", "traits", "trait_merge_list")
 	g, _, res := loadAndValidate(t, root)
 	if res.HasErrors() {
 		t.Fatalf("expected no errors, got %+v", res.Issues)
@@ -202,7 +202,7 @@ func TestTraitMerge_ListAppend(t *testing.T) {
 }
 
 func TestExpression_Happy(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "expression_happy", ".codon")
+	root := fixturePath("fixtures", "validator", "expression", "happy")
 	_, _, res := loadAndValidate(t, root)
 	if res.HasErrors() {
 		t.Fatalf("expected no errors, got %+v", res.Issues)
@@ -210,27 +210,27 @@ func TestExpression_Happy(t *testing.T) {
 }
 
 func TestExpression_ProjectionTargetMissing(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "expression_missing_target", ".codon")
+	root := fixturePath("fixtures", "validator", "expression", "missing_target")
 	assertErrors(t, root, "projection_target_exists")
 }
 
 func TestExpression_SelectorsMissing(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "expression_missing_selectors", ".codon")
+	root := fixturePath("fixtures", "validator", "expression", "missing_selectors")
 	assertErrors(t, root, "projection_selectors_nonempty")
 }
 
 func TestExpression_TargetMissingKindStack(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "expression_target_missing_fields", ".codon")
+	root := fixturePath("fixtures", "validator", "expression", "target_missing_fields")
 	assertErrors(t, root, "target_requires_kind_and_stack")
 }
 
 func TestExpression_TemplateMissingSource(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "expression_template_missing_source", ".codon")
+	root := fixturePath("fixtures", "validator", "expression", "template_missing_source")
 	assertErrors(t, root, "template_source_required")
 }
 
 func TestExpression_ParseFailedTargets(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "expression_parse_failed", ".codon")
+	root := fixturePath("fixtures", "validator", "expression", "parse_failed")
 	g, err := loader.LoadGenome(root)
 	if err != nil {
 		t.Fatalf("load: %v", err)
@@ -247,7 +247,7 @@ func TestExpression_ParseFailedTargets(t *testing.T) {
 }
 
 func TestTypeExprDeepValidation(t *testing.T) {
-	root := fixturePath("fixtures", "validator", "type_expr_checks", ".codon")
+	root := fixturePath("fixtures", "validator", "language", "type_expr_checks")
 	_, _, res := loadAndValidate(t, root)
 	if !res.HasErrors() {
 		t.Fatalf("expected errors for regex/map/ref violations, got none")
