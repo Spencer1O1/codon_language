@@ -26,7 +26,7 @@ type ArtifactChromosome struct {
 
 // ArtifactGene is a gene entry in the composed artifact.
 type ArtifactGene struct {
-	Name   string         `yaml:"name" json:"name"`
+	Name        string         `yaml:"name" json:"name"`
 	Description string         `yaml:"description,omitempty" json:"description,omitempty"`
 	Codons      map[string]any `yaml:"codons" json:"codons"`
 }

@@ -61,5 +61,8 @@ func TestBuildArtifact(t *testing.T) {
 				t.Fatalf("genes not sorted within chromosome %s", ch.Name)
 			}
 		}
+		if ch.Genes[0].Description == "" {
+			t.Fatalf("gene description missing for chromosome %s", ch.Name)
+		}
 	}
 }

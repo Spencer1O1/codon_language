@@ -35,10 +35,11 @@ type CodonSchema struct {
 }
 
 type Gene struct {
-	Name       string
-	Chromosome string
-	Codons     map[string]any
-	Path       string
+	Name        string
+	Chromosome  string
+	Description string
+	Codons      map[string]any
+	Path        string
 }
 
 type Issue struct {
@@ -206,13 +207,14 @@ func loadGenes(root string) ([]Gene, error) {
 		if !ok || name == "" {
 			return nil, fmt.Errorf("gene file %s missing gene name", p)
 		}
+		desc, _ := raw["description"].(string)
 		codons := map[string]any{}
 		// codons_required validation rule
 		if c, ok := raw["codons"].(map[string]any); ok {
 			codons = c
 		}
 		chrom := chromosomeFromPath(root, p)
-		genes = append(genes, Gene{Name: name, Chromosome: chrom, Codons: codons, Path: p})
+		genes = append(genes, Gene{Name: name, Chromosome: chrom, Description: desc, Codons: codons, Path: p})
 	}
 	return genes, nil
 }
