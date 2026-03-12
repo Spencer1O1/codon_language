@@ -1,0 +1,9 @@
+targets:
+  api:
+    kind: api_service
+    stack: go-hex-rest@1.0
+    output_root: services/api
+  worker:
+    kind: worker
+    stack: go-worker@1.0
+    output_root: services/worker

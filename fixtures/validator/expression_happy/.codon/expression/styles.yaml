@@ -1,0 +1,5 @@
+styles:
+  rest_default:
+    auth: required
+  job_default:
+    retries: 3

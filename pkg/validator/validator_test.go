@@ -201,6 +201,51 @@ func TestTraitMerge_ListAppend(t *testing.T) {
 	}
 }
 
+func TestExpression_Happy(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression_happy", ".codon")
+	_, _, res := loadAndValidate(t, root)
+	if res.HasErrors() {
+		t.Fatalf("expected no errors, got %+v", res.Issues)
+	}
+}
+
+func TestExpression_ProjectionTargetMissing(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression_missing_target", ".codon")
+	assertErrors(t, root, "projection_target_exists")
+}
+
+func TestExpression_SelectorsMissing(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression_missing_selectors", ".codon")
+	assertErrors(t, root, "projection_selectors_nonempty")
+}
+
+func TestExpression_TargetMissingKindStack(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression_target_missing_fields", ".codon")
+	assertErrors(t, root, "target_requires_kind_and_stack")
+}
+
+func TestExpression_TemplateMissingSource(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression_template_missing_source", ".codon")
+	assertErrors(t, root, "template_source_required")
+}
+
+func TestExpression_ParseFailedTargets(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression_parse_failed", ".codon")
+	g, err := loader.LoadGenome(root)
+	if err != nil {
+		t.Fatalf("load: %v", err)
+	}
+	found := false
+	for _, is := range g.Issues {
+		if is.Code == "targets_parse_failed" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("expected loader issue targets_parse_failed, got %+v", g.Issues)
+	}
+}
+
 func TestTypeExprDeepValidation(t *testing.T) {
 	root := fixturePath("fixtures", "validator", "type_expr_checks", ".codon")
 	_, _, res := loadAndValidate(t, root)

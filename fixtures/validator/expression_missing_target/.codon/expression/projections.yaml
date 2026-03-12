@@ -1,0 +1,5 @@
+projections:
+  bad_proj:
+    target: missing_target
+    capabilities: ["*"]
+    binding: rest_default

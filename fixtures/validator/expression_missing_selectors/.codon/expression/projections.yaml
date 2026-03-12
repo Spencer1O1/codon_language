@@ -1,0 +1,4 @@
+projections:
+  no_selectors:
+    target: api
+    binding: rest_default

@@ -1,0 +1,9 @@
+projections:
+  api_routes:
+    target: api
+    capabilities: ["*"]
+    binding: rest_default
+  worker_jobs:
+    target: worker
+    capabilities: ["enqueue_task"]
+    binding: job_default

@@ -1,0 +1,6 @@
+templates:
+  go-hex-rest@1.0:
+    source: https://example.com/templates/go-hex-rest.zip
+    checksum: sha256:deadbeef
+  go-worker@1.0:
+    source: https://example.com/templates/go-worker.zip
