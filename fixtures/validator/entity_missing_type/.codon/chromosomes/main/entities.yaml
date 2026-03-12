@@ -1,0 +1,5 @@
+gene: ents
+codons:
+  entities:
+    item:
+      name: {}   # missing type/type_expr/ref

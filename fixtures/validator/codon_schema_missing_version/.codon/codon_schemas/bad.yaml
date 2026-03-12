@@ -1,0 +1,4 @@
+codons:
+  bad_codon:
+    description: missing version and schema
+    schema: ""

@@ -1,0 +1,10 @@
+gene: rels
+codons:
+  entities:
+    a: { id: uuid }
+    b: { id: uuid }
+  relations:
+    bad:
+      from: a
+      to: b
+      type: invalid_kind

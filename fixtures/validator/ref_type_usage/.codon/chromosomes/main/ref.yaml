@@ -1,0 +1,9 @@
+gene: refusage
+codons:
+  entities:
+    thing:
+      target:
+        ref: refusage.entities.other
+        type_expr: uuid   # wrong, should be ref
+    other:
+      id: uuid

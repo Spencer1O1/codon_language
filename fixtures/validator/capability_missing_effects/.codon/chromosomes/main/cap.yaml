@@ -1,0 +1,6 @@
+gene: cap
+codons:
+  capabilities:
+    do_thing:
+      description: missing effects
+      inputs: { foo: string }

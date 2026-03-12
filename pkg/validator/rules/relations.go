@@ -21,6 +21,10 @@ func relationsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result
 			continue
 		}
 		for name, raw := range codon {
+			if strings.TrimSpace(name) == "" {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_key_required", Message: "relation names must be non-empty", Gene: gene.Name, Codon: "relations"})
+				continue
+			}
 			rel, ok := raw.(map[string]any)
 			if !ok {
 				res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_shape", Message: "relation must be an object", Gene: gene.Name, Codon: "relations"})
@@ -45,19 +49,23 @@ func relationsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result
 			from, fok := rel["from"].(string)
 			to, tok := rel["to"].(string)
 			if fok {
-				if err := validateEntityRef(from, g, gene, res); err != nil {
-					res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_target_must_exist", Message: fmt.Sprintf("relation %s from: %v", name, err), Gene: gene.Name, Codon: "relations"})
-				}
-				warnRelationOverqual(from, g, gene, res, name)
+			if err := validateEntityRef(from, g, gene, res); err != nil {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_target_must_exist", Message: fmt.Sprintf("relation %s from: %v", name, err), Gene: gene.Name, Codon: "relations"})
 			}
-			if tok {
-				if err := validateEntityRef(to, g, gene, res); err != nil {
-					res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_target_must_exist", Message: fmt.Sprintf("relation %s to: %v", name, err), Gene: gene.Name, Codon: "relations"})
-				}
-				warnRelationOverqual(to, g, gene, res, name)
+			warnRelationOverqual(from, g, gene, res, name)
+		}
+		if tok {
+			if err := validateEntityRef(to, g, gene, res); err != nil {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_target_must_exist", Message: fmt.Sprintf("relation %s to: %v", name, err), Gene: gene.Name, Codon: "relations"})
 			}
+			warnRelationOverqual(to, g, gene, res, name)
+		}
+		// relation type
+		if typ, ok := rel["type"].(string); !ok || (typ != "one-to-one" && typ != "one-to-many" && typ != "many-to-one" && typ != "many-to-many") {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "relation_type_allowed", Message: fmt.Sprintf("relation %s type must be one-to-one|one-to-many|many-to-one|many-to-many", name), Gene: gene.Name, Codon: "relations"})
 		}
 	}
+}
 }
 
 var relIdentRe = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]*$`)

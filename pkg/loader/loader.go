@@ -27,6 +27,7 @@ type CodonSchema struct {
 	Description string
 	TypeExpr    string
 	TypeAST     tp.TypeNode
+	Source      string // filename
 }
 
 type Gene struct {
@@ -139,7 +140,7 @@ func parseSchemaDoc(data []byte, filename string, dest map[string]CodonSchema) e
 		if err != nil {
 			return fmt.Errorf("parse codon schema %s type %s: %w", filename, name, err)
 		}
-		dest[name] = CodonSchema{Version: cf.Version, Description: cf.Description, TypeExpr: src, TypeAST: ast}
+		dest[name] = CodonSchema{Version: cf.Version, Description: cf.Description, TypeExpr: src, TypeAST: ast, Source: filename}
 	}
 	return nil
 }
@@ -166,10 +167,12 @@ func loadGenes(root string) ([]Gene, error) {
 			return nil, fmt.Errorf("parse gene %s: %w", p, err)
 		}
 		name, ok := raw["gene"].(string)
+		// gene_required validation rule
 		if !ok || name == "" {
 			return nil, fmt.Errorf("gene file %s missing gene name", p)
 		}
 		codons := map[string]any{}
+		// codons_required validation rule
 		if c, ok := raw["codons"].(map[string]any); ok {
 			codons = c
 		}

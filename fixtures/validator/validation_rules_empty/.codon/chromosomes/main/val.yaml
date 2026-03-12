@@ -1,0 +1,4 @@
+gene: val
+codons:
+  validation:
+    rules: []
