@@ -229,6 +229,26 @@ func TestExpression_TemplateMissingSource(t *testing.T) {
 	assertErrors(t, root, "template_source_required")
 }
 
+func TestExpression_TargetsShape(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression", "targets_shape_bad")
+	assertErrors(t, root, "targets_shape_map")
+}
+
+func TestExpression_ProjectionsShape(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression", "projections_shape_bad")
+	assertErrors(t, root, "projections_shape_map")
+}
+
+func TestExpression_StylesShape(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression", "styles_shape_bad")
+	assertErrors(t, root, "styles_shape_map")
+}
+
+func TestExpression_TemplatesShape(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "expression", "templates_shape_bad")
+	assertErrors(t, root, "templates_shape_map")
+}
+
 func TestExpression_ParseFailedTargets(t *testing.T) {
 	root := fixturePath("fixtures", "validator", "expression", "parse_failed")
 	g, err := loader.LoadGenome(root)

@@ -13,10 +13,17 @@ func targetsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) 
 		return
 	}
 	tmap := g.Expression.Targets
+	if tmap == nil {
+		return
+	}
 	seen := map[string]bool{}
 	for name, raw := range tmap {
 		if seen[name] {
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "target_names_unique", Message: "target names must be unique", Codon: "targets"})
+			continue
+		}
+		if _, ok := raw.(map[string]any); !ok {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "targets_shape_map", Message: "targets.yaml must be a map of target_name to object", Codon: "targets"})
 			continue
 		}
 		seen[name] = true

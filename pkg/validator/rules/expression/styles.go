@@ -13,10 +13,17 @@ func stylesRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 		return
 	}
 	smap := g.Expression.Styles
+	if smap == nil {
+		return
+	}
 	seen := map[string]bool{}
 	for name, raw := range smap {
 		if seen[name] {
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "style_names_unique", Message: "style names must be unique", Codon: "styles"})
+			continue
+		}
+		if _, ok := raw.(map[string]any); !ok {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "styles_shape_map", Message: "styles.yaml must be a map of style_name to object", Codon: "styles"})
 			continue
 		}
 		seen[name] = true

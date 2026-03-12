@@ -13,10 +13,17 @@ func templatesRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result
 		return
 	}
 	tmap := g.Expression.Templates
+	if tmap == nil {
+		return
+	}
 	seen := map[string]bool{}
 	for name, raw := range tmap {
 		if seen[name] {
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "template_names_unique", Message: "template names must be unique", Codon: "templates"})
+			continue
+		}
+		if _, ok := raw.(map[string]any); !ok {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "templates_shape_map", Message: "templates.yaml must be a map of template_name to object", Codon: "templates"})
 			continue
 		}
 		seen[name] = true

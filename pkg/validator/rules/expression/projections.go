@@ -13,6 +13,9 @@ func projectionsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Resu
 		return
 	}
 	pmap := g.Expression.Projections
+	if pmap == nil {
+		return
+	}
 	targets := map[string]bool{}
 	if g.Expression.Targets != nil {
 		for k := range g.Expression.Targets {
@@ -23,6 +26,10 @@ func projectionsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Resu
 	for name, raw := range pmap {
 		if seen[name] {
 			res.Add(core.Issue{Severity: core.SeverityError, Code: "projection_names_unique", Message: "projection names must be unique", Codon: "projections"})
+			continue
+		}
+		if _, ok := raw.(map[string]any); !ok {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "projections_shape_map", Message: "projections.yaml must be a map of projection_name to object", Codon: "projections"})
 			continue
 		}
 		seen[name] = true
