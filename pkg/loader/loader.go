@@ -20,6 +20,7 @@ type Genome struct {
 	Genes    []Gene
 	Manifest map[string]any
 	Root     string
+	Issues   []Issue
 }
 
 type CodonSchema struct {
@@ -37,9 +38,15 @@ type Gene struct {
 	Path       string
 }
 
+type Issue struct {
+	Severity string
+	Code     string
+	Message  string
+}
+
 // LoadGenome loads codon schemas and genes from a loader root.
 func LoadGenome(root string) (*Genome, error) {
-	codonSchemas, err := loadCodonSchemas(root)
+	codonSchemas, issues, err := loadCodonSchemas(root)
 	if err != nil {
 		return nil, err
 	}
@@ -55,19 +62,20 @@ func LoadGenome(root string) (*Genome, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Genome{Schemas: codonSchemas, Genes: genes, Manifest: manifest, Root: root, TypeEnv: typeEnv}, nil
+	return &Genome{Schemas: codonSchemas, Genes: genes, Manifest: manifest, Root: root, TypeEnv: typeEnv, Issues: issues}, nil
 }
 
-func loadCodonSchemas(root string) (map[string]CodonSchema, error) {
+func loadCodonSchemas(root string) (map[string]CodonSchema, []Issue, error) {
 	codonSchemas := map[string]CodonSchema{}
+	var issues []Issue
 	// embedded defaults
 	if err := loadCodonSchemasFromFS(core_assets.CodonSchemas, "codon_schemas", codonSchemas); err != nil {
-		return nil, err
+		return nil, issues, err
 	}
 	// disk overrides/extensions
 	files, err := path.Glob(path.Join(root, "codon_schemas", "*.yaml"))
 	if err != nil {
-		return nil, err
+		return nil, issues, err
 	}
 	sort.Strings(files)
 	for _, f := range files {
@@ -76,10 +84,10 @@ func loadCodonSchemas(root string) (map[string]CodonSchema, error) {
 			continue
 		}
 		if err := parseSchemaDoc(data, f, codonSchemas); err != nil {
-			return nil, err
+			issues = append(issues, Issue{Severity: "error", Code: "schema_parseable", Message: err.Error()})
 		}
 	}
-	return codonSchemas, nil
+	return codonSchemas, issues, nil
 }
 
 func loadManifest(root string) (map[string]any, error) {

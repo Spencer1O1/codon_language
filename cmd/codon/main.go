@@ -46,6 +46,7 @@ func runLoad(root string) error {
 	if err != nil {
 		return err
 	}
+	printLoaderIssues(g.Issues)
 	fmt.Printf("codon schemas: %d, genes: %d\n", len(g.Schemas), len(g.Genes))
 	return nil
 }
@@ -54,6 +55,9 @@ func runValidate(root string) error {
 	g, err := loader.LoadGenome(root)
 	if err != nil {
 		return err
+	}
+	if hasLoaderErrors := printLoaderIssues(g.Issues); hasLoaderErrors {
+		return fmt.Errorf("loader reported errors")
 	}
 	env, err := loader.BuildTypeEnv(root)
 	if err != nil {
@@ -69,4 +73,19 @@ func runValidate(root string) error {
 		return fmt.Errorf("validation failed")
 	}
 	return nil
+}
+
+// printLoaderIssues displays loader-stage issues and returns true if any errors were present.
+func printLoaderIssues(issues []loader.Issue) bool {
+	if len(issues) == 0 {
+		return false
+	}
+	errs := false
+	for _, is := range issues {
+		fmt.Printf("loader-%s [%s]: %s\n", is.Severity, is.Code, is.Message)
+		if is.Severity == "error" {
+			errs = true
+		}
+	}
+	return errs
 }

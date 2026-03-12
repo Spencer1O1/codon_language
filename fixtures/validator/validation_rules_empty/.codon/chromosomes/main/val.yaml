@@ -1,5 +1,4 @@
 gene: val
 codons:
   implementation:
-    scope: validator
     rules: []
