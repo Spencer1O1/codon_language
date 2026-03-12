@@ -1,0 +1,15 @@
+codons:
+  regex_value:
+    version: 1.0.0
+    description: must match single a
+    type: Regex<"^[a]$">
+
+  map_key_regex:
+    version: 1.0.0
+    description: keys must be letters a+
+    type: Map<Regex<"^[a]+$">, number>
+
+  ref_primitive:
+    version: 1.0.0
+    description: reference primitive should resolve targets
+    type: ref

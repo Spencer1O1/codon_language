@@ -1,0 +1,7 @@
+gene: test
+codons:
+  regex_value: "bb"              # fails regex
+  map_key_regex:
+    aaa: 1
+    "1bad": 2                   # key fails regex
+  ref_primitive: x.test.missing  # ref type should resolve and fail

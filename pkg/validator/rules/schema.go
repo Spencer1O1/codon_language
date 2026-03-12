@@ -23,27 +23,28 @@ func schemaRules(g *loader.Genome, env map[string]nt.TypeNode, res *core.Result)
 				// basicShape already reports missing schemas
 				continue
 			}
-			if err := validateValueAgainstType(val, schema.TypeAST, env); err != nil {
-				res.Add(core.Issue{Severity: core.SeverityError, Code: "schema_mismatch", Message: fmt.Sprintf("%v", err), Gene: gene.Name, Codon: codonName})
+			if issue := validateValueAgainstType(val, schema.TypeAST, env, g, gene, codonName, res); issue != nil {
+				res.Add(*issue)
 			}
 		}
 	}
 }
 
-func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode) error {
+// validateValueAgainstType returns a coded issue on the first failure, or nil on success.
+func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode, genome *loader.Genome, gene loader.Gene, codon string, res *core.Result) *core.Issue {
 	switch node := t.(type) {
 	case nt.OptionalType:
 		if v == nil {
 			return nil
 		}
-		return validateValueAgainstType(v, node.Base, env)
+		return validateValueAgainstType(v, node.Base, env, genome, gene, codon, res)
 	case nt.ListType:
 		arr, ok := v.([]any)
 		if !ok {
-			return fmt.Errorf("expected list")
+			return issue("schema_mismatch", "expected list", gene.Name, codon)
 		}
 		for _, elem := range arr {
-			if err := validateValueAgainstType(elem, node.Base, env); err != nil {
+			if err := validateValueAgainstType(elem, node.Base, env, genome, gene, codon, res); err != nil {
 				return err
 			}
 		}
@@ -52,7 +53,7 @@ func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode) 
 		if node.Name == "Map" {
 			m, ok := v.(map[string]any)
 			if !ok {
-				return fmt.Errorf("expected map")
+				return issue("schema_mismatch", "expected map", gene.Name, codon)
 			}
 			// check key and value types when provided
 			if len(node.Args) == 2 {
@@ -60,9 +61,9 @@ func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode) 
 				valType := node.Args[1]
 				for k, vv := range m {
 					if err := validateMapKey(k, keyType, env); err != nil {
-						return fmt.Errorf("key %q: %v", k, err)
+						return issue("map_key_constraint", fmt.Sprintf("key %q: %v", k, err), gene.Name, codon)
 					}
-					if err := validateValueAgainstType(vv, valType, env); err != nil {
+					if err := validateValueAgainstType(vv, valType, env, genome, gene, codon, res); err != nil {
 						return err
 					}
 				}
@@ -73,14 +74,14 @@ func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode) 
 			pat := extractRegexPattern(node.Args)
 			s, ok := v.(string)
 			if !ok {
-				return fmt.Errorf("expected string matching regex %q", pat)
+				return issue("regex_constraint_violation", fmt.Sprintf("expected string matching regex %q", pat), gene.Name, codon)
 			}
 			re, err := regexp.Compile(pat)
 			if err != nil {
-				return fmt.Errorf("invalid regex pattern %q", pat)
+				return issue("regex_constraint_violation", fmt.Sprintf("invalid regex pattern %q", pat), gene.Name, codon)
 			}
 			if !re.MatchString(s) {
-				return fmt.Errorf("value %q does not match regex %q", s, pat)
+				return issue("regex_constraint_violation", fmt.Sprintf("value %q does not match regex %q", s, pat), gene.Name, codon)
 			}
 			return nil
 		}
@@ -89,18 +90,18 @@ func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode) 
 	case nt.ObjectType:
 		m, ok := v.(map[string]any)
 		if !ok {
-			return fmt.Errorf("expected object")
+			return issue("schema_mismatch", "expected object", gene.Name, codon)
 		}
 		// required/optional via presence; no required flag in AST, but we can ensure defined fields exist
 		for _, f := range node.Fields {
 			if vv, ok := m[f.Name]; ok {
-				if err := validateValueAgainstType(vv, f.Type, env); err != nil {
-					return fmt.Errorf("field %s: %v", f.Name, err)
+				if err := validateValueAgainstType(vv, f.Type, env, genome, gene, codon, res); err != nil {
+					return err
 				}
 			} else {
 				// treat missing as error unless OptionalType
 				if _, isOpt := f.Type.(nt.OptionalType); !isOpt {
-					return fmt.Errorf("field %s required", f.Name)
+					return issue("schema_mismatch", fmt.Sprintf("field %s required", f.Name), gene.Name, codon)
 				}
 			}
 		}
@@ -108,45 +109,47 @@ func validateValueAgainstType(v any, t nt.TypeNode, env map[string]nt.TypeNode) 
 	case nt.UnionType:
 		// accept if any branch matches
 		for _, opt := range node.Options {
-			if err := validateValueAgainstType(v, opt, env); err == nil {
+			if err := validateValueAgainstType(v, opt, env, genome, gene, codon, res); err == nil {
 				return nil
 			}
 		}
-		return fmt.Errorf("value did not match any union option")
+		return issue("schema_mismatch", "value did not match any union option", gene.Name, codon)
 	case nt.NameType:
 		switch node.Name {
 		case "string", "number", "boolean", "uuid", "datetime", "json", "yaml":
 			if isScalar(v) {
 				return nil
 			}
-			return fmt.Errorf("expected scalar for %s", node.Name)
+			return issue("schema_mismatch", fmt.Sprintf("expected scalar for %s", node.Name), gene.Name, codon)
 		case "ref":
-			if s, ok := v.(string); ok && refPattern.MatchString(s) {
+			if s, ok := v.(string); ok {
+				// Reuse reference resolution so ref TypeExpr behaves like {ref: ...}
+				checkRef(s, genome, gene, codon, res)
 				return nil
 			}
-			return fmt.Errorf("expected ref path string")
+			return issue("schema_mismatch", "expected ref path string", gene.Name, codon)
 		case "TypeExpr":
 			if isScalar(v) {
 				return nil
 			}
-			return fmt.Errorf("expected scalar for %s", node.Name)
+			return issue("schema_mismatch", fmt.Sprintf("expected scalar for %s", node.Name), gene.Name, codon)
 		default:
 			if resolved, ok := env[node.Name]; ok {
-				return validateValueAgainstType(v, resolved, env)
+				return validateValueAgainstType(v, resolved, env, genome, gene, codon, res)
 			}
-			return fmt.Errorf("unknown type %s", node.Name)
+			return issue("type_name_unknown", fmt.Sprintf("unknown type %s", node.Name), gene.Name, codon)
 		}
 	case nt.LiteralType:
 		if s, ok := v.(string); ok && s == node.Value {
 			return nil
 		}
-		return fmt.Errorf("expected literal %s", node.Value)
+		return issue("schema_mismatch", fmt.Sprintf("expected literal %s", node.Value), gene.Name, codon)
 	default:
 		// primitives/scalars
 		if isScalar(v) {
 			return nil
 		}
-		return fmt.Errorf("expected scalar")
+		return issue("schema_mismatch", "expected scalar", gene.Name, codon)
 	}
 }
 
@@ -170,8 +173,7 @@ func validateMapKey(key string, t nt.TypeNode, env map[string]nt.TypeNode) error
 		if resolved, ok := env[kt.Name]; ok {
 			return validateMapKey(key, resolved, env)
 		}
-		// default to string match
-		return nil
+		return fmt.Errorf("unknown type %s", kt.Name)
 	case nt.GenericType:
 		if kt.Name == "Regex" {
 			pat := extractRegexPattern(kt.Args)
@@ -198,4 +200,6 @@ func extractRegexPattern(args []nt.TypeNode) string {
 	return ""
 }
 
-var refPattern = regexp.MustCompile(`^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z][A-Za-z0-9_]*){0,3}$`)
+func issue(code, msg, gene, codon string) *core.Issue {
+	return &core.Issue{Severity: core.SeverityError, Code: code, Message: msg, Gene: gene, Codon: codon}
+}

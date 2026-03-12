@@ -159,6 +159,27 @@ func TestTraitMerge_ListAppend(t *testing.T) {
 	}
 }
 
+func TestTypeExprDeepValidation(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "type_expr_checks", ".codon")
+	_, _, res := loadAndValidate(t, root)
+	if !res.HasErrors() {
+		t.Fatalf("expected errors for regex/map/ref violations, got none")
+	}
+	wantCodes := []string{"regex_constraint_violation", "map_key_constraint", "ref_target_must_exist"}
+	for _, code := range wantCodes {
+		found := false
+		for _, is := range res.Issues {
+			if is.Code == code {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Fatalf("expected error code %s, got %+v", code, res.Issues)
+		}
+	}
+}
+
 // helper
 func assertErrors(t *testing.T, root string, substr string) {
 	t.Helper()
