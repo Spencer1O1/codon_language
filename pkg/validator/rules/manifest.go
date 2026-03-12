@@ -1,9 +1,9 @@
 package rules
 
 import (
-    "path/filepath"
-    "strings"
-    "os"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/Spencer1O1/codon-language/pkg/loader"
 	nt "github.com/Spencer1O1/codon-language/pkg/nucleotype"
@@ -16,11 +16,6 @@ func init() {
 
 // manifestRules enforces manifest-level rules documented in genome_manifest validation codon.
 func manifestRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
-	if g.Manifest == nil {
-		res.Add(core.Issue{Severity: core.SeverityError, Code: "manifest_file_exists", Message: "manifest (genome.yaml) missing"})
-		return
-	}
-
 	// schema_version
 	if sv, ok := g.Manifest["schema_version"].(string); !ok || strings.TrimSpace(sv) == "" {
 		res.Add(core.Issue{Severity: core.SeverityError, Code: "schema_version_required", Message: "schema_version is required"})
