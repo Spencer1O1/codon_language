@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/Spencer1O1/codon-language/pkg/loader"
+	"github.com/Spencer1O1/codon_language/pkg/loader"
 )
 
 // printLoaderIssues displays loader-stage issues and returns true if any errors were present.

@@ -3,8 +3,8 @@ package loader_test
 import (
 	"testing"
 
-	"github.com/Spencer1O1/codon-language/pkg/loader"
-	"github.com/Spencer1O1/codon-language/pkg/validator"
+	"github.com/Spencer1O1/codon_language/pkg/loader"
+	"github.com/Spencer1O1/codon_language/pkg/validator"
 )
 
 func TestLoadAndValidate(t *testing.T) {

@@ -4,9 +4,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/Spencer1O1/codon-language/pkg/loader"
-	nt "github.com/Spencer1O1/codon-language/pkg/nucleotype"
-	"github.com/Spencer1O1/codon-language/pkg/validator/core"
+	"github.com/Spencer1O1/codon_language/pkg/loader"
+	nt "github.com/Spencer1O1/codon_language/pkg/nucleotype"
+	"github.com/Spencer1O1/codon_language/pkg/validator/core"
 )
 
 var identAllowed = regexp.MustCompile(`^[a-z][a-z0-9_]*$`)

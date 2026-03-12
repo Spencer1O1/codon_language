@@ -1,4 +1,4 @@
-module github.com/Spencer1O1/codon-language
+module github.com/Spencer1O1/codon_language
 
 go 1.26.1
 

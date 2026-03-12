@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/Spencer1O1/codon-language/pkg/loader"
+	"github.com/Spencer1O1/codon_language/pkg/loader"
 )
 
 func runLoad(root string) error {

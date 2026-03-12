@@ -1,13 +1,13 @@
 package validator
 
 import (
-	"github.com/Spencer1O1/codon-language/pkg/loader"
-	nt "github.com/Spencer1O1/codon-language/pkg/nucleotype"
-	"github.com/Spencer1O1/codon-language/pkg/validator/core"
-	_ "github.com/Spencer1O1/codon-language/pkg/validator/rules/expression" // placeholder group (future)
-	_ "github.com/Spencer1O1/codon-language/pkg/validator/rules/language"   // register language rules
-	_ "github.com/Spencer1O1/codon-language/pkg/validator/rules/manifest"   // register manifest rules
-	_ "github.com/Spencer1O1/codon-language/pkg/validator/rules/traits"     // register trait rules
+	"github.com/Spencer1O1/codon_language/pkg/loader"
+	nt "github.com/Spencer1O1/codon_language/pkg/nucleotype"
+	"github.com/Spencer1O1/codon_language/pkg/validator/core"
+	_ "github.com/Spencer1O1/codon_language/pkg/validator/rules/expression" // placeholder group (future)
+	_ "github.com/Spencer1O1/codon_language/pkg/validator/rules/language"   // register language rules
+	_ "github.com/Spencer1O1/codon_language/pkg/validator/rules/manifest"   // register manifest rules
+	_ "github.com/Spencer1O1/codon_language/pkg/validator/rules/traits"     // register trait rules
 )
 
 // Validate runs all registered rules against the loaded genome.

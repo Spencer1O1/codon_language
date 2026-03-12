@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	tp "github.com/Spencer1O1/codon-language/pkg/nucleotype"
+	tp "github.com/Spencer1O1/codon_language/pkg/nucleotype"
 )
 
 // ComposedArtifact is the serialized, post-validation genome shape.

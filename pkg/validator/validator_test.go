@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/Spencer1O1/codon-language/pkg/loader"
-	nt "github.com/Spencer1O1/codon-language/pkg/nucleotype"
-	"github.com/Spencer1O1/codon-language/pkg/validator/core"
+	"github.com/Spencer1O1/codon_language/pkg/loader"
+	nt "github.com/Spencer1O1/codon_language/pkg/nucleotype"
+	"github.com/Spencer1O1/codon_language/pkg/validator/core"
 )
 
 func TestValidate_HappyPathExample(t *testing.T) {

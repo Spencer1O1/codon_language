@@ -8,9 +8,9 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/Spencer1O1/codon-language/pkg/loader"
-	tp "github.com/Spencer1O1/codon-language/pkg/nucleotype"
-	"github.com/Spencer1O1/codon-language/pkg/validator/core"
+	"github.com/Spencer1O1/codon_language/pkg/loader"
+	tp "github.com/Spencer1O1/codon_language/pkg/nucleotype"
+	"github.com/Spencer1O1/codon_language/pkg/validator/core"
 	goyaml "gopkg.in/yaml.v3"
 )
 

@@ -2,7 +2,7 @@ GOCACHE ?= $(CURDIR)/.cache/go-build
 GOMODCACHE ?= $(CURDIR)/.cache/go-mod
 ROOT ?=
 
-.PHONY: test build lint fmt vet clean tidy deps load validate validate-codon-language sync-assets sync-core-assets
+.PHONY: test build lint fmt vet clean tidy deps load validate validate-codon_language sync-assets sync-core-assets
 
 test:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go test -count=1 ./cmd/... ./pkg/... ./internal/...
@@ -13,7 +13,7 @@ build:
 load:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go run ./cmd/codon load $(ROOT)
 
-validate-codon-language:
+validate-codon_language:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go run ./cmd/codon validate .codon
 validate-codon:
 	GOCACHE=$(GOCACHE) GOMODCACHE=$(GOMODCACHE) go run ./cmd/codon validate $(ROOT)
