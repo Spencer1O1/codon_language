@@ -1,4 +1,4 @@
-gene: mobile_api
+gene: mobile
 description: Mobile app endpoints for capture & status
 codons:
   capabilities:

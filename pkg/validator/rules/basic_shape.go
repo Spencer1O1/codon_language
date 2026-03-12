@@ -2,6 +2,8 @@ package rules
 
 import (
 	"fmt"
+	"path/filepath"
+	"strings"
 
 	"github.com/Spencer1O1/codon-language/pkg/loader"
 	nt "github.com/Spencer1O1/codon-language/pkg/nucleotype"
@@ -15,6 +17,11 @@ func init() {
 // basicShape checks that each codon has a codon schema and matches top-level shape.
 func basicShape(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 	for _, gene := range g.Genes {
+		// filename stem must match gene name
+		stem := strings.TrimSuffix(filepath.Base(gene.Path), ".yaml")
+		if stem != "" && stem != gene.Name {
+			res.Add(core.Issue{Severity: core.SeverityError, Code: "gene_filename_matches_name", Message: fmt.Sprintf("gene filename %s must match gene name %s", stem, gene.Name), Gene: gene.Name})
+		}
 		for bucket, val := range gene.Codons {
 			schema, ok := g.Schemas[bucket]
 			if !ok {

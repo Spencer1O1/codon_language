@@ -1,4 +1,4 @@
-gene: web_api
+gene: web
 description: Admin/maintainer web dashboard endpoints
 codons:
   capabilities:
