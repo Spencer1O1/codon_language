@@ -1,4 +1,4 @@
-package rules
+package manifest
 
 import (
 	"os"
@@ -11,10 +11,10 @@ import (
 )
 
 func init() {
-	core.Register(manifestRules)
+	core.RegisterWithGroup("manifest", manifestRules)
 }
 
-// manifestRules enforces manifest-level rules documented in genome_manifest validation codon.
+// manifestRules enforces manifest-level rules documented in genome_manifest implementation codon.
 func manifestRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 	// schema_version
 	if sv, ok := g.Manifest["schema_version"].(string); !ok || strings.TrimSpace(sv) == "" {
@@ -34,9 +34,7 @@ func manifestRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result)
 		}
 	}
 
-	// manifest filename check (best-effort path from loader caller)
-	// Not robust without path info; assume loader root contains genome.yaml.
-	// traits map: chromosome -> trait name (legacy global scope)
+	// genome-level traits (legacy map)
 	if traitsRaw, ok := g.Manifest["traits"]; ok {
 		traits, ok := traitsRaw.(map[string]any)
 		if !ok {

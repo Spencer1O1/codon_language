@@ -1,4 +1,4 @@
-package rules
+package language
 
 import (
 	"strings"
@@ -8,7 +8,7 @@ import (
 	"github.com/Spencer1O1/codon-language/pkg/validator/core"
 )
 
-func init() { core.Register(entityRules) }
+func init() { core.RegisterWithGroup("language", entityRules) }
 
 func entityRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 	for _, gene := range g.Genes {
@@ -38,13 +38,11 @@ func entityRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 				// field type required: value is scalar (interpreted as type_expr) OK; if map, must include type/type_expr/ref
 				if m, ok := fval.(map[string]any); ok {
 					_, hasType := m["type"]
-					_, hasTypeExpr := m["type_expr"]
+					_, hasTE := m["type_expr"]
 					_, hasRef := m["ref"]
-					if !hasType && !hasTypeExpr && !hasRef {
-						res.Add(core.Issue{Severity: core.SeverityError, Code: "field_type_required", Message: "field must declare type/type_expr/ref", Gene: gene.Name, Codon: "entities"})
+					if !hasType && !hasTE && !hasRef {
+						res.Add(core.Issue{Severity: core.SeverityError, Code: "field_type_required", Message: "field must include type/type_expr/ref", Gene: gene.Name, Codon: "entities"})
 					}
-				} else {
-					// scalar: treated as type_expr, okay
 				}
 			}
 		}

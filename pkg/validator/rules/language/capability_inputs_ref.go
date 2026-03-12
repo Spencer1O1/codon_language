@@ -1,4 +1,4 @@
-package rules
+package language
 
 import (
 	"github.com/Spencer1O1/codon-language/pkg/loader"
@@ -7,7 +7,7 @@ import (
 )
 
 // ref_type_usage: if a field map has ref, its type/type_expr must be ref or absent.
-func init() { core.Register(refTypeUsageRules) }
+func init() { core.RegisterWithGroup("language", refTypeUsageRules) }
 
 func refTypeUsageRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 	for _, gene := range g.Genes {

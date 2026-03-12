@@ -1,4 +1,4 @@
-package rules
+package language
 
 import (
 	"strings"
@@ -8,7 +8,7 @@ import (
 	"github.com/Spencer1O1/codon-language/pkg/validator/core"
 )
 
-func init() { core.Register(capabilityRules) }
+func init() { core.RegisterWithGroup("language", capabilityRules) }
 
 func capabilityRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 	for _, gene := range g.Genes {
@@ -27,21 +27,12 @@ func capabilityRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Resul
 				continue
 			}
 			seen[name] = true
-			obj, ok := raw.(map[string]any)
+			cap, ok := raw.(map[string]any)
 			if !ok {
 				continue
 			}
-			// effects required
-			if eff, ok := obj["effects"].([]any); !ok || len(eff) == 0 {
-				res.Add(core.Issue{Severity: core.SeverityError, Code: "effects_required", Message: "effects list is required", Gene: gene.Name, Codon: "capabilities"})
-			}
-			// inputs/outputs object
-			for _, key := range []string{"inputs", "outputs"} {
-				if v, ok := obj[key]; ok && v != nil {
-					if _, ok := v.(map[string]any); !ok {
-						res.Add(core.Issue{Severity: core.SeverityError, Code: "inputs_outputs_object", Message: key + " must be an object when present", Gene: gene.Name, Codon: "capabilities"})
-					}
-				}
+			if effects, ok := cap["effects"].([]any); !ok || len(effects) == 0 {
+				res.Add(core.Issue{Severity: core.SeverityError, Code: "effects_required", Message: "capability.effects must be a non-empty list", Gene: gene.Name, Codon: "capabilities"})
 			}
 		}
 	}

@@ -1,4 +1,4 @@
-package rules
+package language
 
 import (
 	"github.com/Spencer1O1/codon-language/pkg/loader"
@@ -6,7 +6,7 @@ import (
 	"github.com/Spencer1O1/codon-language/pkg/validator/core"
 )
 
-func init() { core.Register(rulesMeta) }
+func init() { core.RegisterWithGroup("language", rulesMeta) }
 
 // rulesMeta enforces shape of rules codon and respects scope (defaults to validator).
 func rulesMeta(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {

@@ -1,4 +1,4 @@
-package rules
+package traits
 
 import (
 	"fmt"
@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	core.Register(traitRules)
+	core.RegisterWithGroup("traits", traitRules)
 }
 
 func traitRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
@@ -43,4 +43,27 @@ func traitRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 			}
 		}
 	}
+
+	// chromosome traits
+	for chrom, gene := range groupByChromosome(g.Genes) {
+		if ctraits, ok := g.Manifest["chromosome_traits"].(map[string]any); ok {
+			if nameRaw, ok := ctraits[chrom]; ok {
+				name, _ := nameRaw.(string)
+				if name != "" {
+					pattern := filepath.Join(g.Root, "traits", "chromosome", name, "trait.yaml")
+					if _, err := os.Stat(pattern); err != nil {
+						res.Add(core.Issue{Severity: core.SeverityError, Code: "chromosome_trait_file_exists", Message: "chromosome trait file not found: " + pattern, Gene: gene, Codon: "traits"})
+					}
+				}
+			}
+		}
+	}
+}
+
+func groupByChromosome(genes []loader.Gene) map[string]string {
+	m := map[string]string{}
+	for _, g := range genes {
+		m[g.Chromosome] = g.Name
+	}
+	return m
 }

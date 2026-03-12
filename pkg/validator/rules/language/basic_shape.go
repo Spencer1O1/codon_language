@@ -1,4 +1,4 @@
-package rules
+package language
 
 import (
 	"fmt"
@@ -11,7 +11,7 @@ import (
 )
 
 func init() {
-	core.Register(basicShape)
+	core.RegisterWithGroup("language", basicShape)
 }
 
 // basicShape checks that each codon has a codon schema and matches top-level shape.

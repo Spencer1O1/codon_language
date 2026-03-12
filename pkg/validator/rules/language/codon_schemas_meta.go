@@ -1,4 +1,4 @@
-package rules
+package language
 
 import (
 	"path/filepath"
@@ -9,7 +9,7 @@ import (
 	"github.com/Spencer1O1/codon-language/pkg/validator/core"
 )
 
-func init() { core.Register(codonSchemaRules) }
+func init() { core.RegisterWithGroup("language", codonSchemaRules) }
 
 func codonSchemaRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 	for name, sc := range g.Schemas {
