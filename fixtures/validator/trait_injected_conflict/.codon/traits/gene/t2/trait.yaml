@@ -1,0 +1,5 @@
+genes:
+  svc:
+    entities:
+      injected:
+        type_expr: uuid   # different from t1, should trigger trait_conflict_injected_must_match

@@ -1,0 +1,3 @@
+gene: svc
+codons:
+  traits: [t1, t2]

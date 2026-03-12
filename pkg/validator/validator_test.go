@@ -65,6 +65,41 @@ func TestValidate_RelationTargetMissing(t *testing.T) {
 	assertErrors(t, root, "relation_target_must_exist")
 }
 
+func TestValidate_RelationBadCascade(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "relation_bad_cascade", ".codon")
+	assertErrors(t, root, "cascade_value_allowed")
+}
+
+func TestValidate_RelationBadOwnership(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "relation_bad_ownership", ".codon")
+	assertErrors(t, root, "ownership_side_must_be_valid")
+}
+
+func TestValidate_CapabilityMissingEffects(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "capability_missing_effects", ".codon")
+	assertErrors(t, root, "effects_required")
+}
+
+func TestValidate_EntityMissingType(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "entity_missing_type", ".codon")
+	assertErrors(t, root, "field_type_required")
+}
+
+func TestValidate_RefTypeUsage(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "ref_type_usage", ".codon")
+	assertErrors(t, root, "ref_type_usage")
+}
+
+func TestValidate_ValidationRulesEmpty(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "validation_rules_empty", ".codon")
+	assertErrors(t, root, "rules_required")
+}
+
+func TestValidate_CodonSchemaMissingVersion(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "codon_schema_missing_version", ".codon")
+	assertErrors(t, root, "schema_version_required")
+}
+
 func TestValidate_OverqualifiedWarn(t *testing.T) {
 	root := fixturePath("fixtures", "validator", "overqualified", ".codon")
 	g, err := loader.LoadGenome(root)
@@ -225,7 +260,7 @@ func assertErrors(t *testing.T, root string, substr string) {
 // fixturePath builds a path relative to repo root (tests run from pkg/validator).
 func fixturePath(parts ...string) string {
 	all := append([]string{"..", ".."}, parts...)
-	return filepath.Join(all...)
+		return filepath.Join(all...)
 }
 
 // loadAndValidate is a small helper shared by trait merge tests.

@@ -18,3 +18,8 @@ export Regex<T> = primitive
 
 # Any value (escape hatch for schemas that accept arbitrary YAML)
 export any = primitive
+
+# Generic object map (moved from objects.nucleotype)
+export object_key = Regex<"^[a-z][a-z0-9_]*$">
+export object_value = Union<string, number, boolean, uuid, datetime, json, yaml, object>
+export object = Map<object_key, object_value>

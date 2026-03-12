@@ -1,0 +1,11 @@
+gene: rels
+codons:
+  entities:
+    a: { id: uuid }
+    b: { id: uuid }
+  relations:
+    bad_cascade:
+      from: a
+      to: b
+      type: one-to-one
+      cascade: explode   # invalid value

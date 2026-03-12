@@ -48,9 +48,9 @@ codons:
         examples: Optional<List<object>>,
       }
 
-  validation:
+  implementation:
     version: 1.0.0
-    description: normative validation rules list
+    description: normative rule lists for implementation
     type: |
       {
         rules: List<{

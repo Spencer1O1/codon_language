@@ -1,0 +1,5 @@
+genes:
+  svc:
+    entities:
+      injected:
+        type_expr: string

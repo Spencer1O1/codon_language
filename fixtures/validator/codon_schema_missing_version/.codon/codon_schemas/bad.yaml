@@ -1,4 +1,4 @@
 codons:
   bad_codon:
-    description: missing version and schema
-    schema: ""
+    description: missing version
+    schema: Map<string, string>

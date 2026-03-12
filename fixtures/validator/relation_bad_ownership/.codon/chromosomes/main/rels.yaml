@@ -1,0 +1,11 @@
+gene: rels
+codons:
+  entities:
+    a: { id: uuid }
+    b: { id: uuid }
+  relations:
+    bad_owner:
+      from: a
+      to: b
+      type: one-to-one
+      ownership: both   # invalid
