@@ -55,6 +55,16 @@ func TestValidate_IdentifierReserved(t *testing.T) {
 	assertErrors(t, root, "identifier_reserved")
 }
 
+func TestValidate_RefTargetMissing(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "ref_target_missing", ".codon")
+	assertErrors(t, root, "ref_target_must_exist")
+}
+
+func TestValidate_RelationTargetMissing(t *testing.T) {
+	root := fixturePath("fixtures", "validator", "relation_missing_target", ".codon")
+	assertErrors(t, root, "relation_target_must_exist")
+}
+
 func TestValidate_OverqualifiedWarn(t *testing.T) {
 	root := fixturePath("fixtures", "validator", "overqualified", ".codon")
 	g, err := loader.LoadGenome(root)

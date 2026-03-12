@@ -1,0 +1,10 @@
+gene: rels
+codons:
+  entities:
+    foo:
+      id: uuid
+  relations:
+    bad_rel:
+      from: foo
+      to: missing_entity   # should error: missing target
+      type: one-to-one

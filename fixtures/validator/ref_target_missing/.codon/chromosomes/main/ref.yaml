@@ -1,0 +1,6 @@
+gene: refdemo
+codons:
+  entities:
+    foo:
+      target:
+        ref: main.relations.missing   # missing target should error
