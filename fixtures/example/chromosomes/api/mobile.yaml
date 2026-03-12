@@ -1,6 +1,24 @@
 gene: mobile
 description: Mobile app endpoints for capture & status
 codons:
+  documentation:
+    semantics:
+      - Mobile API exposes capture and status flows used by the field app.
+      - Capabilities are thin request/response contracts; business logic lives in service layer.
+    guidance:
+      - Keep inputs minimal; prefer IDs and URLs over blobs.
+      - Avoid breaking changes—add new capabilities instead of mutating existing contracts.
+    examples: []
+
+  implementation:
+    rules:
+      - code: mobile_capabilities_should_be_idempotent
+        severity: warn
+        message: mobile endpoints should be idempotent to handle flaky connectivity.
+      - code: mobile_inputs_require_auth
+        severity: error
+        message: mobile capabilities must assume authenticated caller; enforce auth upstream.
+
   capabilities:
     mobile_submit_report:
       description: Public mobile flow to submit report with photo.

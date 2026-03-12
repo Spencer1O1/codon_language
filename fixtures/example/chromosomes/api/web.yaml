@@ -1,6 +1,24 @@
 gene: web
 description: Admin/maintainer web dashboard endpoints
 codons:
+  documentation:
+    semantics:
+      - Web API powers the admin/maintainer dashboard.
+      - Capabilities focus on ticket assignment and oversight.
+    guidance:
+      - Keep responses small; dashboards can paginate or fetch details per ticket.
+      - Enforce role-based access in gateway layer.
+    examples: []
+
+  implementation:
+    rules:
+      - code: web_capabilities_require_role
+        severity: error
+        message: web capabilities must be authorized for admin/maintainer roles.
+      - code: web_capabilities_paginate
+        severity: warn
+        message: list-like responses should support pagination to avoid heavy loads.
+
   capabilities:
     view_dashboard:
       description: Org/admin dashboard to monitor tickets and assets.

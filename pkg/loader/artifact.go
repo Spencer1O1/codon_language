@@ -27,7 +27,8 @@ type ArtifactChromosome struct {
 // ArtifactGene is a gene entry in the composed artifact.
 type ArtifactGene struct {
 	Name   string         `yaml:"name" json:"name"`
-	Codons map[string]any `yaml:"codons" json:"codons"`
+	Description string         `yaml:"description,omitempty" json:"description,omitempty"`
+	Codons      map[string]any `yaml:"codons" json:"codons"`
 }
 
 // TraitApplied records a trait that was applied during composition.
@@ -80,7 +81,7 @@ func BuildArtifact(g *Genome) *ComposedArtifact {
 	// group genes by chromosome for determinism
 	chMap := map[string][]ArtifactGene{}
 	for _, ge := range g.Genes {
-		chMap[ge.Chromosome] = append(chMap[ge.Chromosome], ArtifactGene{Name: ge.Name, Codons: ge.Codons})
+		chMap[ge.Chromosome] = append(chMap[ge.Chromosome], ArtifactGene{Name: ge.Name, Description: ge.Description, Codons: ge.Codons})
 	}
 	var chromosomes []ArtifactChromosome
 	for ch, genes := range chMap {
