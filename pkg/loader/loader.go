@@ -255,7 +255,10 @@ func loadGenes(root string) ([]Gene, error) {
 		if !ok || name == "" {
 			return nil, fmt.Errorf("gene file %s missing gene name", p)
 		}
-		desc, _ := raw["description"].(string)
+		desc := ""
+		if d, ok := raw["description"].(string); ok {
+			desc = d
+		}
 		codons := map[string]any{}
 		// codons_required validation rule
 		if c, ok := raw["codons"].(map[string]any); ok {
