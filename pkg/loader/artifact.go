@@ -14,6 +14,7 @@ type ComposedArtifact struct {
 	CodonSchemas  map[string]any       `yaml:"codon_schemas" json:"codon_schemas"`
 	Nucleotypes   map[string]string    `yaml:"nucleotypes" json:"nucleotypes"`
 	Chromosomes   []ArtifactChromosome `yaml:"chromosomes" json:"chromosomes"`
+	Expression    map[string]any       `yaml:"expression,omitempty" json:"expression,omitempty"`
 	TraitsApplied []TraitApplied       `yaml:"traits_applied,omitempty" json:"traits_applied,omitempty"`
 	Issues        []Issue              `yaml:"issues,omitempty" json:"issues,omitempty"`
 }
@@ -90,6 +91,25 @@ func BuildArtifact(g *Genome) *ComposedArtifact {
 	}
 	sort.Slice(chromosomes, func(i, j int) bool { return chromosomes[i].Name < chromosomes[j].Name })
 	art.Chromosomes = chromosomes
+
+	if g.Expression != nil {
+		exp := map[string]any{}
+		if g.Expression.Targets != nil {
+			exp["targets"] = g.Expression.Targets
+		}
+		if g.Expression.Projections != nil {
+			exp["projections"] = g.Expression.Projections
+		}
+		if g.Expression.Styles != nil {
+			exp["styles"] = g.Expression.Styles
+		}
+		if g.Expression.Templates != nil {
+			exp["templates"] = g.Expression.Templates
+		}
+		if len(exp) > 0 {
+			art.Expression = exp
+		}
+	}
 
 	return art
 }

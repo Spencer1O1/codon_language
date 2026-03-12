@@ -22,6 +22,7 @@ type Genome struct {
 	TypeExport   []string
 	Genes        []Gene
 	Manifest     map[string]any
+	Expression   *ExpressionAssets
 	Root         string
 	Issues       []Issue
 }
@@ -58,6 +59,8 @@ func LoadGenome(root string) (*Genome, error) {
 	if err != nil {
 		return nil, err
 	}
+	expr, exprIssues := loadExpression(root)
+	issues = append(issues, exprIssues...)
 	genes, err := loadGenes(root)
 	if err != nil {
 		return nil, err
@@ -73,6 +76,7 @@ func LoadGenome(root string) (*Genome, error) {
 		TypeExport:   exportedTypes,
 		Genes:        genes,
 		Manifest:     manifest,
+		Expression:   expr,
 		Root:         root,
 		Issues:       issues,
 	}, nil
@@ -122,6 +126,45 @@ func loadManifest(root string) (map[string]any, error) {
 		return nil, fmt.Errorf("parse manifest %s: %w", path, err)
 	}
 	return manifest, nil
+}
+
+// ExpressionAssets holds parsed expression files (optional).
+type ExpressionAssets struct {
+	Targets     map[string]any
+	Projections map[string]any
+	Styles      map[string]any
+	Templates   map[string]any
+}
+
+func loadExpression(root string) (*ExpressionAssets, []Issue) {
+	exprRoot := path.Join(root, "expression")
+	if _, err := os.Stat(exprRoot); err != nil {
+		return nil, nil
+	}
+	var issues []Issue
+	loadFile := func(name string) map[string]any {
+		fp := path.Join(exprRoot, name)
+		data, err := os.ReadFile(fp)
+		if err != nil {
+			if os.IsNotExist(err) {
+				return nil
+			}
+			issues = append(issues, Issue{Severity: "error", Code: "expression_read_failed", Message: fmt.Sprintf("read %s: %v", fp, err)})
+			return nil
+		}
+		var m map[string]any
+		if err := goyaml.Unmarshal(data, &m); err != nil {
+			issues = append(issues, Issue{Severity: "error", Code: "expression_parse_failed", Message: fmt.Sprintf("parse %s: %v", fp, err)})
+			return nil
+		}
+		return m
+	}
+	return &ExpressionAssets{
+		Targets:     loadFile("targets.yaml"),
+		Projections: loadFile("projections.yaml"),
+		Styles:      loadFile("styles.yaml"),
+		Templates:   loadFile("templates.yaml"),
+	}, issues
 }
 
 func loadCodonSchemasFromFS(fsys fs.FS, dir string, dest map[string]CodonSchema, export bool, exportList *[]string) error {
