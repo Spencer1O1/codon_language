@@ -140,7 +140,7 @@ func loadExpression(root string) (*ExpressionAssets, []Issue) {
 		return nil, nil
 	}
 	var issues []Issue
-	loadFile := func(name, codePrefix string) map[string]any {
+	loadFile := func(name, codePrefix string, key string) map[string]any {
 		fp := path.Join(exprRoot, name)
 		data, err := os.ReadFile(fp)
 		if err != nil {
@@ -155,13 +155,16 @@ func loadExpression(root string) (*ExpressionAssets, []Issue) {
 			issues = append(issues, Issue{Severity: "error", Code: codePrefix + "_parse_failed", Message: fmt.Sprintf("parse %s: %v", fp, err)})
 			return nil
 		}
+		if inner, ok := m[key].(map[string]any); ok {
+			return inner
+		}
 		return m
 	}
 	assets := &ExpressionAssets{
-		Targets:     loadFile("targets.yaml", "targets"),
-		Projections: loadFile("projections.yaml", "projections"),
-		Styles:      loadFile("styles.yaml", "styles"),
-		Templates:   loadFile("templates.yaml", "templates"),
+		Targets:     loadFile("targets.yaml", "targets", "targets"),
+		Projections: loadFile("projections.yaml", "projections", "projections"),
+		Styles:      loadFile("styles.yaml", "styles", "styles"),
+		Templates:   loadFile("templates.yaml", "templates", "templates"),
 	}
 	if assets.Targets == nil && assets.Projections == nil && assets.Styles == nil && assets.Templates == nil {
 		return nil, issues

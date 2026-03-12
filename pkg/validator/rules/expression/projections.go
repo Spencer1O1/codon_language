@@ -12,16 +12,11 @@ func projectionsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Resu
 	if g.Expression == nil || g.Expression.Projections == nil {
 		return
 	}
-	pmap, ok := g.Expression.Projections["projections"].(map[string]any)
-	if !ok {
-		return
-	}
+	pmap := g.Expression.Projections
 	targets := map[string]bool{}
 	if g.Expression.Targets != nil {
-		if tmap, ok := g.Expression.Targets["targets"].(map[string]any); ok {
-			for k := range tmap {
-				targets[k] = true
-			}
+		for k := range g.Expression.Targets {
+			targets[k] = true
 		}
 	}
 	seen := map[string]bool{}

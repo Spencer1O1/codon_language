@@ -12,10 +12,7 @@ func targetsRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) 
 	if g.Expression == nil || g.Expression.Targets == nil {
 		return
 	}
-	tmap, ok := g.Expression.Targets["targets"].(map[string]any)
-	if !ok {
-		return
-	}
+	tmap := g.Expression.Targets
 	seen := map[string]bool{}
 	for name, raw := range tmap {
 		if seen[name] {

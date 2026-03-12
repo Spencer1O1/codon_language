@@ -12,10 +12,7 @@ func stylesRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result) {
 	if g.Expression == nil || g.Expression.Styles == nil {
 		return
 	}
-	smap, ok := g.Expression.Styles["styles"].(map[string]any)
-	if !ok {
-		return
-	}
+	smap := g.Expression.Styles
 	seen := map[string]bool{}
 	for name, raw := range smap {
 		if seen[name] {

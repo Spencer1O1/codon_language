@@ -12,10 +12,7 @@ func templatesRules(g *loader.Genome, _ map[string]nt.TypeNode, res *core.Result
 	if g.Expression == nil || g.Expression.Templates == nil {
 		return
 	}
-	tmap, ok := g.Expression.Templates["templates"].(map[string]any)
-	if !ok {
-		return
-	}
+	tmap := g.Expression.Templates
 	seen := map[string]bool{}
 	for name, raw := range tmap {
 		if seen[name] {
