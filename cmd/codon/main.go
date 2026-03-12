@@ -67,7 +67,7 @@ func runValidate(root string) error {
 	errs, warns, infos := res.Summary()
 	fmt.Printf("errors: %d, warnings: %d, infos: %d\n", errs, warns, infos)
 	for _, is := range res.Issues {
-		fmt.Printf("%s [%s]: %s (gene=%s codon=%s)\n", is.Severity, is.Code, is.Message, is.Gene, is.Codon)
+		printIssue("validation", string(is.Severity), is.Code, is.Message, is.Gene, is.Codon)
 	}
 	if res.HasErrors() {
 		return fmt.Errorf("validation failed")
@@ -82,10 +82,19 @@ func printLoaderIssues(issues []loader.Issue) bool {
 	}
 	errs := false
 	for _, is := range issues {
-		fmt.Printf("loader-%s [%s]: %s\n", is.Severity, is.Code, is.Message)
+		printIssue("loader", is.Severity, is.Code, is.Message, "", "")
 		if is.Severity == "error" {
 			errs = true
 		}
 	}
 	return errs
+}
+
+// printIssue renders a single issue consistently for loader and validator.
+func printIssue(prefix, severity, code, message, gene, codon string) {
+	line := fmt.Sprintf("%s-%s [%s]: %s", prefix, severity, code, message)
+	if gene != "" || codon != "" {
+		line += fmt.Sprintf(" (gene=%s codon=%s)", gene, codon)
+	}
+	fmt.Println(line)
 }
