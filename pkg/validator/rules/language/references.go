@@ -55,11 +55,18 @@ func checkRef(ref string, genome *loader.Genome, gene loader.Gene, codon string,
 			return
 		}
 	}
-	// resolve
+	// quick over-qualification: if last segment matches a field in current gene
+	if len(parts) > 1 {
+		if ents, ok := gene.Codons["entities"].(map[string]any); ok {
+			if _, ok := ents[parts[len(parts)-1]]; ok {
+				res.Add(core.Issue{Severity: core.SeverityWarn, Code: "ref_overqualified", Message: "ref is over-qualified; use shortest form", Gene: gene.Name, Codon: codon})
+				return
+			}
+		}
+	}
 	if resolveRef(ref, genome, gene) {
 		return
 	}
-	// over-qualification: try shorter paths
 	if overQualifiedRef(ref, genome, gene) {
 		res.Add(core.Issue{Severity: core.SeverityWarn, Code: "ref_overqualified", Message: "ref is over-qualified; use shortest form", Gene: gene.Name, Codon: codon})
 		return
@@ -110,13 +117,15 @@ func resolveRef(ref string, genome *loader.Genome, gene loader.Gene) bool {
 // overQualifiedRef returns true if a shorter equivalent reference exists.
 func overQualifiedRef(ref string, genome *loader.Genome, gene loader.Gene) bool {
 	parts := strings.Split(ref, ".")
-	if len(parts) >= 3 {
-		if resolveRef(parts[len(parts)-2]+"."+parts[len(parts)-1], genome, gene) {
+	// chrom.gene.field -> gene.field only when chrom matches current chromosome
+	if len(parts) == 3 && parts[0] == gene.Chromosome {
+		if resolveRef(parts[1]+"."+parts[2], genome, gene) {
 			return true
 		}
 	}
-	if len(parts) >= 2 {
-		if resolveRef(parts[len(parts)-1], genome, gene) {
+	// gene.field -> field only when gene matches current gene and chromosome
+	if len(parts) == 2 && parts[0] == gene.Name {
+		if resolveRef(parts[1], genome, gene) {
 			return true
 		}
 	}

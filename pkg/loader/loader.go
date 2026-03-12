@@ -65,10 +65,8 @@ func LoadGenome(root string) (*Genome, error) {
 	if err != nil {
 		return nil, err
 	}
-	typeEnv, exportedTypes, err := BuildTypeEnv(root)
-	if err != nil {
-		return nil, err
-	}
+	typeEnv, exportedTypes, typeIssues := BuildTypeEnv(root)
+	issues = append(issues, typeIssues...)
 	return &Genome{
 		Schemas:      codonSchemas,
 		SchemaExport: schemaExport,
@@ -142,29 +140,33 @@ func loadExpression(root string) (*ExpressionAssets, []Issue) {
 		return nil, nil
 	}
 	var issues []Issue
-	loadFile := func(name string) map[string]any {
+	loadFile := func(name, codePrefix string) map[string]any {
 		fp := path.Join(exprRoot, name)
 		data, err := os.ReadFile(fp)
 		if err != nil {
 			if os.IsNotExist(err) {
 				return nil
 			}
-			issues = append(issues, Issue{Severity: "error", Code: "expression_read_failed", Message: fmt.Sprintf("read %s: %v", fp, err)})
+			issues = append(issues, Issue{Severity: "error", Code: codePrefix + "_read_failed", Message: fmt.Sprintf("read %s: %v", fp, err)})
 			return nil
 		}
 		var m map[string]any
 		if err := goyaml.Unmarshal(data, &m); err != nil {
-			issues = append(issues, Issue{Severity: "error", Code: "expression_parse_failed", Message: fmt.Sprintf("parse %s: %v", fp, err)})
+			issues = append(issues, Issue{Severity: "error", Code: codePrefix + "_parse_failed", Message: fmt.Sprintf("parse %s: %v", fp, err)})
 			return nil
 		}
 		return m
 	}
-	return &ExpressionAssets{
-		Targets:     loadFile("targets.yaml"),
-		Projections: loadFile("projections.yaml"),
-		Styles:      loadFile("styles.yaml"),
-		Templates:   loadFile("templates.yaml"),
-	}, issues
+	assets := &ExpressionAssets{
+		Targets:     loadFile("targets.yaml", "targets"),
+		Projections: loadFile("projections.yaml", "projections"),
+		Styles:      loadFile("styles.yaml", "styles"),
+		Templates:   loadFile("templates.yaml", "templates"),
+	}
+	if assets.Targets == nil && assets.Projections == nil && assets.Styles == nil && assets.Templates == nil {
+		return nil, issues
+	}
+	return assets, issues
 }
 
 func loadCodonSchemasFromFS(fsys fs.FS, dir string, dest map[string]CodonSchema, export bool, exportList *[]string) error {
@@ -276,17 +278,14 @@ func chromosomeFromPath(root, full string) string {
 
 // BuildTypeEnv builds a symbol table from nucleotide declarations.
 // Returns the full env and the list of exported type names (public).
-func BuildTypeEnv(root string) (map[string]tp.TypeNode, []string, error) {
+func BuildTypeEnv(root string) (map[string]tp.TypeNode, []string, []Issue) {
 	env := map[string]tp.TypeNode{}
 	var exported []string
+	var issues []Issue
 	// embedded defaults (public primitives)
-	if err := loadTypesFromFS(core_assets.Nucleotypes, "nucleotides/types", env, true, &exported); err != nil {
-		return nil, exported, err
-	}
+	issues = append(issues, loadTypesFromFS(core_assets.Nucleotypes, "nucleotides/types", env, true, &exported)...)
 	// engine-only embedded types (not exported)
-	if err := loadTypesFromFS(engine_assets.Nucleotypes, "nucleotides/types", env, false, nil); err != nil {
-		return nil, exported, err
-	}
+	issues = append(issues, loadTypesFromFS(engine_assets.Nucleotypes, "nucleotides/types", env, false, nil)...)
 	// hardcoded internal nucleotypes (not shipped to consumers)
 	coreNames := `export chromosome_name = string
 export gene_name = string
@@ -299,7 +298,7 @@ export capability_name = string
 export relation_name = string
 `
 	if _, err := parseTypesDoc(coreNames, "builtin:names", env); err != nil {
-		return nil, exported, err
+		issues = append(issues, Issue{Severity: "error", Code: "nucleotype_parseable", Message: err.Error()})
 	}
 	coreFields := `field_key = Regex<"^[a-z][a-z0-9_]*$">
 export field<T> = Map<field_key, {
@@ -310,31 +309,34 @@ export field<T> = Map<field_key, {
 }>
 `
 	if _, err := parseTypesDoc(coreFields, "builtin:fields", env); err != nil {
-		return nil, exported, err
+		issues = append(issues, Issue{Severity: "error", Code: "nucleotype_parseable", Message: err.Error()})
 	}
 	// disk overrides/extensions
 	files, err := path.Glob(path.Join(root, "nucleotides", "types", "*.nucleotype"))
 	if err != nil {
-		return nil, exported, err
+		return nil, exported, []Issue{{Severity: "error", Code: "nucleotype_parseable", Message: err.Error()}}
 	}
 	sort.Strings(files)
 	for _, f := range files {
 		data, err := os.ReadFile(f)
 		if err != nil {
-			return nil, exported, err
+			issues = append(issues, Issue{Severity: "error", Code: "nucleotype_parseable", Message: err.Error()})
+			continue
 		}
 		names, err := parseTypesDoc(string(data), f, env)
 		if err != nil {
-			return nil, exported, err
+			issues = append(issues, Issue{Severity: "error", Code: "nucleotype_parseable", Message: err.Error()})
+			continue
 		}
 		exported = append(exported, names...)
 	}
 	// inject primitives as terminals
 	env["primitive"] = tp.NameType{Name: "primitive"}
-	return env, exported, nil
+	return env, exported, issues
 }
 
-func loadTypesFromFS(fsys fs.FS, dir string, env map[string]tp.TypeNode, export bool, exportList *[]string) error {
+func loadTypesFromFS(fsys fs.FS, dir string, env map[string]tp.TypeNode, export bool, exportList *[]string) []Issue {
+	var issues []Issue
 	entries, err := fs.ReadDir(fsys, dir)
 	if err != nil {
 		return nil
@@ -349,17 +351,19 @@ func loadTypesFromFS(fsys fs.FS, dir string, env map[string]tp.TypeNode, export 
 		}
 		data, err := fs.ReadFile(fsys, path.Join(dir, e.Name()))
 		if err != nil {
-			return err
+			issues = append(issues, Issue{Severity: "error", Code: "nucleotype_parseable", Message: err.Error()})
+			continue
 		}
 		names, err := parseTypesDoc(string(data), e.Name(), env)
 		if err != nil {
-			return err
+			issues = append(issues, Issue{Severity: "error", Code: "nucleotype_parseable", Message: err.Error()})
+			continue
 		}
 		if export && exportList != nil {
 			*exportList = append(*exportList, names...)
 		}
 	}
-	return nil
+	return issues
 }
 
 func parseTypesDoc(src string, filename string, env map[string]tp.TypeNode) ([]string, error) {
