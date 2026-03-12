@@ -45,16 +45,9 @@ func applyGenomeTraits(g *loader.Genome, res *core.Result) {
 			continue
 		}
 		name = strings.TrimSuffix(path.Base(name), ".yaml")
-		tf, schemas, err := loadTraitFile(path.Join(g.Root, "traits", "genome", name))
-		if err != nil {
-			res.Add(core.Issue{Severity: core.SeverityError, Code: "genome_trait_file_exists", Message: err.Error()})
+		tf, ok := loadTraitAndAssets(g, path.Join(g.Root, "traits", "genome", name), res, core.SeverityError, "genome")
+		if !ok {
 			continue
-		}
-		if err := mergeNucleotypesWithEnv(g, path.Join(g.Root, "traits", "genome", name), res); err != nil {
-			// issues recorded; continue
-		}
-		if err := mergeSchemas(g, schemas, res); err != nil {
-			// mergeSchemas reports issues; continue to attempt codon injection
 		}
 		injectedSeen := map[string]map[string]any{}
 		for geneName, codons := range tf.Genes {
@@ -85,16 +78,9 @@ func applyChromosomeTraits(g *loader.Genome, res *core.Result) {
 			continue
 		}
 		name = strings.TrimSuffix(path.Base(name), ".yaml")
-		tp, schemas, err := loadTraitFile(path.Join(g.Root, "traits", "chromosome", name))
-		if err != nil {
-			res.Add(core.Issue{Severity: core.SeverityError, Code: "chromosome_trait_file_exists", Message: err.Error()})
+		tp, ok := loadTraitAndAssets(g, path.Join(g.Root, "traits", "chromosome", name), res, core.SeverityError, "chromosome")
+		if !ok {
 			continue
-		}
-		if err := mergeNucleotypesWithEnv(g, path.Join(g.Root, "traits", "chromosome", name), res); err != nil {
-			// continue
-		}
-		if err := mergeSchemas(g, schemas, res); err != nil {
-			// continue
 		}
 		injectedSeen := map[string]map[string]any{}
 		for geneName, codons := range tp.Genes {
@@ -127,16 +113,9 @@ func applyGeneTraits(g *loader.Genome, res *core.Result) {
 				continue
 			}
 			name = strings.TrimSuffix(path.Base(name), ".yaml")
-			tf, schemas, err := loadTraitFile(path.Join(g.Root, "traits", "gene", name))
-			if err != nil {
-				res.Add(core.Issue{Severity: core.SeverityError, Code: "gene_trait_file_exists", Message: err.Error(), Gene: gene.Name, Codon: "traits"})
+			tf, ok := loadTraitAndAssets(g, path.Join(g.Root, "traits", "gene", name), res, core.SeverityError, "gene")
+			if !ok {
 				continue
-			}
-			if err := mergeNucleotypesWithEnv(g, path.Join(g.Root, "traits", "gene", name), res); err != nil {
-				// issues recorded; continue
-			}
-			if err := mergeSchemas(g, schemas, res); err != nil {
-				// issues recorded; continue
 			}
 			codons := tf.Genes[gene.Name]
 			if codons == nil {
@@ -386,6 +365,25 @@ func mergeNucleotypesWithEnv(g *loader.Genome, traitDir string, res *core.Result
 		}
 	}
 	return nil
+}
+
+// loadTraitAndAssets loads a trait and merges its schemas/nucleotypes. Returns ok=false when loading failed.
+func loadTraitAndAssets(g *loader.Genome, traitPath string, res *core.Result, sev core.Severity, scope string) (*genomeTraitFile, bool) {
+	tf, schemas, err := loadTraitFile(traitPath)
+	if err != nil {
+		code := fmt.Sprintf("%s_trait_file_exists", scope)
+		res.Add(core.Issue{Severity: sev, Code: code, Message: err.Error()})
+		return nil, false
+	}
+	if err := mergeNucleotypesWithEnv(g, traitPath, res); err != nil {
+		res.Add(core.Issue{Severity: sev, Code: "trait_nucleotype_load_failed", Message: err.Error()})
+		return nil, false
+	}
+	if err := mergeSchemas(g, schemas, res); err != nil {
+		res.Add(core.Issue{Severity: sev, Code: "trait_schema_load_failed", Message: err.Error()})
+		return nil, false
+	}
+	return tf, true
 }
 
 func appendIfMissing(list []string, name string) []string {
