@@ -1,282 +1,147 @@
-# Codon Language Manifesto
-## What Codon Is
+# Codon Language (spec + engine)
+Work in progress! Contribution welcome, contact @ spencerliamsmith@gmail.com
 
-**Codon is a domain-specific language (DSL) for describing software architecture.**
+Codon is a DSL  for describing software architecture in an implementation‑agnostic way. It’s layered:
+- **Genome** – the whole spec for a system.
+- **Chromosomes** – bounded contexts/domains.
+- **Genes** – modules within a chromosome.
+- **Codons** – architectural units (entities, capabilities, relations, traits, docs, implementation rules, expression docs, etc.).
+Optionally, a genome includes **expression** assets (targets/projections/styles/templates) that guide an **expressor** to generate concrete project structure (services, APIs, UI, infra) deterministically after validation.
 
-A Codon genome defines the **semantic structure of a system** — domains, modules, models, capabilities, and relationships — independently of any implementation language or framework.
+This repo contains:
+- The self‑hosted Codon language specification (written in Codon).
+- A Go loader/validator/emitter CLI to parse, validate, and emit composed genomes.
 
-Codon does **not** describe code directly.
-Instead, Codon describes architecture, which is then **expressed** into implementation artifacts.
+**Future use:** once projection engines are plugged in, any validated genome + expression assets can generate runnable project scaffolds (API + UI + infra), with traits enabling reusable architecture patterns.
 
-The genome is the source of **truth** for system architecture.
+## What’s in the repo
 
----
+- `.codon/` – the language genome (spec):
+  - `genome.yaml` – manifest
+  - `chromosomes/` – genes documenting language constructs (entities, capabilities, relations, traits, expression docs, tooling, etc.)
+  - `codon_schemas/` – codon schema definitions
+  - `nucleotides/types/` – primitive & engine nucleotypes
+  - `traits/` – trait specs
+  - `expression/` – (optional) projection assets live next to chromosomes; their shapes are documented under `chromosomes/expression/`.
+- `pkg/` – Go implementation of loader, validator, nucleotype parser.
+- `cmd/codon/` – CLI entrypoint (`load`, `validate`, `emit`).
+- `fixtures/` – test genomes grouped by domain (language/traits/manifest/expression) and a full example.
 
-# Core Philosophy
+## Workflow
 
-Codon is built on several guiding principles:
-- **Architecture first** — system structure is defined before implementation.
-- **Semantics over files** — the genome describes meaning, not directories.
-- **Structure before detail** — fields and types can be inferred from higher-level structure.
-- **Explicit dependencies** — architectural boundaries must be declared.
-- **Deterministic expression** — the same genome and expression rules must produce the same output.
-- **Evolution through mutation** — architecture evolves through explicit patches.
-
----
-
-# The Genome Model
-Codon organizes architecture using biological metaphors.
-
-| Concept | Meaning |
-|---------|---------|
-| Genome | complete architecture of a system |
-| Chromosome | architectural domain or bounded context |
-| Gene | module-level unit within a chromosome |
-| Codon	| architectural instruction (entity, capability, relation, etc.) |
-| Nucleotide | primitive data (strings, flags, field types, etc.) |
-
-This hierarchy defines the **semantic structure** of the architecture.
-
----
-
-# Core Codon Types
-
-Genes may contain the following architectural codons:
-
-### Entities
-
-Persistent domain models owned by a gene.
-
-```
-entities:
-  User:
-    fields:
-      email: string
+Validate a genome (runs loader + validator):
+```bash
+make validate ROOT=./fixtures/example        # or any genome root
+# or directly:
+GOCACHE=... GOMODCACHE=... go run ./cmd/codon validate ./fixtures/example
 ```
 
----
-
-### Capabilities
-
-Semantic domain actions.
-
+Emit the composed genome (post-validation) as YAML:
+```bash
+make emit ROOT=./fixtures/example
 ```
-capabilities:
-  - create-user
-  - authenticate-user
-```
+The composed artifact includes manifest, codon_schemas (exported), nucleotypes (exported), chromosomes/genes with codons, traits_applied, issues, and optional `expression` (targets/projections/styles/templates).
 
-Capabilities describe **what the system does**, not how it is implemented.
-
----
-
-### Relations
-
-Structural links between entities within the same gene.
-
-```
-relations:
-  - from: Comment
-    to: Issue
-    type: many-to-one
-    name: issue
+Run tests:
+```bash
+make test
 ```
 
----
+## Expression assets (projection inputs)
 
-### References
+Expression files live at `expression/` (sibling to `chromosomes/`). Shapes are enforced and documented in `chromosomes/expression/*.yaml`:
+- `targets.yaml` – map target_name → {kind, stack, output_root?, overwrite?, …}
+- `projections.yaml` – map projection_name → {target, binding, capabilities/entities/relations selectors}
+- `styles.yaml` – map style_name → {version?, …}
+- `templates.yaml` – map template_name → {source, checksum?, variables?, postprocess?}
 
-Cross-gene links to entities owned by other genes.
+Loader parses these optionally; validator enforces shapes and required fields; composed genome mirrors them (no nesting).
 
-```
-references:
-  - from: Issue
-    to: identity.user.User
-```
+## Minimal example (ticketing slice)
 
-References require explicit dependencies.
-
----
-
-### Traits
-
-Reusable architectural programs that expand into genome structure.
-
-Traits can introduce:
-- chromosomes
-- genes
-- entities
-- capabilities
-- relations
-- references
-
-Traits allow common architecture patterns to be reused.
-
----
-
-# Addressing Model
-Codon uses a canonical addressing system.
-```
-chromosome.gene.entity
-```
-Example:
-```
-identity.user.User
-```
-This addressing model guarantees deterministic reference resolution.
-
----
-
-# Dependencies
-
-Genes must declare dependencies on other genes they reference.
-```
-dependencies:
-  - identity.user
-```
-Rules:
-- dependencies must reference existing genes
-- cross-gene references require a declared dependency
-- circular dependencies are invalid unless explicitly allowed
-
-Dependencies enforce **architectural boundaries**.
-
----
-
-Genome Composition
-
-A genome is composed from:
 ```
 genome.yaml
 chromosomes/
+  ticketing/
+    tickets.yaml
+expression/
+  targets.yaml
+  projections.yaml
 ```
-Example structure:
+
+`genome.yaml`
+```yaml
+schema_version: 1.0.0
+project:
+  name: ticketing-example
+  type: service
 ```
-genome.yaml
-chromosomes/
-  identity/
-    user.yaml
-  tracking/
-    issues.yaml
+
+`chromosomes/ticketing/tickets.yaml`
+```yaml
+gene: tickets
+description: Ticketing domain
+codons:
+  entities:
+    ticket:
+      id: uuid
+      reporter_id: uuid
+      status: Union<"open","closed">
+  capabilities:
+    create_ticket:
+      effects: ["create_ticket"]
+      inputs:
+        reporter_id: { type: uuid }
+      outputs:
+        ticket_id: { type: uuid }
+  relations:
+    reporter_to_ticket:
+      from: ticket
+      to: ticket   # self for example; normally another entity
+      type: one-to-one
 ```
-The **composed genome** is the semantic model formed by combining the manifest with all gene files.
 
----
-
-# Traits and Expansion
-
-Traits are **architectural macros** that expand into genome structure.
-
-Two attachment scopes exist:
-
-| Scope |	Behavior |
-|-------|----------|
-| project |	may introduce chromosomes or genes |
-| gene | expands only within the owning gene |
-
-Trait expansion must be deterministic.
-
----
-
-# Expression
-
-The genome itself does **not** describe implementation structure.
-
-Instead, **expression rules** project architecture into code.
+`expression/targets.yaml`
+```yaml
+targets:
+  api:
+    kind: api_service
+    stack: go-hex-rest@1.0
+    output_root: services/api
 ```
-genome → expression → implementation
+
+`expression/projections.yaml`
+```yaml
+projections:
+  api_routes:
+    target: api
+    capabilities: ["*"]
+    binding: rest_default
 ```
-Examples of expression artifacts:
-- services
-- controllers
-- repositories
-- API routes
-- database schemas
 
-Expression rules are defined in the `expression/` directory.
-
----
-
-# Mutation
-
-Genomes evolve through **explicit mutations**.
-
-Mutations are applied using structured patches.
-
-AI proposes mutation
-User approves mutation
-Codon applies mutation
-Git records evolution
-
-Mutations guarantee that architectural evolution is:
-- explicit
-- reviewable
-- reproducible
-
----
-
-# Validation
-
-The genome must satisfy several rule classes:
-
-### Structural validation
-- schema compliance
-- allowed codon types
-- valid file structure
-
-### Addressing validation
-- reference resolution
-- identifier uniqueness
-
-### Architectural validation
-- dependency correctness
-- relation validity
-- trait expansion consistency
-
-Validation ensures the genome remains a coherent architecture model.
-
----
-
-# Codon Is a Language
-Codon is not just configuration.
-
-It defines:
-- **grammar** — valid structures
-- **semantics** — architectural meaning
-- **resolution rules** — addressing and references
-- **transformation rules** — traits and mutation
-- **projection rules** — expression into code
-
-The YAML files are only the **syntax**.
-
-The language itself is the **Codon genome model**.
-
----
-
-# Long-Term Goal
-
-The ultimate goal of Codon is:
-
-> A deterministic architectural language from which complete software systems can be derived, evolved, validated, and regenerated.
-
-Codon genomes are intended to be:
--readable by humans
--analyzable by machines
--evolvable over time
-- expressive enough to describe complex architectures
-
-
----
-
-# Layers
-
+Run:
+```bash
+make validate ROOT=./fixtures/example   # or your genome root
+make emit ROOT=./fixtures/example
 ```
-Codon Language
-│
-├── syntax (YAML structure)
-├── grammar (allowed constructs)
-├── semantics (meaning of constructs)
-├── addressing (name resolution)
-├── transformation (traits + mutation)
-└── projection (expression → code)
-```
+
+## Addressing & refs
+
+Refs resolve by shortest path: `field` (same gene), `gene.field` (same chromosome), `chromosome.gene.field` (cross-chromosome). Over‑qualification warns; missing targets error.
+
+## Traits
+
+Traits live under `traits/` (genome/chromosome/gene scopes). Trait-local codon_schemas/nucleotypes are loaded before injection. Trait merge policies and conflict rules are in `chromosomes/language/traits.yaml` and enforced by the validator.
+
+## Contributing / testing changes
+
+1. Edit the spec in `.codon/` or engine code under `pkg/`.
+2. Run `make test`.
+3. Optionally emit the example: `make emit ROOT=./fixtures/example` to inspect composed output.
+
+## Status
+
+- Loader: parses manifest, schemas, nucleotypes, traits, expression; emits loader issues.
+- Validator: grouped rule sets (manifest/language/traits/expression).
+- Expression: shapes and field typing enforced; capability coverage reported as info; uniqueness enforced.
+- Emission: composed genome includes expression section and is closed/typed per `chromosomes/tooling/composed_genome.yaml`.
