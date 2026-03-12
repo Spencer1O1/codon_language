@@ -9,20 +9,25 @@ import (
 
 // ComposedArtifact is the serialized, post-validation genome shape.
 type ComposedArtifact struct {
-	SchemaVersion string            `yaml:"schema_version" json:"schema_version"`
-	Manifest      map[string]any    `yaml:"manifest" json:"manifest"`
-	CodonSchemas  map[string]any    `yaml:"codon_schemas" json:"codon_schemas"`
-	Nucleotypes   map[string]string `yaml:"nucleotypes" json:"nucleotypes"`
-	Genes         []ArtifactGene    `yaml:"genes" json:"genes"`
-	TraitsApplied []TraitApplied    `yaml:"traits_applied,omitempty" json:"traits_applied,omitempty"`
-	Issues        []Issue           `yaml:"issues,omitempty" json:"issues,omitempty"`
+	SchemaVersion string               `yaml:"schema_version" json:"schema_version"`
+	Manifest      map[string]any       `yaml:"manifest" json:"manifest"`
+	CodonSchemas  map[string]any       `yaml:"codon_schemas" json:"codon_schemas"`
+	Nucleotypes   map[string]string    `yaml:"nucleotypes" json:"nucleotypes"`
+	Chromosomes   []ArtifactChromosome `yaml:"chromosomes" json:"chromosomes"`
+	TraitsApplied []TraitApplied       `yaml:"traits_applied,omitempty" json:"traits_applied,omitempty"`
+	Issues        []Issue              `yaml:"issues,omitempty" json:"issues,omitempty"`
+}
+
+// ArtifactChromosome groups genes by chromosome.
+type ArtifactChromosome struct {
+	Name  string         `yaml:"name" json:"name"`
+	Genes []ArtifactGene `yaml:"genes" json:"genes"`
 }
 
 // ArtifactGene is a gene entry in the composed artifact.
 type ArtifactGene struct {
-	Chromosome string         `yaml:"chromosome" json:"chromosome"`
-	Gene       string         `yaml:"gene" json:"gene"`
-	Codons     map[string]any `yaml:"codons" json:"codons"`
+	Name   string         `yaml:"name" json:"name"`
+	Codons map[string]any `yaml:"codons" json:"codons"`
 }
 
 // TraitApplied records a trait that was applied during composition.
@@ -72,18 +77,18 @@ func BuildArtifact(g *Genome) *ComposedArtifact {
 		art.Nucleotypes[n] = formatType(g.TypeEnv[n])
 	}
 
-	// genes: sorted for determinism
-	genes := make([]ArtifactGene, 0, len(g.Genes))
+	// group genes by chromosome for determinism
+	chMap := map[string][]ArtifactGene{}
 	for _, ge := range g.Genes {
-		genes = append(genes, ArtifactGene{Chromosome: ge.Chromosome, Gene: ge.Name, Codons: ge.Codons})
+		chMap[ge.Chromosome] = append(chMap[ge.Chromosome], ArtifactGene{Name: ge.Name, Codons: ge.Codons})
 	}
-	sort.Slice(genes, func(i, j int) bool {
-		if genes[i].Chromosome == genes[j].Chromosome {
-			return genes[i].Gene < genes[j].Gene
-		}
-		return genes[i].Chromosome < genes[j].Chromosome
-	})
-	art.Genes = genes
+	var chromosomes []ArtifactChromosome
+	for ch, genes := range chMap {
+		sort.Slice(genes, func(i, j int) bool { return genes[i].Name < genes[j].Name })
+		chromosomes = append(chromosomes, ArtifactChromosome{Name: ch, Genes: genes})
+	}
+	sort.Slice(chromosomes, func(i, j int) bool { return chromosomes[i].Name < chromosomes[j].Name })
+	art.Chromosomes = chromosomes
 
 	return art
 }

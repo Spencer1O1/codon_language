@@ -17,7 +17,8 @@ codons:
       {
         schema_version: { type_expr: TypeExpr },
         project: { type_expr: TypeExpr },
-        traits: { type_expr: TypeExpr }
+        traits: { type_expr: TypeExpr },
+        chromosome_traits: { type_expr: TypeExpr }
       }
 
   composed_genome_format:
@@ -29,7 +30,7 @@ codons:
         manifest: { type_expr: TypeExpr },
         codon_schemas: { type_expr: TypeExpr },
         nucleotypes: { type_expr: TypeExpr },
-        genes: { type_expr: TypeExpr },
+        chromosomes: { type_expr: TypeExpr },
         traits_applied: { type_expr: TypeExpr },
         issues: { type_expr: TypeExpr }
       }

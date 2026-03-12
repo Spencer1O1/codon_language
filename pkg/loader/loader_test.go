@@ -43,14 +43,23 @@ func TestBuildArtifact(t *testing.T) {
 	if _, ok := art.Nucleotypes["string"]; !ok {
 		t.Fatalf("expected nucleotype string")
 	}
-	if len(art.Genes) == 0 {
-		t.Fatalf("genes empty")
+	if len(art.Chromosomes) == 0 {
+		t.Fatalf("chromosomes empty")
 	}
-	// ordering deterministic: genes sorted by chromosome then gene
-	for i := 1; i < len(art.Genes); i++ {
-		a, b := art.Genes[i-1], art.Genes[i]
-		if a.Chromosome > b.Chromosome || (a.Chromosome == b.Chromosome && a.Gene > b.Gene) {
-			t.Fatalf("genes not sorted: %v then %v", a, b)
+	// ordering deterministic: chromosomes then genes sorted
+	for i := 1; i < len(art.Chromosomes); i++ {
+		if art.Chromosomes[i-1].Name > art.Chromosomes[i].Name {
+			t.Fatalf("chromosomes not sorted")
+		}
+	}
+	for _, ch := range art.Chromosomes {
+		if len(ch.Genes) == 0 {
+			t.Fatalf("chromosome %s has no genes", ch.Name)
+		}
+		for i := 1; i < len(ch.Genes); i++ {
+			if ch.Genes[i-1].Name > ch.Genes[i].Name {
+				t.Fatalf("genes not sorted within chromosome %s", ch.Name)
+			}
 		}
 	}
 }
